@@ -9,6 +9,12 @@ class AppState<T> extends Equatable {
 
   const AppState({this.status = StateStatus.initial, this.data, this.message});
 
+  bool get isInitial => status == StateStatus.initial;
+  bool get isLoading =>
+      status == StateStatus.loading || status == StateStatus.loadingOverlay;
+  bool get isSuccess => status == StateStatus.success;
+  bool get isError => status == StateStatus.error;
+
   AppState<T> copyWith({StateStatus? status, T? data, String? message}) {
     return AppState<T>(
       status: status ?? this.status,

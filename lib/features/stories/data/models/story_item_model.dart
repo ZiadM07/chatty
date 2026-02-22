@@ -83,6 +83,7 @@ class StoryItemModel extends Equatable {
       'url': url,
       'caption': caption,
       'thumbnailUrl': thumbnailUrl,
+      // ignore: deprecated_member_use
       'backgroundColor': backgroundColor?.value,
       'createdAt': Timestamp.fromDate(createdAt),
       'expiresAt': Timestamp.fromDate(expiresAt),

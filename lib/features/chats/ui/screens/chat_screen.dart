@@ -1,6 +1,4 @@
 import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/di/injectable.dart';
-import 'package:chatty/core/utils/enums.dart';
 import 'package:chatty/features/auth/cubits/auth_cubit.dart';
 import 'package:chatty/features/chats/cubits/chat_cubit.dart';
 import 'package:chatty/features/chats/ui/widgets/chat_app_bar.dart';
@@ -8,7 +6,10 @@ import 'package:chatty/features/chats/ui/widgets/chat_back_ground.dart';
 import 'package:chatty/features/chats/ui/widgets/chat_input.dart';
 import 'package:chatty/features/chats/ui/widgets/swipe_to_reply.dart';
 import 'package:chatty/features/chats/ui/widgets/text_message_bubble.dart';
-import 'package:chatty/features/shared/widgets/app_toast.dart';
+import '../../../../core/di/injectable.dart';
+import '../../../../core/utils/enums.dart';
+import '../../../shared/widgets/app_toast.dart';
+import '../widgets/voice_message_bubble.dart';
 
 @RoutePage()
 class ChatScreen extends StatefulWidget implements AutoRouteWrapper {
@@ -80,7 +81,6 @@ class _ChatScreenState extends State<ChatScreen> {
       listener: (context, state) {
         if (state.sendState.status == StateStatus.error) {
           context.read<ChatCubit>().resetSendState();
-
           AppToast.showError(
             message: state.sendState.message ?? context.locale.unexpectedError,
             context: context,
@@ -182,56 +182,40 @@ class _ChatScreenState extends State<ChatScreen> {
             messages.length - 1 - index == lastMyMessageIndex;
 
         return SwipeToReply(
-          key: ValueKey(message.id),
           isMe: isMe,
           onSwipe: message.isDeleted
               ? null
               : () => context.read<ChatCubit>().setReplyingTo(message),
           onLongPress: isMe && !message.isDeleted
-              ? () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(context.locale.deleteMessage),
-                      content: Text(context.locale.deleteForEveryone),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(context.locale.cancel),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            context.read<ChatCubit>().deleteMessage(
-                              messageId: message.id,
-                            );
-                            AppToast.showSuccess(
-                              message: context.locale.messageDeleted,
-                              context: context,
-                            );
-                            _scrollToBottom();
-                          },
-                          child: Text(context.locale.delete),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+              ? () => context.read<ChatCubit>().deleteMessage(
+                  messageId: message.id,
+                )
               : null,
-
-          child: TextMessageBubble(
-            message: message.isDeleted
-                ? context.locale.messageDeleted
-                : message.content,
-            time: _formatTime(message.createdAt),
-            status: isMe && isLastMyMessage ? message.status : null,
-            isMe: isMe,
-            isDeleted: message.isDeleted,
-            messageType: message.type,
-            replyToContent: message.replyToContent,
-            replyToSenderId: message.replyToSenderId,
-            currentUid: _currentUid,
-          ),
+          child: message.type == MessageType.audio
+              ? VoiceMessageBubble(
+                  audioUrl: message.content,
+                  duration: Duration(
+                    milliseconds: message.metadata?['duration'] as int? ?? 0,
+                  ),
+                  time: _formatTime(message.createdAt),
+                  status: isMe && isLastMyMessage ? message.status : null,
+                  isMe: isMe,
+                  isDeleted: message.isDeleted,
+                  currentUid: _currentUid,
+                )
+              : TextMessageBubble(
+                  message: message.isDeleted
+                      ? context.locale.messageDeleted
+                      : message.content,
+                  time: _formatTime(message.createdAt),
+                  status: isMe && isLastMyMessage ? message.status : null,
+                  isMe: isMe,
+                  isDeleted: message.isDeleted,
+                  messageType: message.type,
+                  replyToContent: message.replyToContent,
+                  replyToSenderId: message.replyToSenderId,
+                  currentUid: _currentUid,
+                ),
         );
       },
     );

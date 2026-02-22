@@ -2938,6 +2938,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change the wallpaper for your chats'**
   String get chatsWallpaperSubtitle;
+
+  /// No description provided for @mediaAndFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Media & Files'**
+  String get mediaAndFiles;
+
+  /// No description provided for @mediaEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No media yet'**
+  String get mediaEmptyTitle;
+
+  /// No description provided for @mediaErrorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load media. Please try again.'**
+  String get mediaErrorDescription;
+
+  /// No description provided for @mediaErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading media'**
+  String get mediaErrorTitle;
+
+  /// No description provided for @noSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared files'**
+  String get noSharedFiles;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -112,7 +112,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
                 ).addAction(
                   onTap: navigateUid != null
                       ? () => context.router.push(
-                          UserInfoRoute(uid: navigateUid!),
+                          UserInfoRoute(uid: navigateUid!, chatId: chat!.id),
                         )
                       : null,
                 ),

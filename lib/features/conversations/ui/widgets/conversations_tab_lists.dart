@@ -33,7 +33,7 @@ class ConversationsTabLists extends StatelessWidget {
               isEmpty: directChats.isEmpty,
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                separatorBuilder: (_, _) => const SizedBox(height: 16),
                 itemCount: directChats.length,
                 itemBuilder: (context, index) => MessagesItem(
                   chat: directChats[index],
@@ -48,7 +48,7 @@ class ConversationsTabLists extends StatelessWidget {
               isEmpty: groupChats.isEmpty,
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                separatorBuilder: (_, _) => const SizedBox(height: 16),
                 itemCount: groupChats.length,
                 itemBuilder: (context, index) => GroupMessageItem(
                   chat: groupChats[index],

@@ -68,27 +68,22 @@ class ProfileBodyList extends StatelessWidget {
 // ─── Logout Bottom Sheet ──────────────────────────────────────────────────────
 
 void _confirmLogout(BuildContext context) {
-  // Capture cubit before entering the sheet — the sheet's context
-  // may not have BlocProvider above it since showModalBottomSheet
-  // creates a new route detached from the widget tree.
   final authCubit = context.read<AuthCubit>();
 
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
     builder: (_) {
-      // Re-provide the cubit into the sheet's isolated route context
       return BlocProvider.value(
         value: authCubit,
         child: BlocConsumer<AuthCubit, AuthState>(
           listenWhen: (prev, curr) => prev.signOutState != curr.signOutState,
           listener: (ctx, state) {
             if (state.signOutState.status == StateStatus.success) {
-              // Close the sheet first, then replace the entire route stack
               ctx.router.replaceAll([const UnauthenticatedRoutes()]);
             }
             if (state.signOutState.status == StateStatus.error) {
-              ctx.router.pop(); // close sheet
+              ctx.router.pop();
               AppToast.showError(
                 message:
                     state.signOutState.message ??
@@ -97,12 +92,12 @@ void _confirmLogout(BuildContext context) {
               );
             }
           },
-          builder: (ctx, state) {
+          builder: (context, state) {
             return StateHandler(
               state: state.signOutState,
-              // Overlay spinner keeps the sheet visible while signing out
               loadingOverlayWidget: const CircularProgressIndicator(),
-              builder: (_, __) => _LogoutSheetContent(authCubit: authCubit),
+              builder: (context, state) =>
+                  _LogoutSheetContent(authCubit: authCubit),
             );
           },
         ),
@@ -132,7 +127,6 @@ class _LogoutSheetContent extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              /* ──────────────── ICON ──────────────── */
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -155,7 +149,6 @@ class _LogoutSheetContent extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              /* ──────────────── TITLE ─────────────── */
               Text(
                 context.locale.logout,
                 style: context.textTheme.titleLarge?.copyWith(
@@ -166,7 +159,6 @@ class _LogoutSheetContent extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              /* ────────────────── BODY ────────────── */
               Text(
                 context.locale.logoutConfirm,
                 textAlign: TextAlign.center,
@@ -178,10 +170,8 @@ class _LogoutSheetContent extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              /* ────────────────── ACTIONS ─────────── */
               Row(
                 children: [
-                  // Cancel
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -203,7 +193,6 @@ class _LogoutSheetContent extends StatelessWidget {
 
                   const SizedBox(width: 12),
 
-                  // Confirm logout
                   Expanded(
                     child: AppButton(
                       text: context.locale.logout,

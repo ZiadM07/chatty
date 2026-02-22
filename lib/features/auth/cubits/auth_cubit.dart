@@ -18,12 +18,6 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   // ─── Watch Firebase Auth Stream ───────────────────────────────────────────
-  //
-  //  Firebase Auth is async on startup — it takes a moment to restore the
-  //  persisted session. The first emission is when currentUser is reliable.
-  //  We set authReady = true on that first emission so StartupRedirectScreen
-  //  knows it can trust the state.
-  // ─────────────────────────────────────────────────────────────────────────
 
   void _watchAuthState() {
     _repository.authStateChanges.listen(
@@ -111,8 +105,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Save Profile (FillProfile screen) ───────────────────────────────────
-
   Future<void> saveProfile({required UserModel user, File? imageFile}) async {
     emit(
       state.copyWith(
@@ -151,8 +143,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Forgot Password ──────────────────────────────────────────────────────
-
   Future<void> sendPasswordResetEmail({required String email}) async {
     emit(
       state.copyWith(
@@ -190,8 +180,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Sign Out ─────────────────────────────────────────────────────────────
-
   Future<void> signOut() async {
     emit(
       state.copyWith(
@@ -224,8 +212,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Delete Account ───────────────────────────────────────────────────────
-
   Future<void> deleteAccount() async {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
@@ -257,8 +243,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Update Presence ──────────────────────────────────────────────────────
-
   Future<void> setOnline() async {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
@@ -270,12 +254,6 @@ class AuthCubit extends Cubit<AuthState> {
     if (uid == null) return;
     await _repository.updateUserPresence(uid: uid, isOnline: false);
   }
-
-  // ─── Reset Individual States ──────────────────────────────────────────────
-  //
-  //  Call these when navigating away from a screen to avoid stale states
-  //  triggering callbacks when the user comes back.
-  // ─────────────────────────────────────────────────────────────────────────
 
   void resetLoginState() => emit(state.copyWith(loginState: const AppState()));
 

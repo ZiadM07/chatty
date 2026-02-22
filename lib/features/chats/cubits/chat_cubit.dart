@@ -6,11 +6,9 @@ import 'package:chatty/features/chats/data/data_source/chat_data_source.dart';
 import 'package:chatty/features/chats/data/models/chat_model.dart';
 import 'package:chatty/features/chats/data/repositories/chat_repository.dart';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-
 class ChatState extends Equatable {
   final ChatModel? chat;
-  final AppState<ChatModel> chatState; // loading the chat doc itself
+  final AppState<ChatModel> chatState;
   final AppState<List<MessageModel>> messagesState;
   final AppState<MessageModel> sendState;
   final AppState<void> deleteMessageState;
@@ -58,21 +56,12 @@ class ChatState extends Equatable {
   ];
 }
 
-// ─── Cubit ────────────────────────────────────────────────────────────────────
-
 @injectable
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository _repository;
   StreamSubscription<List<MessageModel>>? _messagesSub;
 
   ChatCubit(this._repository) : super(const ChatState());
-
-  // ─── Init ─────────────────────────────────────────────────────────────────
-  //
-  //  Accepts only [chatId] — fetches the chat document once then
-  //  starts watching messages. This way the screen always has fresh
-  //  data and we never pass stale model snapshots through routes.
-  // ─────────────────────────────────────────────────────────────────────────
 
   Future<void> init({
     required String chatId,
@@ -149,11 +138,8 @@ class ChatCubit extends Cubit<ChatState> {
           ),
         );
 
-    // Mark as read silently
     _repository.markChatAsRead(chatId: chatId, uid: currentUid);
   }
-
-  // ─── Send Text ────────────────────────────────────────────────────────────
 
   Future<void> sendTextMessage({
     required String senderId,
@@ -192,8 +178,6 @@ class ChatCubit extends Cubit<ChatState> {
       );
     }
   }
-
-  // ─── Send Media ───────────────────────────────────────────────────────────
 
   Future<void> sendMediaMessage({
     required String senderId,
@@ -241,8 +225,6 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  // ─── Delete Message ───────────────────────────────────────────────────────
-
   Future<void> deleteMessage({required String messageId}) async {
     final chatId = state.chat?.id;
     if (chatId == null) return;
@@ -260,15 +242,11 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  // ─── Mark As Read ─────────────────────────────────────────────────────────
-
   Future<void> markAsRead({required String uid}) async {
     final chatId = state.chat?.id;
     if (chatId == null) return;
     await _repository.markChatAsRead(chatId: chatId, uid: uid);
   }
-
-  // ─── Group Management ─────────────────────────────────────────────────────
 
   Future<void> addGroupMembers({required List<String> newMemberIds}) async {
     final chatId = state.chat?.id;
@@ -351,14 +329,10 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  // ─── Reply ────────────────────────────────────────────────────────────────
-
   void setReplyingTo(MessageModel message) =>
       emit(state.copyWith(replyingTo: message));
 
   void clearReplyingTo() => emit(state.copyWith(clearReplyingTo: true));
-
-  // ─── Reset ────────────────────────────────────────────────────────────────
 
   void resetSendState() => emit(state.copyWith(sendState: const AppState()));
   void resetDeleteMessageState() =>

@@ -1,4 +1,5 @@
 import 'package:chatty/core/framework/pick_file.dart';
+import 'package:chatty/core/utils/enums.dart';
 import 'package:chatty/features/auth/cubits/auth_cubit.dart';
 import 'package:chatty/features/auth/cubits/auth_state.dart';
 import 'package:chatty/features/auth/data/models/user_model.dart';
@@ -92,7 +93,6 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
         }
       },
       builder: (context, state) {
-        // loadingOverlay → form stays visible, spinner shows on top via StateHandler
         return StateHandler(
           state: state.fillProfileState,
           builder: (context, _) => AppScaffold(

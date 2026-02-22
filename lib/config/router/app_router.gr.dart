@@ -13,23 +13,24 @@ import 'package:auto_route/auto_route.dart' as _i21;
 import 'package:chatty/config/router/app_router.dart' as _i2;
 import 'package:chatty/core/constants/exports.dart' as _i22;
 import 'package:chatty/features/auth/ui/screens/fill_profile_screen.dart'
-    as _i7;
-import 'package:chatty/features/auth/ui/screens/login_screen.dart' as _i9;
+    as _i8;
+import 'package:chatty/features/auth/ui/screens/login_screen.dart' as _i10;
 import 'package:chatty/features/auth/ui/screens/signup_screen.dart' as _i15;
 import 'package:chatty/features/auth/ui/screens/startup_redirect_screen.dart'
     as _i16;
 import 'package:chatty/features/auth/ui/screens/welcome_screen.dart' as _i20;
-import 'package:chatty/features/chats/ui/screens/chat_screen.dart' as _i3;
+import 'package:chatty/features/chats/ui/screens/chat_media_screen.dart' as _i3;
+import 'package:chatty/features/chats/ui/screens/chat_screen.dart' as _i4;
+import 'package:chatty/features/chats/ui/screens/user_info_screen.dart' as _i18;
 import 'package:chatty/features/conversations/ui/screens/conversations_screen.dart'
-    as _i6;
-import 'package:chatty/features/main/main_screen.dart' as _i10;
-import 'package:chatty/features/media/ui/screens/media_screen.dart' as _i11;
+    as _i7;
+import 'package:chatty/features/main/main_screen.dart' as _i11;
 import 'package:chatty/features/profile/ui/screens/chat_wallpaper_screen.dart'
-    as _i4;
-import 'package:chatty/features/profile/ui/screens/chats_settings_screen.dart'
     as _i5;
+import 'package:chatty/features/profile/ui/screens/chats_settings_screen.dart'
+    as _i6;
 import 'package:chatty/features/profile/ui/screens/language_settings_screen.dart'
-    as _i8;
+    as _i9;
 import 'package:chatty/features/profile/ui/screens/notification_settings_screen.dart'
     as _i12;
 import 'package:chatty/features/profile/ui/screens/profile_screen.dart' as _i13;
@@ -39,7 +40,6 @@ import 'package:chatty/features/stories/ui/screens/add_story_screen.dart'
     as _i1;
 import 'package:chatty/features/stories/ui/screens/story_viewer_screen.dart'
     as _i17;
-import 'package:chatty/features/users/ui/screens/user_info_screen.dart' as _i18;
 import 'package:chatty/features/users/ui/screens/users_screen.dart' as _i19;
 
 /// generated route for
@@ -75,7 +75,56 @@ class AuthenticatedRoutes extends _i21.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i3.ChatScreen]
+/// [_i3.ChatMediaScreen]
+class ChatMediaRoute extends _i21.PageRouteInfo<ChatMediaRouteArgs> {
+  ChatMediaRoute({
+    _i22.Key? key,
+    required String chatId,
+    List<_i21.PageRouteInfo>? children,
+  }) : super(
+         ChatMediaRoute.name,
+         args: ChatMediaRouteArgs(key: key, chatId: chatId),
+         initialChildren: children,
+       );
+
+  static const String name = 'ChatMediaRoute';
+
+  static _i21.PageInfo page = _i21.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ChatMediaRouteArgs>();
+      return _i21.WrappedRoute(
+        child: _i3.ChatMediaScreen(key: args.key, chatId: args.chatId),
+      );
+    },
+  );
+}
+
+class ChatMediaRouteArgs {
+  const ChatMediaRouteArgs({this.key, required this.chatId});
+
+  final _i22.Key? key;
+
+  final String chatId;
+
+  @override
+  String toString() {
+    return 'ChatMediaRouteArgs{key: $key, chatId: $chatId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ChatMediaRouteArgs) return false;
+    return key == other.key && chatId == other.chatId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ chatId.hashCode;
+}
+
+/// generated route for
+/// [_i4.ChatScreen]
 class ChatRoute extends _i21.PageRouteInfo<ChatRouteArgs> {
   ChatRoute({
     _i22.Key? key,
@@ -94,7 +143,7 @@ class ChatRoute extends _i21.PageRouteInfo<ChatRouteArgs> {
     builder: (data) {
       final args = data.argsAs<ChatRouteArgs>();
       return _i21.WrappedRoute(
-        child: _i3.ChatScreen(key: args.key, chatId: args.chatId),
+        child: _i4.ChatScreen(key: args.key, chatId: args.chatId),
       );
     },
   );
@@ -124,7 +173,7 @@ class ChatRouteArgs {
 }
 
 /// generated route for
-/// [_i4.ChatWallpaperScreen]
+/// [_i5.ChatWallpaperScreen]
 class ChatWallpaperRoute extends _i21.PageRouteInfo<void> {
   const ChatWallpaperRoute({List<_i21.PageRouteInfo>? children})
     : super(ChatWallpaperRoute.name, initialChildren: children);
@@ -134,13 +183,13 @@ class ChatWallpaperRoute extends _i21.PageRouteInfo<void> {
   static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i4.ChatWallpaperScreen();
+      return const _i5.ChatWallpaperScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i5.ChatsSettingsScreen]
+/// [_i6.ChatsSettingsScreen]
 class ChatsSettingsRoute extends _i21.PageRouteInfo<void> {
   const ChatsSettingsRoute({List<_i21.PageRouteInfo>? children})
     : super(ChatsSettingsRoute.name, initialChildren: children);
@@ -150,13 +199,13 @@ class ChatsSettingsRoute extends _i21.PageRouteInfo<void> {
   static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i5.ChatsSettingsScreen();
+      return const _i6.ChatsSettingsScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i6.ConversationsScreen]
+/// [_i7.ConversationsScreen]
 class ConversationsRoute extends _i21.PageRouteInfo<void> {
   const ConversationsRoute({List<_i21.PageRouteInfo>? children})
     : super(ConversationsRoute.name, initialChildren: children);
@@ -166,13 +215,13 @@ class ConversationsRoute extends _i21.PageRouteInfo<void> {
   static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i6.ConversationsScreen();
+      return const _i7.ConversationsScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i7.FillProfileScreen]
+/// [_i8.FillProfileScreen]
 class FillProfileRoute extends _i21.PageRouteInfo<void> {
   const FillProfileRoute({List<_i21.PageRouteInfo>? children})
     : super(FillProfileRoute.name, initialChildren: children);
@@ -182,13 +231,13 @@ class FillProfileRoute extends _i21.PageRouteInfo<void> {
   static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i7.FillProfileScreen();
+      return const _i8.FillProfileScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i8.LanguageSettingsScreen]
+/// [_i9.LanguageSettingsScreen]
 class LanguageSettingsRoute extends _i21.PageRouteInfo<void> {
   const LanguageSettingsRoute({List<_i21.PageRouteInfo>? children})
     : super(LanguageSettingsRoute.name, initialChildren: children);
@@ -198,13 +247,13 @@ class LanguageSettingsRoute extends _i21.PageRouteInfo<void> {
   static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i8.LanguageSettingsScreen();
+      return const _i9.LanguageSettingsScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i9.LoginScreen]
+/// [_i10.LoginScreen]
 class LoginRoute extends _i21.PageRouteInfo<void> {
   const LoginRoute({List<_i21.PageRouteInfo>? children})
     : super(LoginRoute.name, initialChildren: children);
@@ -214,13 +263,13 @@ class LoginRoute extends _i21.PageRouteInfo<void> {
   static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i9.LoginScreen();
+      return const _i10.LoginScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i10.MainScreen]
+/// [_i11.MainScreen]
 class MainRoute extends _i21.PageRouteInfo<void> {
   const MainRoute({List<_i21.PageRouteInfo>? children})
     : super(MainRoute.name, initialChildren: children);
@@ -230,23 +279,7 @@ class MainRoute extends _i21.PageRouteInfo<void> {
   static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i10.MainScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [_i11.MediaScreen]
-class MediaRoute extends _i21.PageRouteInfo<void> {
-  const MediaRoute({List<_i21.PageRouteInfo>? children})
-    : super(MediaRoute.name, initialChildren: children);
-
-  static const String name = 'MediaRoute';
-
-  static _i21.PageInfo page = _i21.PageInfo(
-    name,
-    builder: (data) {
-      return const _i11.MediaScreen();
+      return const _i11.MainScreen();
     },
   );
 }
@@ -402,10 +435,11 @@ class UserInfoRoute extends _i21.PageRouteInfo<UserInfoRouteArgs> {
   UserInfoRoute({
     _i22.Key? key,
     required String uid,
+    String? chatId,
     List<_i21.PageRouteInfo>? children,
   }) : super(
          UserInfoRoute.name,
-         args: UserInfoRouteArgs(key: key, uid: uid),
+         args: UserInfoRouteArgs(key: key, uid: uid, chatId: chatId),
          initialChildren: children,
        );
 
@@ -416,33 +450,39 @@ class UserInfoRoute extends _i21.PageRouteInfo<UserInfoRouteArgs> {
     builder: (data) {
       final args = data.argsAs<UserInfoRouteArgs>();
       return _i21.WrappedRoute(
-        child: _i18.UserInfoScreen(key: args.key, uid: args.uid),
+        child: _i18.UserInfoScreen(
+          key: args.key,
+          uid: args.uid,
+          chatId: args.chatId,
+        ),
       );
     },
   );
 }
 
 class UserInfoRouteArgs {
-  const UserInfoRouteArgs({this.key, required this.uid});
+  const UserInfoRouteArgs({this.key, required this.uid, this.chatId});
 
   final _i22.Key? key;
 
   final String uid;
 
+  final String? chatId;
+
   @override
   String toString() {
-    return 'UserInfoRouteArgs{key: $key, uid: $uid}';
+    return 'UserInfoRouteArgs{key: $key, uid: $uid, chatId: $chatId}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! UserInfoRouteArgs) return false;
-    return key == other.key && uid == other.uid;
+    return key == other.key && uid == other.uid && chatId == other.chatId;
   }
 
   @override
-  int get hashCode => key.hashCode ^ uid.hashCode;
+  int get hashCode => key.hashCode ^ uid.hashCode ^ chatId.hashCode;
 }
 
 /// generated route for

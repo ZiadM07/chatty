@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chatty/core/utils/enums.dart';
 import 'package:chatty/features/chats/data/data_source/chat_data_source.dart';
 import 'package:chatty/features/chats/data/models/chat_model.dart';
@@ -106,12 +107,30 @@ class ChatRepository {
       path: _StoragePaths.chatMedia(chatId),
     );
 
+    // Extract audio duration if this is an audio message
+    Map<String, dynamic>? metadata;
+    if (type == MessageType.audio) {
+      final player = AudioPlayer();
+      try {
+        await player.setSourceDeviceFile(file.path);
+        final duration = await player.getDuration();
+        if (duration != null) {
+          metadata = {'duration': duration.inMilliseconds};
+        }
+      } catch (_) {
+        // If duration extraction fails, send without metadata
+      } finally {
+        await player.dispose();
+      }
+    }
+
     return _dataSource.sendMessage(
       chatId: chatId,
       senderId: senderId,
       memberIds: memberIds,
       content: url,
       type: type,
+      metadata: metadata,
       replyToId: replyToId,
       replyToContent: replyToContent,
       replyToSenderId: replyToSenderId,
@@ -121,7 +140,7 @@ class ChatRepository {
   Future<void> markMessagesDelivered({
     required String chatId,
     required String uid,
-  }) => _dataSource.markMessageAsDelivered(chatId: chatId, uid: uid);
+  }) => _dataSource.markMessagesDelivered(chatId: chatId, uid: uid);
 
   Future<void> markChatAsRead({required String chatId, required String uid}) =>
       _dataSource.markChatAsRead(chatId: chatId, uid: uid);
@@ -130,6 +149,20 @@ class ChatRepository {
     required String chatId,
     required String messageId,
   }) => _dataSource.deleteMessage(chatId: chatId, messageId: messageId);
+
+  // ─── Media Messages ───────────────────────────────────────────────────────
+
+  Future<List<MessageModel>> getMediaMessages({
+    required String chatId,
+    MessageType? type,
+    int limit = 30,
+    String? lastMessageId,
+  }) => _dataSource.getMediaMessages(
+    chatId: chatId,
+    type: type,
+    limit: limit,
+    lastMessageId: lastMessageId,
+  );
 
   // ─── Group Management ─────────────────────────────────────────────────────
 

@@ -6,5 +6,6 @@ enum MessageType { text, image, audio, video, file }
 
 enum MessageStatus { sending, sent, delivered, read, failed }
 
-enum StoryItemType { image, video, text }
+enum UserStatus { online, offline, away }
 
+enum StoryItemType { image, video, text }

@@ -123,11 +123,11 @@ class AppRouter extends RootStackRouter {
           duration: const Duration(milliseconds: 400),
         ),
         CustomRoute(
-          page: MediaRoute.page,
+          page: ChatMediaRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 400),
         ),
-           CustomRoute(
+        CustomRoute(
           page: ChatWallpaperRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 400),

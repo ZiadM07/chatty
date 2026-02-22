@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:chatty/core/constants/exports.dart';
 import 'package:chatty/core/framework/pick_file.dart';

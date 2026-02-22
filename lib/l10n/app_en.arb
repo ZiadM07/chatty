@@ -1,4 +1,3 @@
-
 {
   "@@locale": "en",
   "theme": "Theme",
@@ -33,7 +32,11 @@
   "invalidAccessKey": "Invalid access key",
   "failedToAuthenticate": "Failed to authenticate: {error}",
   "@failedToAuthenticate": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "chats": "Chats",
   "calls": "Calls",
@@ -45,7 +48,6 @@
   "newUser": "New User",
   "myUsers": "My Users",
   "conversations": "Conversations",
-
   "addStory": "Add Story",
   "viewStory": "View Story",
   "storyViews": "Story Views",
@@ -169,7 +171,11 @@
   "loggedOutSuccessfully": "Logged out successfully",
   "failedToLogout": "Failed to logout: {error}",
   "@failedToLogout": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "updateRequired": "Update Required",
   "updateRequiredMessage": "A new version of the app is available. Please update to continue using the app.",
@@ -248,8 +254,8 @@
   "thisIsHowYourAppWillLook": "This is how your app will look",
   "about": "About",
   "aboutApp": "About App",
-  "pleaseSelectAtLeastOneContact":"Please Select AtLeast One Contact",
-  "groupCreatedSuccessfully":"Group Created Successfully",
+  "pleaseSelectAtLeastOneContact": "Please Select AtLeast One Contact",
+  "groupCreatedSuccessfully": "Group Created Successfully",
   "pleaseEnterGroupName": "Please enter a group name",
   "createNewGroup": "Create New Group",
   "addMembersToYourGroup": "Add members to your group",
@@ -395,51 +401,53 @@
   "noStories": "No stories",
   "mediaComing": "Media feature coming soon",
   "createGroupComing": "Create group feature coming soon",
-
   "groupsInCommon": "{count} groups in common",
   "@groupsInCommon": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "message": "Message",
   "muteNotifications": "Mute notifications",
   "silenceAlerts": "Silence alerts",
-
   "mediaLinks": "Media & Links",
   "sharedFiles": "Shared files",
-
   "joined": "Joined",
-
   "block": "Block {username}",
   "@block": {
-    "placeholders": { "username": { "type": "String" } }
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   },
-
   "blockDesc": "Block this user",
-
   "reportDesc": "Report this user",
-
   "blockUser": "Block user",
   "blockUserConfirm": "Are you sure you want to block this user?",
-
   "reportUser": "Report user",
   "reportUserConfirm": "Are you sure you want to report this user?",
-
   "reportReason": "Report reason",
   "reportReasonHint": "Tell us why you're reporting this user",
-
   "showMore": "Show more ({count})",
   "@showMore": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "showLess": "Show less",
-
   "createGroupWith": "Create a group with {username}",
   "@createGroupWith": {
-    "placeholders": { "username": { "type": "String" } }
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   },
-
   "startNewCommunity": "Start a new community",
   "bioUpdatedSuccess": "Bio updated successfully",
   "profileTapToAddBio": "Tap to add bio",
@@ -507,7 +515,7 @@
   "pdf": "pdf",
   "file": "file",
   "offline": "offline",
-  "notificationInfo":"Your settings are applied instantly.",
+  "notificationInfo": "Your settings are applied instantly.",
   "groupPictureUpdated": "Group Picture Updated",
   "groupImageDesc": "Make your group stand out with a picture.",
   "admin": "admin",
@@ -542,5 +550,10 @@
   "languageSettings": "Language Settings",
   "addCaption": "Add caption",
   "chatsSettings": "Chats Settings",
-  "chatsWallpaperSubtitle": "Change the wallpaper for your chats"
+  "chatsWallpaperSubtitle": "Change the wallpaper for your chats",
+  "mediaAndFiles": "Media & Files",
+  "mediaEmptyTitle": "No media yet",
+  "mediaErrorDescription": "Failed to load media. Please try again.",
+  "mediaErrorTitle": "Error loading media",
+  "noSharedFiles": "No shared files"
 }

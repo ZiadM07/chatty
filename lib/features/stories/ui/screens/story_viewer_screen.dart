@@ -499,7 +499,7 @@ class _ProgressSegment extends StatelessWidget {
           : isCurrent && controller != null
           ? AnimatedBuilder(
               animation: controller!,
-              builder: (_, __) => _fill(context, controller!.value),
+              builder: (_, child) => _fill(context, controller!.value),
             )
           : const SizedBox.shrink(),
     );
@@ -847,7 +847,7 @@ class _ViewersSheet extends StatelessWidget {
                 shrinkWrap: true,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 itemCount: viewerIds.length,
-                separatorBuilder: (_, __) => Divider(
+                separatorBuilder: (context, index) => Divider(
                   height: 1,
                   color: context.colorScheme.outline.withValues(alpha: 0.08),
                 ),
@@ -859,10 +859,6 @@ class _ViewersSheet extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Viewer tile — lazy loads user info
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _ViewerTile extends StatefulWidget {
   final String uid;

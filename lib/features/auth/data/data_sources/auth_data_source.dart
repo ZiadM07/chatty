@@ -95,8 +95,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  // ─── getCurrentUser ───────────────────────────────────────────────────────
-
   @override
   Future<AuthModel?> getCurrentUser() async {
     try {
@@ -109,8 +107,6 @@ class AuthDataSourceImpl implements AuthDataSource {
       throw _mapFirebaseAuthException(e);
     }
   }
-
-  // ─── signUpWithEmailAndPassword ───────────────────────────────────────────
 
   @override
   Future<AuthModel> signUpWithEmailAndPassword({
@@ -134,8 +130,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  // ─── signInWithEmailAndPassword ───────────────────────────────────────────
-
   @override
   Future<AuthModel> signInWithEmailAndPassword({
     required String email,
@@ -156,8 +150,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  // ─── signOut ──────────────────────────────────────────────────────────────
-
   @override
   Future<void> signOut() async {
     try {
@@ -174,8 +166,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  // ─── sendPasswordResetEmail ───────────────────────────────────────────────
-
   @override
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
@@ -184,8 +174,6 @@ class AuthDataSourceImpl implements AuthDataSource {
       throw _mapFirebaseAuthException(e);
     }
   }
-
-  // ─── sendEmailVerification ────────────────────────────────────────────────
 
   @override
   Future<void> sendEmailVerification() async {
@@ -197,8 +185,6 @@ class AuthDataSourceImpl implements AuthDataSource {
       throw _mapFirebaseAuthException(e);
     }
   }
-
-  // ─── saveUserProfile ──────────────────────────────────────────────────────
 
   @override
   Future<void> saveUserProfile({required UserModel user}) async {
@@ -221,8 +207,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  // ─── getUserProfile ───────────────────────────────────────────────────────
-
   @override
   Future<UserModel?> getUserProfile({required String uid}) async {
     try {
@@ -239,8 +223,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  // ─── markProfileComplete ──────────────────────────────────────────────────
-
   @override
   Future<void> markProfileComplete({required String uid}) async {
     try {
@@ -251,8 +233,6 @@ class AuthDataSourceImpl implements AuthDataSource {
       throw FirestoreException(e.message ?? 'Failed to mark profile complete.');
     }
   }
-
-  // ─── updateUserPresence ───────────────────────────────────────────────────
 
   @override
   Future<void> updateUserPresence({
@@ -268,8 +248,6 @@ class AuthDataSourceImpl implements AuthDataSource {
       throw FirestoreException(e.message ?? 'Failed to update presence.');
     }
   }
-
-  // ─── deleteAccount ────────────────────────────────────────────────────────
 
   @override
   Future<void> deleteAccount({required String uid}) async {
@@ -287,8 +265,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  // ─── authStateChanges ─────────────────────────────────────────────────────
-
   @override
   Stream<AuthModel?> get authStateChanges {
     return _firebaseAuth.authStateChanges().asyncMap((user) async {
@@ -297,8 +273,6 @@ class AuthDataSourceImpl implements AuthDataSource {
       return _mapFirebaseUser(user, isProfileComplete: isProfileComplete);
     });
   }
-
-  // ─── Exception Mapper ─────────────────────────────────────────────────────
 
   AuthException _mapFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
@@ -328,8 +302,6 @@ class AuthDataSourceImpl implements AuthDataSource {
   }
 }
 
-// ─── Custom Exceptions ────────────────────────────────────────────────────
-
 class AuthException implements Exception {
   final String message;
   const AuthException(this.message);
@@ -345,7 +317,6 @@ class FirestoreException implements Exception {
   @override
   String toString() => 'FirestoreException: $message';
 }
-// ─── Firestore Collection Keys ─────────────────────────────────────────────
 
 class _Collections {
   static const String users = 'users';

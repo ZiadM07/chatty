@@ -10,12 +10,9 @@ import '../../../../core/state/app_state.dart';
 import '../data/models/chat_model.dart';
 import '../data/repositories/chat_repository.dart';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-
 class ConversationsState extends Equatable {
   final AppState<List<ChatModel>> chatsState;
 
-  /// Stores only the chatId on success — route pushes ChatRoute(chatId:)
   final AppState<String> openChatState;
 
   const ConversationsState({
@@ -35,16 +32,12 @@ class ConversationsState extends Equatable {
   List<Object?> get props => [chatsState, openChatState];
 }
 
-// ─── Cubit ────────────────────────────────────────────────────────────────────
-
 @injectable
 class ConversationsCubit extends Cubit<ConversationsState> {
   final ChatRepository _repository;
   StreamSubscription<List<ChatModel>>? _chatsSub;
 
   ConversationsCubit(this._repository) : super(const ConversationsState());
-
-  // ─── Watch Chats ──────────────────────────────────────────────────────────
 
   void watchChats({required String uid}) {
     emit(
@@ -77,8 +70,6 @@ class ConversationsCubit extends Cubit<ConversationsState> {
       ),
     );
   }
-
-  // ─── Open or Create 1-to-1 ───────────────────────────────────────────────
 
   Future<void> openOrCreateOneToOneChat({
     required String uid,
@@ -120,8 +111,6 @@ class ConversationsCubit extends Cubit<ConversationsState> {
       );
     }
   }
-
-  // ─── Create Group ─────────────────────────────────────────────────────────
 
   Future<void> createGroupChat({
     required String createdBy,

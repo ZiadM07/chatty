@@ -1,11 +1,8 @@
+import 'package:chatty/core/utils/enums.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user_model.g.dart';
-
-enum UserStatus { online, offline, away }
-
-enum Gender { male, female }
 
 @JsonSerializable()
 class UserModel extends Equatable {
@@ -39,12 +36,8 @@ class UserModel extends Equatable {
     this.blockedUsers = const [],
   });
 
-  // ─── Factory: from JSON ───────────────────────────────────────────────────
-
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
-
-  // ─── Factory: from Firestore ──────────────────────────────────────────────
 
   factory UserModel.fromFirestore(Map<String, dynamic> data, String uid) {
     return UserModel(
@@ -74,11 +67,7 @@ class UserModel extends Equatable {
     );
   }
 
-  // ─── To JSON ──────────────────────────────────────────────────────────────
-
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
-
-  // ─── To Firestore Map ─────────────────────────────────────────────────────
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -97,8 +86,6 @@ class UserModel extends Equatable {
       'blockedUsers': blockedUsers,
     };
   }
-
-  // ─── CopyWith ─────────────────────────────────────────────────────────────
 
   UserModel copyWith({
     String? uid,
@@ -146,8 +133,6 @@ class UserModel extends Equatable {
   bool get hasBio => bio != null && bio!.isNotEmpty;
 
   bool isBlockedBy(String otherUid) => blockedUsers.contains(otherUid);
-
-  // ─── Equatable ────────────────────────────────────────────────────────────
 
   @override
   List<Object?> get props => [

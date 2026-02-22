@@ -24,6 +24,7 @@ import '../../features/auth/data/data_sources/auth_data_source.dart' as _i933;
 import '../../features/auth/data/repositories/auth_repositories.dart' as _i613;
 import '../../features/chats/cubits/chat_cubit.dart' as _i1008;
 import '../../features/chats/cubits/conversations_cubit.dart' as _i1021;
+import '../../features/chats/cubits/chat_media_cubit.dart' as _i938;
 import '../../features/chats/data/data_source/chat_data_source.dart' as _i206;
 import '../../features/chats/data/repositories/chat_repository.dart' as _i737;
 import '../../features/profile/cubits/profile_cubit.dart' as _i877;
@@ -45,6 +46,7 @@ import '../../features/users/data/data_sources/users_data_source.dart' as _i295;
 import '../../features/users/data/repositories/users_repository.dart' as _i190;
 import '../constants/exports.dart' as _i600;
 import '../framework/api_executor.dart' as _i142;
+import '../framework/audio_service.dart' as _i946;
 import '../framework/firestore_offline_helper.dart' as _i279;
 import '../framework/network.dart' as _i159;
 import '../framework/permissions.dart' as _i349;
@@ -74,6 +76,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => injectionModule.providePrefs(),
       preResolve: true,
     );
+    gh.singleton<_i946.AudioService>(() => _i946.AudioService());
     gh.lazySingleton<_i59.FirebaseAuth>(() => injectionModule.firebaseAuth);
     gh.lazySingleton<_i974.FirebaseFirestore>(() => injectionModule.firestore);
     gh.lazySingleton<_i454.SupabaseClient>(() => injectionModule.client);
@@ -171,6 +174,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i1021.ConversationsCubit>(
       () => _i1021.ConversationsCubit(gh<_i737.ChatRepository>()),
+    );
+    gh.factory<_i938.ChatMediaCubit>(
+      () => _i938.ChatMediaCubit(gh<_i737.ChatRepository>()),
     );
     gh.factory<_i149.StoriesCubit>(
       () => _i149.StoriesCubit(gh<_i621.StoryRepository>()),

@@ -5,30 +5,17 @@ import '../../../../core/state/app_state.dart';
 import '../data/models/auth_model.dart';
 import '../data/models/user_model.dart';
 
-// ─── Auth State ───────────────────────────────────────────────────────────────
-//
-//  We use a single class with named constructors so StateHandler can consume
-//  it directly via `state.authState`, `state.loginState`, etc.
-//  Each screen gets its own AppState slot — they never interfere.
-// ─────────────────────────────────────────────────────────────────────────────
-
 class AuthState extends Equatable {
-  /// Tracks the currently signed-in user. Drives the root router.
   final AuthModel? currentUser;
 
-  /// login screen state  → data: AuthModel
   final AppState<AuthModel> loginState;
 
-  /// signup screen state → data: AuthModel
   final AppState<AuthModel> signUpState;
 
-  /// fill profile screen state → data: UserModel
   final AppState<UserModel> fillProfileState;
 
-  /// password reset state → no data needed, just status + message
   final AppState<void> forgotPasswordState;
 
-  /// sign out / delete account state
   final AppState<void> signOutState;
 
   final bool authReady;
@@ -43,11 +30,7 @@ class AuthState extends Equatable {
     this.authReady = false,
   });
 
-  // ─── Initial ──────────────────────────────────────────────────────────────
-
   factory AuthState.initial() => const AuthState();
-
-  // ─── CopyWith ─────────────────────────────────────────────────────────────
 
   AuthState copyWith({
     AuthModel? currentUser,
@@ -69,8 +52,6 @@ class AuthState extends Equatable {
       signOutState: signOutState ?? this.signOutState,
     );
   }
-
-  // ─── Equatable ────────────────────────────────────────────────────────────
 
   @override
   List<Object?> get props => [

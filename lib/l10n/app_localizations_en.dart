@@ -1467,4 +1467,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatsWallpaperSubtitle => 'Change the wallpaper for your chats';
+
+  @override
+  String get mediaAndFiles => 'Media & Files';
+
+  @override
+  String get mediaEmptyTitle => 'No media yet';
+
+  @override
+  String get mediaErrorDescription => 'Failed to load media. Please try again.';
+
+  @override
+  String get mediaErrorTitle => 'Error loading media';
+
+  @override
+  String get noSharedFiles => 'No shared files';
 }

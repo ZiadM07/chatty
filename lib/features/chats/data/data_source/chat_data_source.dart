@@ -5,27 +5,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class ChatDataSource {
-  // ─── Conversations ────────────────────────────────────────────────────────
-
-  /// Real-time stream of all chats the user is a member of, sorted by lastMessageAt desc.
   Stream<List<ChatModel>> watchChats({required String uid});
 
-  /// Fetch a single chat document once.
   Future<ChatModel?> getChat({required String chatId});
 
-  /// Find an existing 1-to-1 chat between [uid] and [otherUid]. Returns null if none.
   Future<ChatModel?> findOneToOneChat({
     required String uid,
     required String otherUid,
   });
 
-  /// Create a new 1-to-1 chat. Caller should call [findOneToOneChat] first.
   Future<ChatModel> createOneToOneChat({
     required String uid,
     required String otherUid,
   });
 
-  /// Create a new group chat.
   Future<ChatModel> createGroupChat({
     required String createdBy,
     required List<String> memberIds,
@@ -33,42 +26,40 @@ abstract class ChatDataSource {
     String? groupPhotoUrl,
   });
 
-  /// Delete a chat and all its messages.
   Future<void> deleteChat({required String chatId});
 
-  // ─── Messages ─────────────────────────────────────────────────────────────
-
-  /// Real-time stream of messages for [chatId], sorted by createdAt asc.
   Stream<List<MessageModel>> watchMessages({required String chatId});
 
-  /// Send a message. Atomically writes the message + updates chat preview + increments unread counts.
   Future<MessageModel> sendMessage({
     required String chatId,
     required String senderId,
     required List<String> memberIds,
     required String content,
     MessageType type,
+    Map<String, dynamic>? metadata,
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
   });
 
-  /// Reset unreadCounts[uid] to 0 when the user opens a chat.
-  Future<void> markChatAsRead({required String chatId, required String uid});
-
-  /// Mark a message as delivered.
-  Future<void> markMessageAsDelivered({
+  Future<void> markMessagesDelivered({
     required String chatId,
     required String uid,
   });
 
-  /// Soft delete — sets isDeleted = true and clears content.
+  Future<void> markChatAsRead({required String chatId, required String uid});
+
   Future<void> deleteMessage({
     required String chatId,
     required String messageId,
   });
 
-  // ─── Group Management ─────────────────────────────────────────────────────
+  Future<List<MessageModel>> getMediaMessages({
+    required String chatId,
+    MessageType? type,
+    int limit = 30,
+    String? lastMessageId,
+  });
 
   Future<void> addGroupMembers({
     required String chatId,
@@ -93,15 +84,11 @@ class ChatDataSourceImpl implements ChatDataSource {
 
   const ChatDataSourceImpl(this._firestore);
 
-  // ─── Refs ─────────────────────────────────────────────────────────────────
-
   CollectionReference<Map<String, dynamic>> get _chats =>
       _firestore.collection('chats');
 
   CollectionReference<Map<String, dynamic>> _messages(String chatId) =>
       _chats.doc(chatId).collection('messages');
-
-  // ─── Watch Chats ──────────────────────────────────────────────────────────
 
   @override
   Stream<List<ChatModel>> watchChats({required String uid}) {
@@ -121,8 +108,6 @@ class ChatDataSourceImpl implements ChatDataSource {
     });
   }
 
-  // ─── Get Chat ─────────────────────────────────────────────────────────────
-
   @override
   Future<ChatModel?> getChat({required String chatId}) async {
     try {
@@ -133,8 +118,6 @@ class ChatDataSourceImpl implements ChatDataSource {
       throw ChatException(e.message ?? 'Failed to get chat.');
     }
   }
-
-  // ─── Find One-to-One ──────────────────────────────────────────────────────
 
   @override
   Future<ChatModel?> findOneToOneChat({
@@ -158,8 +141,6 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 
-  // ─── Create One-to-One ────────────────────────────────────────────────────
-
   @override
   Future<ChatModel> createOneToOneChat({
     required String uid,
@@ -180,8 +161,6 @@ class ChatDataSourceImpl implements ChatDataSource {
       throw ChatException(e.message ?? 'Failed to create chat.');
     }
   }
-
-  // ─── Create Group ─────────────────────────────────────────────────────────
 
   @override
   Future<ChatModel> createGroupChat({
@@ -210,8 +189,6 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 
-  // ─── Delete Chat ──────────────────────────────────────────────────────────
-
   @override
   Future<void> deleteChat({required String chatId}) async {
     try {
@@ -221,8 +198,6 @@ class ChatDataSourceImpl implements ChatDataSource {
       throw ChatException(e.message ?? 'Failed to delete chat.');
     }
   }
-
-  // ─── Watch Messages ───────────────────────────────────────────────────────
 
   @override
   Stream<List<MessageModel>> watchMessages({required String chatId}) {
@@ -236,8 +211,6 @@ class ChatDataSourceImpl implements ChatDataSource {
         );
   }
 
-  // ─── Send Message ─────────────────────────────────────────────────────────
-
   @override
   Future<MessageModel> sendMessage({
     required String chatId,
@@ -245,6 +218,7 @@ class ChatDataSourceImpl implements ChatDataSource {
     required List<String> memberIds,
     required String content,
     MessageType type = MessageType.text,
+    Map<String, dynamic>? metadata,
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
@@ -261,18 +235,16 @@ class ChatDataSourceImpl implements ChatDataSource {
         type: type,
         status: MessageStatus.sent,
         createdAt: now,
+        metadata: metadata,
         replyToId: replyToId,
         replyToContent: replyToContent,
         replyToSenderId: replyToSenderId,
       );
 
-      // Increment unread for everyone except sender
       final unreadIncrements = {
         for (final uid in memberIds.where((id) => id != senderId))
           'unreadCounts.$uid': FieldValue.increment(1),
       };
-
-      // Atomic: write message + update chat preview in one batch
       final batch = _firestore.batch();
       batch.set(msgRef, message.toFirestore());
       batch.update(_chats.doc(chatId), {
@@ -290,18 +262,12 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 
-  // ─── Mark As Read ─────────────────────────────────────────────────────────
-
   @override
   Future<void> markChatAsRead({
     required String chatId,
     required String uid,
   }) async {
     try {
-      // 1. Reset unread counter
-      // 2. Bulk-update all sent/delivered messages from others → read
-      //    We do this in a batch so it's one round-trip.
-
       final unreadSnap = await _messages(chatId)
           .where('senderId', isNotEqualTo: uid)
           .where('isDeleted', isEqualTo: false)
@@ -312,7 +278,6 @@ class ChatDataSourceImpl implements ChatDataSource {
         return s == 'sent' || s == 'delivered';
       }).toList();
 
-      // Firestore batch limit is 500 — chunk if needed
       const chunkSize = 400;
       for (var i = 0; i < toUpdate.length; i += chunkSize) {
         final chunk = toUpdate.skip(i).take(chunkSize);
@@ -324,7 +289,6 @@ class ChatDataSourceImpl implements ChatDataSource {
         await batch.commit();
       }
 
-      // If no messages to update, still reset the counter
       if (toUpdate.isEmpty) {
         await _chats.doc(chatId).update({'unreadCounts.$uid': 0});
       }
@@ -333,14 +297,8 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 
-  // ─── Mark Delivered ──────────────────────────────────────────────────────
-  //
-  //  Called when the recipient's device receives messages but they haven't
-  //  opened the chat yet. Upgrades all `sent` messages from others → `delivered`.
-  // ─────────────────────────────────────────────────────────────────────────
-
   @override
-  Future<void> markMessageAsDelivered({
+  Future<void> markMessagesDelivered({
     required String chatId,
     required String uid,
   }) async {
@@ -367,8 +325,6 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 
-  // ─── Delete Message ───────────────────────────────────────────────────────
-
   @override
   Future<void> deleteMessage({
     required String chatId,
@@ -383,7 +339,49 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 
-  // ─── Group Management ─────────────────────────────────────────────────────
+  @override
+  Future<List<MessageModel>> getMediaMessages({
+    required String chatId,
+    MessageType? type,
+    int limit = 30,
+    String? lastMessageId,
+  }) async {
+    try {
+      Query<Map<String, dynamic>> query = _messages(chatId)
+          .where('isDeleted', isEqualTo: false)
+          .orderBy('createdAt', descending: true);
+
+      if (type != null) {
+        query = query.where('type', isEqualTo: type.name);
+      } else {
+        query = query.where(
+          'type',
+          whereIn: [
+            MessageType.image.name,
+            MessageType.video.name,
+            MessageType.audio.name,
+            MessageType.file.name,
+          ],
+        );
+      }
+
+      if (lastMessageId != null) {
+        final lastDoc = await _messages(chatId).doc(lastMessageId).get();
+        if (lastDoc.exists) {
+          query = query.startAfterDocument(lastDoc);
+        }
+      }
+
+      query = query.limit(limit);
+
+      final snap = await query.get();
+      return snap.docs
+          .map((d) => MessageModel.fromFirestore(d.data(), d.id, chatId))
+          .toList();
+    } on FirebaseException catch (e) {
+      throw ChatException(e.message ?? 'Failed to load media.');
+    }
+  }
 
   @override
   Future<void> addGroupMembers({
@@ -433,8 +431,6 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
   String _mediaLabel(MessageType type) {
     return switch (type) {
       MessageType.image => '📷 Photo',
@@ -460,8 +456,6 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 }
-
-// ─── Exception ────────────────────────────────────────────────────────────────
 
 class ChatException implements Exception {
   final String message;

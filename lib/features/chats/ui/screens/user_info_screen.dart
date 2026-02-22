@@ -5,18 +5,19 @@ import 'package:chatty/features/shared/widgets/app_toast.dart';
 import 'package:chatty/features/users/cubits/user_info_cubit.dart';
 import 'package:chatty/features/users/cubits/user_info_state.dart';
 
-import 'package:chatty/features/users/ui/widgets/account_info_section.dart';
-import 'package:chatty/features/users/ui/widgets/actions_section.dart';
-import 'package:chatty/features/users/ui/widgets/groups_section.dart';
-import 'package:chatty/features/users/ui/widgets/media_section.dart';
-import 'package:chatty/features/users/ui/widgets/notifications_section.dart';
+import 'package:chatty/features/chats/ui/widgets/account_info_section.dart';
+import 'package:chatty/features/chats/ui/widgets/actions_section.dart';
+import 'package:chatty/features/chats/ui/widgets/groups_section.dart';
+import 'package:chatty/features/chats/ui/widgets/media_section.dart';
+import 'package:chatty/features/chats/ui/widgets/notifications_section.dart';
 
 import 'package:chatty/config/router/app_router.gr.dart';
 
 @RoutePage()
 class UserInfoScreen extends StatefulWidget implements AutoRouteWrapper {
   final String uid;
-  const UserInfoScreen({super.key, required this.uid});
+  final String? chatId;
+  const UserInfoScreen({super.key, required this.uid, this.chatId});
 
   @override
   Widget wrappedRoute(BuildContext context) {
@@ -121,7 +122,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                           const SizedBox(height: 30),
                           const NotificationsSection(),
                           const SizedBox(height: 10),
-                          const MediaSection(),
+                          MediaSection(chatId: widget.chatId),
                           const SizedBox(height: 20),
                           const GroupsSection(),
                         ],

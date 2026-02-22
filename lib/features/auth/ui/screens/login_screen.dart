@@ -31,8 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // ─── Submit ───────────────────────────────────────────────────────────────
-
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     context.read<AuthCubit>().login(
@@ -40,8 +38,6 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordController.text.trim(),
     );
   }
-
-  // ─── Navigation ───────────────────────────────────────────────────────────
 
   void _onSuccess(AuthState state) {
     context.read<AuthCubit>().resetLoginState();
@@ -64,12 +60,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ─── Build ────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
-      // Only rebuild when loginState changes — nothing else matters here
       buildWhen: (prev, curr) => prev.loginState != curr.loginState,
       listenWhen: (prev, curr) => prev.loginState != curr.loginState,
       listener: (context, state) {

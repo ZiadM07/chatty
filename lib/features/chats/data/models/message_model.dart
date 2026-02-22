@@ -15,6 +15,8 @@ class MessageModel extends Equatable {
   final String? replyToId;
   final String? replyToContent;
   final String? replyToSenderId;
+  final Map<String, dynamic>?
+  metadata; // duration for audio, dimensions for images, etc.
 
   const MessageModel({
     required this.id,
@@ -29,6 +31,7 @@ class MessageModel extends Equatable {
     this.replyToId,
     this.replyToContent,
     this.replyToSenderId,
+    this.metadata,
   });
 
   factory MessageModel.fromFirestore(
@@ -55,6 +58,7 @@ class MessageModel extends Equatable {
       replyToId: data['replyToId'] as String?,
       replyToContent: data['replyToContent'] as String?,
       replyToSenderId: data['replyToSenderId'] as String?,
+      metadata: data['metadata'] as Map<String, dynamic>?,
     );
   }
 
@@ -84,6 +88,7 @@ class MessageModel extends Equatable {
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
+    Map<String, dynamic>? metadata,
   }) => MessageModel(
     id: id ?? this.id,
     chatId: chatId ?? this.chatId,
@@ -97,6 +102,7 @@ class MessageModel extends Equatable {
     replyToId: replyToId ?? this.replyToId,
     replyToContent: replyToContent ?? this.replyToContent,
     replyToSenderId: replyToSenderId ?? this.replyToSenderId,
+    metadata: metadata ?? this.metadata,
   );
 
   bool get isMedia => type != MessageType.text;

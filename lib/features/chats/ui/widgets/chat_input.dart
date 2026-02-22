@@ -4,7 +4,8 @@ import 'package:chatty/core/framework/pick_file.dart';
 import 'package:chatty/core/utils/enums.dart';
 import 'package:chatty/features/chats/data/models/message_model.dart';
 import 'package:chatty/features/shared/cubits/app_cubit.dart';
-import 'package:chatty/features/users/data/repositories/users_repository.dart';
+import '../../../../core/framework/audio_service.dart';
+import '../../../users/data/repositories/users_repository.dart';
 
 class ChatInput extends StatefulWidget {
   final ValueChanged<String>? onSendPressed;
@@ -40,6 +41,7 @@ class _ChatInputState extends State<ChatInput> {
   late final TextEditingController _controller;
   bool _hasText = false;
   bool _showQuickActions = false;
+  final _audioService = getIt<AudioService>();
 
   @override
   void initState() {
@@ -64,6 +66,28 @@ class _ChatInputState extends State<ChatInput> {
   void _toggleQuickActions() =>
       setState(() => _showQuickActions = !_showQuickActions);
 
+  // ─── Voice recording ───────────────────────────────────────────────────
+
+  Future<void> _startRecording() async {
+    final hasPermission = await _audioService.hasRecordPermission();
+    if (!hasPermission) {
+      // TODO: show permission denied snackbar
+      return;
+    }
+    await _audioService.startRecording();
+  }
+
+  Future<void> _stopRecordingAndSend() async {
+    final result = await _audioService.stopRecording();
+    if (mounted) {
+      widget.onSendAttachment?.call(result.file!);
+    }
+  }
+
+  // Future<void> _cancelRecording() async {
+  //   await _audioService.cancelRecording();
+  // }
+
   Future<void> _pickImage() async {
     setState(() => _showQuickActions = false);
     final file = await PickFile.image();
@@ -85,9 +109,7 @@ class _ChatInputState extends State<ChatInput> {
 
   @override
   Widget build(BuildContext context) {
-    final appCubit = context.watch<AppCubit>();
-    final enterIsSend = appCubit.enterIsSend;
-
+    final appCubit = context.read<AppCubit>();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -107,7 +129,7 @@ class _ChatInputState extends State<ChatInput> {
                   message: widget.replyingTo!,
                   currentUid: widget.currentUid ?? '',
                   onCancel: widget.onCancelReply,
-                ).addPadding(right: 55)
+                )
               : const SizedBox.shrink(),
         ),
 
@@ -133,12 +155,14 @@ class _ChatInputState extends State<ChatInput> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                   minLines: 1,
-                  textInputAction: enterIsSend
+                  textInputAction: appCubit.enterIsSend
                       ? TextInputAction.send
                       : TextInputAction.newline,
-
-                  onSubmitted: enterIsSend ? (_) => _sendMessage() : null,
-
+                  onSubmitted: (value) {
+                    if (appCubit.enterIsSend) {
+                      _sendMessage();
+                    }
+                  },
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: context.colorScheme.textPrimary,
                   ),
@@ -178,9 +202,13 @@ class _ChatInputState extends State<ChatInput> {
                               icon: SolarIconsBold.camera,
                               onPressed: _pickImage,
                             ),
-                            _ActionButton(
-                              icon: SolarIconsBold.microphone2,
-                              onPressed: () {},
+                            GestureDetector(
+                              onLongPress: _startRecording,
+                              onLongPressEnd: (_) => _stopRecordingAndSend(),
+                              child: _ActionButton(
+                                icon: SolarIconsBold.microphone2,
+                                onPressed: () {}, // Only long-press works
+                              ),
                             ),
                           ],
                         )

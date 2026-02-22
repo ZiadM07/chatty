@@ -1,4 +1,3 @@
-
 {
   "@@locale": "ar",
   "theme": "السمة",
@@ -33,7 +32,11 @@
   "invalidAccessKey": "مفتاح وصول غير صالح",
   "failedToAuthenticate": "فشل تسجيل الدخول: {error}",
   "@failedToAuthenticate": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "chats": "الدردشات",
   "calls": "المكالمات",
@@ -167,7 +170,11 @@
   "loggedOutSuccessfully": "تم تسجيل الخروج بنجاح",
   "failedToLogout": "فشل تسجيل الخروج: {error}",
   "@failedToLogout": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "updateRequired": "يتطلب تحديث",
   "updateRequiredMessage": "يتوفر إصدار جديد من التطبيق. يرجى التحديث للمتابعة.",
@@ -218,7 +225,6 @@
   "chatsSubtitle": "الخلفية، سجل الدردشة",
   "languageSubtitle": "اختر لغتك",
   "notificationSubtitle": "الرسائل والمكالمات والتنبيهات",
-
   "appearance": "المظهر",
   "systemDefault": "النظام الافتراضي",
   "chatWallpaper": "خلفيات الدردشة",
@@ -229,12 +235,10 @@
   "preferences": "التفضيلات",
   "enterIsSend": "الإدخال هو الإرسال",
   "pressEnterToSend": "اضغط على Enter للإرسال",
-
   "dangerZone": "منطقة الخطر",
   "clearAllChats": "مسح جميع الدردشات",
   "deleteAllConversationHistory": "حذف سجل المحادثات بالكامل",
   "deleteAllConversationHistoryConfirm": "هل أنت متأكد أنك تريد حذف جميع المحادثات؟",
-
   "themeSettings": "إعدادات المظهر",
   "chooseYourPreferredTheme": "اختر المظهر الذي يناسبك",
   "brightAndClean": "مظهر فاتح وواضح",
@@ -242,16 +246,14 @@
   "easierOnEyes": "أريح للعين في الإضاءة المنخفضة",
   "lightMode": "الوضع الفاتح",
   "matchDeviceSettings": "مطابقة إعدادات الجهاز",
-
   "preview": "معاينة",
   "colorsAndContrast": "معاينة الألوان والتباين",
   "themeChangesApplyImmediately": "تُطبّق تغييرات المظهر مباشرة وتحفظ تلقائيًا",
   "sampleMessage": "رسالة تجريبية",
   "thisIsHowYourAppWillLook": "هكذا سيبدو تطبيقك",
-
   "about": "حول التطبيق",
-  "pleaseSelectAtLeastOneContact":"الرجاء تحديد جهة اتصال واحدة على الأقل",
-  "groupCreatedSuccessfully":"تم إنشاء المجموعة بنجاح",
+  "pleaseSelectAtLeastOneContact": "الرجاء تحديد جهة اتصال واحدة على الأقل",
+  "groupCreatedSuccessfully": "تم إنشاء المجموعة بنجاح",
   "pleaseEnterGroupName": "الرجاء إدخال اسم المجموعة",
   "createNewGroup": "إنشاء مجموعة جديدة",
   "addMembersToYourGroup": "إضافة أعضاء إلى مجموعتك",
@@ -371,7 +373,6 @@
   "messageNotificationsDesc": "تلقي إشعار عند وصول رسالة جديدة",
   "groupNotifications": "إشعارات المجموعات",
   "groupNotificationsDesc": "ابقَ على اطلاع بنشاطات المجموعات",
-
   "notificationPreferences": "إعدادات الإشعارات",
   "vibration": "الاهتزاز",
   "vibrationDesc": "اهتزاز عند وصول إشعار",
@@ -400,51 +401,53 @@
   "noStories": "لا توجد قصص",
   "mediaComing": "ميزة الوسائط قريبًا",
   "createGroupComing": "ميزة إنشاء المجموعة قريبًا",
-
   "groupsInCommon": "{count} مجموعات مشتركة",
   "@groupsInCommon": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "message": "مراسلة",
   "muteNotifications": "كتم الإشعارات",
   "silenceAlerts": "إسكات التنبيهات",
-
   "mediaLinks": "الوسائط والروابط",
   "sharedFiles": "الملفات المشتركة",
-
   "joined": "انضم في",
-
   "block": "حظر {username}",
   "@block": {
-    "placeholders": { "username": { "type": "String" } }
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   },
-
   "blockDesc": "حظر هذا المستخدم",
-
   "reportDesc": "الإبلاغ عن هذا المستخدم",
-
   "blockUser": "حظر المستخدم",
   "blockUserConfirm": "هل أنت متأكد أنك تريد حظر هذا المستخدم؟",
-
   "reportUser": "الإبلاغ عن المستخدم",
   "reportUserConfirm": "هل أنت متأكد أنك تريد الإبلاغ عن هذا المستخدم؟",
-
   "reportReason": "سبب الإبلاغ",
   "reportReasonHint": "أخبرنا لماذا تقوم بالإبلاغ عن هذا المستخدم",
-
   "showMore": "عرض المزيد ({count})",
   "@showMore": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "showLess": "عرض أقل",
-
   "createGroupWith": "إنشاء مجموعة مع {username}",
   "@createGroupWith": {
-    "placeholders": { "username": { "type": "String" } }
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   },
-
   "startNewCommunity": "ابدأ مجتمعًا جديدًا",
   "bioUpdatedSuccess": "Bio updated successfully",
   "profileTapToAddBio": "اضغط لإضافة نبذة",
@@ -512,7 +515,7 @@
   "pdf": "pdf",
   "file": "ملف",
   "offline": "غير متصل",
-  "notificationInfo":"يتم تطبيق إعداداتك فورًا",
+  "notificationInfo": "يتم تطبيق إعداداتك فورًا",
   "groupPictureUpdated": "تم تحديث صورة المجموعة",
   "groupImageDesc": "اجعل مجموعتك مميزة بصورة.",
   "admin": "مسؤل",
@@ -547,7 +550,10 @@
   "languageSettings": "إعدادات اللغة",
   "addCaption": "إضافة التسمية",
   "chatsSettings": "إعدادات الدردشات",
-  "chatsWallpaperSubtitle": "تغيير الخلفية للدردشات"
-
-
+  "chatsWallpaperSubtitle": "تغيير الخلفية للدردشات",
+  "mediaAndFiles": "الوسائط والملفات",
+  "mediaEmptyTitle": "لا توجد وسائط بعد",
+  "mediaErrorDescription": "فشل تحميل الوسائط. يرجى المحاولة مرة أخرى.",
+  "mediaErrorTitle": "خطأ في تحميل الوسائط",
+  "noSharedFiles": "لا توجد ملفات مشتركة"
 }

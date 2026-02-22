@@ -120,10 +120,9 @@ class ChatsSettingsScreen extends StatelessWidget {
                   icon: Icons.keyboard_return,
                   onTap: () {},
                   trailing: Switch(
-  value: appCubit.enterIsSend,
-  onChanged: appCubit.toggleEnterIsSend,
-)
-
+                    value: appCubit.enterIsSend,
+                    onChanged: appCubit.toggleEnterIsSend,
+                  ),
                 ),
               ],
             ).addPadding(horizontal: 20),

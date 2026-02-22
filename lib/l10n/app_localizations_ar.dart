@@ -1467,4 +1467,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chatsWallpaperSubtitle => 'تغيير الخلفية للدردشات';
+
+  @override
+  String get mediaAndFiles => 'الوسائط والملفات';
+
+  @override
+  String get mediaEmptyTitle => 'لا توجد وسائط بعد';
+
+  @override
+  String get mediaErrorDescription => 'فشل تحميل الوسائط. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get mediaErrorTitle => 'خطأ في تحميل الوسائط';
+
+  @override
+  String get noSharedFiles => 'لا توجد ملفات مشتركة';
 }

@@ -15,14 +15,10 @@ class SignUpModel extends Equatable {
     this.confirmPassword = '',
   });
 
-  // ─── Factory: from JSON ───────────────────────────────────────────────────
-
   factory SignUpModel.fromJson(Map<String, dynamic> json) =>
       _$SignUpModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$SignUpModelToJson(this);
-
-  // ─── CopyWith ─────────────────────────────────────────────────────────────
 
   SignUpModel copyWith({
     String? email,
@@ -35,8 +31,6 @@ class SignUpModel extends Equatable {
       confirmPassword: confirmPassword ?? this.confirmPassword,
     );
   }
-
-  // ─── Validation ───────────────────────────────────────────────────────────
 
   String? get emailError {
     if (email.isEmpty) return 'Email is required';
@@ -67,8 +61,6 @@ class SignUpModel extends Equatable {
       emailError == null &&
       passwordError == null &&
       confirmPasswordError == null;
-
-  // ─── Equatable ────────────────────────────────────────────────────────────
 
   @override
   List<Object?> get props => [email, password, confirmPassword];
