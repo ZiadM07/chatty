@@ -1,13 +1,17 @@
-import 'package:chatty/core/constants/exports.dart';
+import 'package:Chatty/core/constants/exports.dart';
 
 class ActionsSection extends StatelessWidget {
   final bool isLoadingChat;
   final VoidCallback onMessage;
+  final VoidCallback? onViewStory;
+  final bool showStory;
 
   const ActionsSection({
     super.key,
     required this.isLoadingChat,
     required this.onMessage,
+    this.onViewStory,
+    this.showStory = true,
   });
 
   @override
@@ -15,7 +19,6 @@ class ActionsSection extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        /* ─── Message ─── */
         _ActionButton(
           icon: isLoadingChat
               ? SizedBox(
@@ -33,18 +36,15 @@ class ActionsSection extends StatelessWidget {
           label: context.locale.message,
           onTap: isLoadingChat ? null : onMessage,
         ),
-
-        /* ─── View Story ─── */
-        _ActionButton(
-          icon: Icon(
-            SolarIconsOutline.userHeartRounded,
-            color: context.colorScheme.onPrimary,
+        if (showStory)
+          _ActionButton(
+            icon: Icon(
+              SolarIconsOutline.userHeartRounded,
+              color: context.colorScheme.onPrimary,
+            ),
+            label: context.locale.viewStory,
+            onTap: onViewStory,
           ),
-          label: context.locale.viewStory,
-          onTap: () {
-            // TODO: wire story navigation
-          },
-        ),
       ],
     );
   }

@@ -1,7 +1,7 @@
-import 'package:chatty/config/router/app_router.gr.dart';
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/di/injectable.dart';
-import 'package:chatty/features/chats/cubits/chat_media_cubit.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/di/injectable.dart';
+import 'package:Chatty/features/chats/cubits/chat_media_cubit.dart';
 
 class MediaSection extends StatelessWidget {
   final String? chatId;

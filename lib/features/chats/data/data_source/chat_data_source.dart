@@ -1,35 +1,33 @@
-import 'package:chatty/core/utils/enums.dart';
-import 'package:chatty/features/chats/data/models/chat_model.dart';
-import 'package:chatty/features/chats/data/models/message_model.dart';
+import 'package:Chatty/core/utils/enums.dart';
+import 'package:Chatty/features/chats/data/models/chat_model.dart';
+import 'package:Chatty/features/chats/data/models/message_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class ChatDataSource {
   Stream<List<ChatModel>> watchChats({required String uid});
-
+  Stream<ChatModel?> watchChat({required String chatId});
   Future<ChatModel?> getChat({required String chatId});
-
   Future<ChatModel?> findOneToOneChat({
     required String uid,
     required String otherUid,
   });
-
   Future<ChatModel> createOneToOneChat({
     required String uid,
     required String otherUid,
+    required String uidName,
+    required String otherUidName,
   });
-
   Future<ChatModel> createGroupChat({
     required String createdBy,
     required List<String> memberIds,
+    required Map<String, String> memberNames,
     required String groupName,
+    String? groupDescription,
     String? groupPhotoUrl,
   });
-
   Future<void> deleteChat({required String chatId});
-
   Stream<List<MessageModel>> watchMessages({required String chatId});
-
   Future<MessageModel> sendMessage({
     required String chatId,
     required String senderId,
@@ -40,42 +38,64 @@ abstract class ChatDataSource {
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
+    MessageType? replyToType,
+  });
+  Future<void> reactToMessage({
+    required String chatId,
+    required String messageId,
+    required String uid,
+    required String? reaction,
   });
 
   Future<void> markMessagesDelivered({
     required String chatId,
     required String uid,
   });
-
   Future<void> markChatAsRead({required String chatId, required String uid});
+
+  Future<void> markMessagesSeenBy({
+    required String chatId,
+    required String uid,
+  });
 
   Future<void> deleteMessage({
     required String chatId,
     required String messageId,
   });
-
   Future<List<MessageModel>> getMediaMessages({
     required String chatId,
     MessageType? type,
     int limit = 30,
     String? lastMessageId,
   });
-
   Future<void> addGroupMembers({
     required String chatId,
     required List<String> newMemberIds,
+    required Map<String, String> newMemberNames,
   });
-
   Future<void> removeGroupMember({
     required String chatId,
     required String memberId,
   });
-
   Future<void> updateGroupInfo({
     required String chatId,
     String? groupName,
+    String? groupDescription,
     String? groupPhotoUrl,
   });
+
+  Future<void> patchMemberNames({
+    required String chatId,
+    required Map<String, String> memberNames,
+  });
+
+  Future<void> transferOwnershipAndLeave({
+    required String chatId,
+    required String newOwnerUid,
+    required String currentOwnerUid,
+  });
+
+  Future<void> leaveGroup({required String chatId, required String uid});
 }
 
 @LazySingleton(as: ChatDataSource)
@@ -96,15 +116,20 @@ class ChatDataSourceImpl implements ChatDataSource {
       final chats = s.docs
           .map((d) => ChatModel.fromFirestore(d.data(), d.id))
           .toList();
-
-      // Sort client-side so null lastMessageAt (new chats) don't crash the query
       chats.sort((a, b) {
         final aTime = a.lastMessageAt ?? a.createdAt;
         final bTime = b.lastMessageAt ?? b.createdAt;
-        return bTime.compareTo(aTime); // descending
+        return bTime.compareTo(aTime);
       });
-
       return chats;
+    });
+  }
+
+  @override
+  Stream<ChatModel?> watchChat({required String chatId}) {
+    return _chats.doc(chatId).snapshots().map((snap) {
+      if (!snap.exists || snap.data() == null) return null;
+      return ChatModel.fromFirestore(snap.data()!, snap.id);
     });
   }
 
@@ -129,12 +154,10 @@ class ChatDataSourceImpl implements ChatDataSource {
           .where('type', isEqualTo: ChatType.oneToOne.name)
           .where('memberIds', arrayContains: uid)
           .get();
-
       final match = snap.docs
           .map((d) => ChatModel.fromFirestore(d.data(), d.id))
           .where((c) => c.memberIds.contains(otherUid))
           .toList();
-
       return match.isEmpty ? null : match.first;
     } on FirebaseException catch (e) {
       throw ChatException(e.message ?? 'Failed to find chat.');
@@ -145,6 +168,8 @@ class ChatDataSourceImpl implements ChatDataSource {
   Future<ChatModel> createOneToOneChat({
     required String uid,
     required String otherUid,
+    required String uidName,
+    required String otherUidName,
   }) async {
     try {
       final doc = _chats.doc();
@@ -152,6 +177,7 @@ class ChatDataSourceImpl implements ChatDataSource {
         id: doc.id,
         type: ChatType.oneToOne,
         memberIds: [uid, otherUid],
+        memberNames: {uid: uidName, otherUid: otherUidName},
         unreadCounts: {uid: 0, otherUid: 0},
         createdAt: DateTime.now(),
       );
@@ -166,7 +192,9 @@ class ChatDataSourceImpl implements ChatDataSource {
   Future<ChatModel> createGroupChat({
     required String createdBy,
     required List<String> memberIds,
+    required Map<String, String> memberNames,
     required String groupName,
+    String? groupDescription,
     String? groupPhotoUrl,
   }) async {
     try {
@@ -176,7 +204,9 @@ class ChatDataSourceImpl implements ChatDataSource {
         id: doc.id,
         type: ChatType.group,
         memberIds: allMembers,
+        memberNames: memberNames,
         groupName: groupName,
+        groupDescription: groupDescription,
         groupPhotoUrl: groupPhotoUrl,
         groupCreatedBy: createdBy,
         unreadCounts: {for (final id in allMembers) id: 0},
@@ -222,11 +252,11 @@ class ChatDataSourceImpl implements ChatDataSource {
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
+    MessageType? replyToType,
   }) async {
     try {
       final msgRef = _messages(chatId).doc();
       final now = DateTime.now();
-
       final message = MessageModel(
         id: msgRef.id,
         chatId: chatId,
@@ -239,8 +269,8 @@ class ChatDataSourceImpl implements ChatDataSource {
         replyToId: replyToId,
         replyToContent: replyToContent,
         replyToSenderId: replyToSenderId,
+        replyToType: replyToType,
       );
-
       final unreadIncrements = {
         for (final uid in memberIds.where((id) => id != senderId))
           'unreadCounts.$uid': FieldValue.increment(1),
@@ -255,10 +285,28 @@ class ChatDataSourceImpl implements ChatDataSource {
         ...unreadIncrements,
       });
       await batch.commit();
-
       return message;
     } on FirebaseException catch (e) {
       throw ChatException(e.message ?? 'Failed to send message.');
+    }
+  }
+
+  @override
+  Future<void> reactToMessage({
+    required String chatId,
+    required String messageId,
+    required String uid,
+    required String? reaction,
+  }) async {
+    try {
+      await _messages(chatId).doc(messageId).update({
+        if (reaction != null)
+          'reactions.$uid': reaction
+        else
+          'reactions.$uid': FieldValue.delete(),
+      });
+    } on FirebaseException catch (e) {
+      throw ChatException(e.message ?? 'Failed to react.');
     }
   }
 
@@ -294,6 +342,43 @@ class ChatDataSourceImpl implements ChatDataSource {
       }
     } on FirebaseException catch (e) {
       throw ChatException(e.message ?? 'Failed to mark as read.');
+    }
+  }
+
+  @override
+  Future<void> markMessagesSeenBy({
+    required String chatId,
+    required String uid,
+  }) async {
+    try {
+      final snap = await _messages(chatId)
+          .where('senderId', isNotEqualTo: uid)
+          .where('isDeleted', isEqualTo: false)
+          .get();
+
+      final unseen = snap.docs.where((doc) {
+        final readBy = List<String>.from(doc.data()['readBy'] as List? ?? []);
+        return !readBy.contains(uid);
+      }).toList();
+
+      if (unseen.isEmpty) return;
+
+      const chunkSize = 400;
+      for (var i = 0; i < unseen.length; i += chunkSize) {
+        final chunk = unseen.skip(i).take(chunkSize);
+        final batch = _firestore.batch();
+        for (final doc in chunk) {
+          batch.update(doc.reference, {
+            'readBy': FieldValue.arrayUnion([uid]),
+            'status': MessageStatus.read.name,
+          });
+        }
+
+        batch.update(_chats.doc(chatId), {'unreadCounts.$uid': 0});
+        await batch.commit();
+      }
+    } on FirebaseException catch (e) {
+      throw ChatException(e.message ?? 'Failed to mark messages as seen.');
     }
   }
 
@@ -367,14 +452,10 @@ class ChatDataSourceImpl implements ChatDataSource {
 
       if (lastMessageId != null) {
         final lastDoc = await _messages(chatId).doc(lastMessageId).get();
-        if (lastDoc.exists) {
-          query = query.startAfterDocument(lastDoc);
-        }
+        if (lastDoc.exists) query = query.startAfterDocument(lastDoc);
       }
 
-      query = query.limit(limit);
-
-      final snap = await query.get();
+      final snap = await query.limit(limit).get();
       return snap.docs
           .map((d) => MessageModel.fromFirestore(d.data(), d.id, chatId))
           .toList();
@@ -387,11 +468,14 @@ class ChatDataSourceImpl implements ChatDataSource {
   Future<void> addGroupMembers({
     required String chatId,
     required List<String> newMemberIds,
+    required Map<String, String> newMemberNames,
   }) async {
     try {
       await _chats.doc(chatId).update({
         'memberIds': FieldValue.arrayUnion(newMemberIds),
         for (final uid in newMemberIds) 'unreadCounts.$uid': 0,
+        for (final entry in newMemberNames.entries)
+          'memberNames.${entry.key}': entry.value,
       });
     } on FirebaseException catch (e) {
       throw ChatException(e.message ?? 'Failed to add members.');
@@ -414,15 +498,46 @@ class ChatDataSourceImpl implements ChatDataSource {
   }
 
   @override
+  Future<void> leaveGroup({required String chatId, required String uid}) async {
+    try {
+      await _chats.doc(chatId).update({
+        'memberIds': FieldValue.arrayRemove([uid]),
+        'unreadCounts.$uid': FieldValue.delete(),
+      });
+    } on FirebaseException catch (e) {
+      throw ChatException(e.message ?? 'Failed to leave group.');
+    }
+  }
+
+  @override
+  Future<void> transferOwnershipAndLeave({
+    required String chatId,
+    required String newOwnerUid,
+    required String currentOwnerUid,
+  }) async {
+    try {
+      await _chats.doc(chatId).update({
+        'groupCreatedBy': newOwnerUid,
+        'memberIds': FieldValue.arrayRemove([currentOwnerUid]),
+        'unreadCounts.$currentOwnerUid': FieldValue.delete(),
+      });
+    } on FirebaseException catch (e) {
+      throw ChatException(e.message ?? 'Failed to transfer ownership.');
+    }
+  }
+
+  @override
   Future<void> updateGroupInfo({
     required String chatId,
     String? groupName,
     String? groupPhotoUrl,
+    String? groupDescription,
   }) async {
     try {
       final data = <String, dynamic>{
         'groupName': ?groupName,
         'groupPhotoUrl': ?groupPhotoUrl,
+        'groupDescription': ?groupDescription,
       };
       if (data.isEmpty) return;
       await _chats.doc(chatId).update(data);
@@ -431,15 +546,25 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 
-  String _mediaLabel(MessageType type) {
-    return switch (type) {
-      MessageType.image => '📷 Photo',
-      MessageType.audio => '🎵 Audio',
-      MessageType.video => '🎥 Video',
-      MessageType.file => '📎 File',
-      _ => '',
-    };
+  @override
+  Future<void> patchMemberNames({
+    required String chatId,
+    required Map<String, String> memberNames,
+  }) async {
+    try {
+      await _chats.doc(chatId).update({'memberNames': memberNames});
+    } on FirebaseException catch (e) {
+      throw ChatException(e.message ?? 'Failed to patch member names.');
+    }
   }
+
+  String _mediaLabel(MessageType type) => switch (type) {
+    MessageType.image => '🖼️ Photo',
+    MessageType.audio => '🎙️ Voice Message',
+    MessageType.video => '🎬 Video',
+    MessageType.file => '📄 File',
+    _ => '',
+  };
 
   Future<void> _deleteSubCollection(
     CollectionReference<Map<String, dynamic>> ref,

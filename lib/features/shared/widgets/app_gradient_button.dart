@@ -1,19 +1,19 @@
-import 'package:chatty/core/constants/exports.dart';
+import 'package:Chatty/core/constants/exports.dart';
 
-enum AppGradientButtonType { normal, gradient }
+enum AppButtonType { normal, gradient, error }
 
 class AppButton extends StatelessWidget {
   final String text;
   final TextStyle? style;
   final double? borderRadius;
   final VoidCallback? onTap;
-  final AppGradientButtonType type;
+  final AppButtonType type;
   const AppButton({
     required this.text,
     this.style,
     this.borderRadius = 24,
     this.onTap,
-    this.type = AppGradientButtonType.gradient,
+    this.type = AppButtonType.gradient,
     super.key,
   });
 
@@ -23,10 +23,10 @@ class AppButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: type == AppGradientButtonType.normal
+        color: type == AppButtonType.normal
             ? context.colorScheme.surfaceContainerHighest
             : null,
-        gradient: type == AppGradientButtonType.gradient
+        gradient: type == AppButtonType.gradient
             ? LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -34,6 +34,12 @@ class AppButton extends StatelessWidget {
                   context.colorScheme.primary,
                   context.colorScheme.secondary,
                 ],
+              )
+            : type == AppButtonType.error
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [context.colorScheme.error, context.colorScheme.error],
               )
             : null,
 

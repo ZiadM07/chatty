@@ -1,10 +1,14 @@
 import 'dart:async';
-import 'package:chatty/core/utils/enums.dart';
-import 'package:chatty/features/chats/data/models/message_model.dart';
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/chats/data/data_source/chat_data_source.dart';
-import 'package:chatty/features/chats/data/models/chat_model.dart';
-import 'package:chatty/features/chats/data/repositories/chat_repository.dart';
+import 'package:Chatty/core/framework/failure.dart';
+import 'package:Chatty/core/framework/in_app_sound_service.dart';
+import 'package:Chatty/core/utils/enums.dart';
+import 'package:Chatty/features/chats/data/models/message_model.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/di/injectable.dart';
+import 'package:Chatty/features/chats/data/models/chat_model.dart';
+import 'package:Chatty/features/chats/data/repositories/chat_repository.dart';
+import '../../../core/framework/notification_service.dart';
+import '../../users/data/repositories/users_repository.dart';
 
 class ChatState extends Equatable {
   final ChatModel? chat;
@@ -14,6 +18,7 @@ class ChatState extends Equatable {
   final AppState<void> deleteMessageState;
   final AppState<void> updateGroupState;
   final MessageModel? replyingTo;
+  final bool isAtBottom;
 
   const ChatState({
     this.chat,
@@ -23,6 +28,7 @@ class ChatState extends Equatable {
     this.deleteMessageState = const AppState(),
     this.updateGroupState = const AppState(),
     this.replyingTo,
+    this.isAtBottom = true,
   });
 
   ChatState copyWith({
@@ -34,6 +40,7 @@ class ChatState extends Equatable {
     AppState<void>? updateGroupState,
     MessageModel? replyingTo,
     bool clearReplyingTo = false,
+    bool? isAtBottom,
   }) => ChatState(
     chat: chat ?? this.chat,
     chatState: chatState ?? this.chatState,
@@ -42,6 +49,7 @@ class ChatState extends Equatable {
     deleteMessageState: deleteMessageState ?? this.deleteMessageState,
     updateGroupState: updateGroupState ?? this.updateGroupState,
     replyingTo: clearReplyingTo ? null : replyingTo ?? this.replyingTo,
+    isAtBottom: isAtBottom ?? this.isAtBottom,
   );
 
   @override
@@ -53,20 +61,31 @@ class ChatState extends Equatable {
     deleteMessageState,
     updateGroupState,
     replyingTo,
+    isAtBottom,
   ];
 }
 
 @injectable
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository _repository;
+  final NotificationService _notificationService;
   StreamSubscription<List<MessageModel>>? _messagesSub;
 
-  ChatCubit(this._repository) : super(const ChatState());
+  bool _isFirstLoad = true;
+  int _lastMessageCount = 0;
+  String? _currentUid;
+  String? _currentChatId;
+
+  ChatCubit(this._repository, this._notificationService)
+    : super(const ChatState());
 
   Future<void> init({
     required String chatId,
     required String currentUid,
   }) async {
+    _currentUid = currentUid;
+    _currentChatId = chatId;
+
     emit(
       state.copyWith(chatState: const AppState(status: StateStatus.loading)),
     );
@@ -86,16 +105,18 @@ class ChatCubit extends Cubit<ChatState> {
         return;
       }
 
+      final patchedChat = await _patchMemberNamesIfNeeded(chat);
+
       emit(
         state.copyWith(
-          chat: chat,
-          chatState: AppState(status: StateStatus.success, data: chat),
+          chat: patchedChat,
+          chatState: AppState(status: StateStatus.success, data: patchedChat),
           messagesState: const AppState(status: StateStatus.loading),
         ),
       );
 
       _watchMessages(chatId: chatId, currentUid: currentUid);
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           chatState: AppState(status: StateStatus.error, message: e.message),
@@ -113,32 +134,93 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
+  Future<ChatModel> _patchMemberNamesIfNeeded(ChatModel chat) async {
+    final missingUids = chat.memberIds
+        .where((uid) => chat.memberNames[uid] == null)
+        .toList();
+
+    if (missingUids.isEmpty) return chat;
+
+    final updates = <String, String>{...chat.memberNames};
+    for (final uid in missingUids) {
+      final user = await getIt<UsersRepository>().getUserById(uid: uid);
+      if (user != null) updates[uid] = user.displayName;
+    }
+
+    await _repository.patchMemberNames(chatId: chat.id, memberNames: updates);
+
+    return chat.copyWith(memberNames: updates);
+  }
+
   void _watchMessages({required String chatId, required String currentUid}) {
     _messagesSub?.cancel();
-    _messagesSub = _repository
-        .watchMessages(chatId: chatId)
-        .listen(
-          (messages) => emit(
-            state.copyWith(
-              messagesState: AppState(
-                status: StateStatus.success,
-                data: messages,
-              ),
-            ),
-          ),
-          onError: (e) => emit(
-            state.copyWith(
-              messagesState: AppState(
-                status: StateStatus.error,
-                message: e is ChatException
-                    ? e.message
-                    : 'Failed to load messages.',
-              ),
+    _isFirstLoad = true;
+    _lastMessageCount = 0;
+
+    _messagesSub = _repository.watchMessages(chatId: chatId).listen(
+      (messages) {
+        if (_isFirstLoad) {
+          _lastMessageCount = messages.length;
+          _isFirstLoad = false;
+          _markSeenIfAtBottom();
+        } else if (messages.length > _lastMessageCount) {
+          final newest = messages.last;
+          final isIncoming = newest.senderId != currentUid;
+
+          if (isIncoming) {
+            getIt<InAppSoundService>().playMessageSound();
+
+            if (state.isAtBottom) {
+              _markSeenIfAtBottom();
+            }
+          }
+
+          _lastMessageCount = messages.length;
+        } else {
+          _lastMessageCount = messages.length;
+        }
+
+        emit(
+          state.copyWith(
+            messagesState: AppState(
+              status: StateStatus.success,
+              data: messages,
             ),
           ),
         );
+      },
+      onError: (e) => emit(
+        state.copyWith(
+          messagesState: AppState(
+            status: StateStatus.error,
+            message: e is Failure ? e.message : 'Failed to load messages.',
+          ),
+        ),
+      ),
+    );
 
     _repository.markChatAsRead(chatId: chatId, uid: currentUid);
+  }
+
+  void onScrolledToBottom() {
+    if (state.isAtBottom) return;
+    emit(state.copyWith(isAtBottom: true));
+    _markSeenIfAtBottom();
+  }
+
+  void onScrolledAway() {
+    if (!state.isAtBottom) return;
+    emit(state.copyWith(isAtBottom: false));
+  }
+
+  void _markSeenIfAtBottom() {
+    final chatId = _currentChatId;
+    final uid = _currentUid;
+    if (chatId == null || uid == null) return;
+
+    _repository
+        .markMessagesSeenBy(chatId: chatId, uid: uid)
+        .catchError((e) => debugPrint('⚠️ markSeenBy failed: $e'));
   }
 
   Future<void> sendTextMessage({
@@ -160,8 +242,33 @@ class ChatCubit extends Cubit<ChatState> {
         replyToId: reply?.id,
         replyToContent: reply?.content,
         replyToSenderId: reply?.senderId,
+        replyToType: reply?.type,
       );
-    } on ChatException catch (e) {
+
+      final senderName = chat.nameFor(senderId);
+      final recipientUids = chat.memberIds
+          .where((id) => id != senderId)
+          .toList();
+
+      if (chat.isGroup) {
+        await _notificationService.sendGroupNotification(
+          senderUsername: senderName,
+          recipientUids: recipientUids,
+          message: content,
+          chatId: chat.id,
+          groupName: chat.groupName ?? 'Group',
+          groupPhoto: chat.groupPhotoUrl,
+        );
+      } else {
+        await _notificationService.sendMessageNotification(
+          senderUid: senderId,
+          senderUsername: senderName,
+          receiverUid: recipientUids.first,
+          message: content,
+          chatId: chat.id,
+        );
+      }
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           sendState: AppState(status: StateStatus.error, message: e.message),
@@ -177,6 +284,23 @@ class ChatCubit extends Cubit<ChatState> {
         ),
       );
     }
+  }
+
+  Future<void> reactToMessage({
+    required String messageId,
+    required String? reaction,
+  }) async {
+    final chatId = state.chat?.id;
+    final uid = _currentUid;
+    if (chatId == null || uid == null) return;
+    try {
+      await _repository.reactToMessage(
+        chatId: chatId,
+        messageId: messageId,
+        uid: uid,
+        reaction: reaction,
+      );
+    } catch (_) {}
   }
 
   Future<void> sendMediaMessage({
@@ -205,9 +329,42 @@ class ChatCubit extends Cubit<ChatState> {
         replyToId: reply?.id,
         replyToContent: reply?.content,
         replyToSenderId: reply?.senderId,
+        replyToType: reply?.type,
       );
+
+      final senderName = chat.nameFor(senderId);
+      final recipientUids = chat.memberIds
+          .where((id) => id != senderId)
+          .toList();
+      final mediaLabel = switch (type) {
+        MessageType.image => '📷 Photo',
+        MessageType.video => '🎥 Video',
+        MessageType.audio => '🎵 Audio',
+        MessageType.file => '📎 File',
+        _ => 'Media',
+      };
+
+      if (chat.isGroup) {
+        await _notificationService.sendGroupNotification(
+          senderUsername: senderName,
+          recipientUids: recipientUids,
+          message: mediaLabel,
+          chatId: chat.id,
+          groupName: chat.groupName ?? 'Group',
+          groupPhoto: chat.groupPhotoUrl,
+        );
+      } else {
+        await _notificationService.sendMessageNotification(
+          senderUid: senderId,
+          senderUsername: senderName,
+          receiverUid: recipientUids.first,
+          message: mediaLabel,
+          chatId: chat.id,
+        );
+      }
+
       emit(state.copyWith(sendState: const AppState()));
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           sendState: AppState(status: StateStatus.error, message: e.message),
@@ -230,7 +387,7 @@ class ChatCubit extends Cubit<ChatState> {
     if (chatId == null) return;
     try {
       await _repository.deleteMessage(chatId: chatId, messageId: messageId);
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           deleteMessageState: AppState(
@@ -248,15 +405,19 @@ class ChatCubit extends Cubit<ChatState> {
     await _repository.markChatAsRead(chatId: chatId, uid: uid);
   }
 
-  Future<void> addGroupMembers({required List<String> newMemberIds}) async {
+  Future<void> addGroupMembers({
+    required List<String> newMemberIds,
+    required Map<String, String> newMemberNames,
+  }) async {
     final chatId = state.chat?.id;
     if (chatId == null) return;
     try {
       await _repository.addGroupMembers(
         chatId: chatId,
         newMemberIds: newMemberIds,
+        newMemberNames: newMemberNames,
       );
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           updateGroupState: AppState(
@@ -273,7 +434,7 @@ class ChatCubit extends Cubit<ChatState> {
     if (chatId == null) return;
     try {
       await _repository.removeGroupMember(chatId: chatId, memberId: memberId);
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           updateGroupState: AppState(
@@ -308,7 +469,7 @@ class ChatCubit extends Cubit<ChatState> {
           updateGroupState: const AppState(status: StateStatus.success),
         ),
       );
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           updateGroupState: AppState(

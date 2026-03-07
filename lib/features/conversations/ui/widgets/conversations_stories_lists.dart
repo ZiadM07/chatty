@@ -1,12 +1,12 @@
-import 'package:chatty/config/router/app_router.gr.dart';
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/auth/cubits/auth_cubit.dart';
-import 'package:chatty/features/chats/cubits/conversations_cubit.dart';
-import 'package:chatty/features/profile/cubits/profile_cubit.dart';
-import 'package:chatty/features/stories/cubits/stories_cubit.dart';
-import 'package:chatty/features/shared/widgets/app_image.dart';
-import 'package:chatty/features/stories/data/models/story_item_model.dart';
-import 'package:chatty/features/stories/data/models/story_model.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
+import 'package:Chatty/features/chats/cubits/conversations_cubit.dart';
+import 'package:Chatty/features/profile/cubits/profile_cubit.dart';
+import 'package:Chatty/features/stories/cubits/stories_cubit.dart';
+import 'package:Chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/features/stories/data/models/story_item_model.dart';
+import 'package:Chatty/features/stories/data/models/story_model.dart';
 
 class ConversationsStoriesLists extends StatefulWidget {
   const ConversationsStoriesLists({super.key});
@@ -19,14 +19,6 @@ class ConversationsStoriesLists extends StatefulWidget {
 class _ConversationsStoriesListsState extends State<ConversationsStoriesLists> {
   bool _feedSeeded = false;
 
-  // ─── Seed feed once chats are loaded ─────────────────────────────────────
-  //
-  //  We watch ConversationsCubit for the first successful chats load and
-  //  pass the contact uid list to StoriesCubit.watchFeedStories.
-  //  After seeding, we ignore further chat updates to avoid re-subscribing
-  //  on every new message.
-  // ─────────────────────────────────────────────────────────────────────────
-
   void _trySeedFeed(BuildContext context) {
     if (_feedSeeded) return;
     final chatsState = context.read<ConversationsCubit>().state.chatsState;
@@ -35,7 +27,6 @@ class _ConversationsStoriesListsState extends State<ConversationsStoriesLists> {
     final uid = context.read<AuthCubit>().state.currentUser?.uid ?? '';
     final chats = chatsState.data ?? [];
 
-    // Collect unique contact uids from 1-to-1 chats
     final contactUids = chats
         .where((c) => c.isOneToOne)
         .map((c) => c.otherMemberId(uid))
@@ -55,7 +46,6 @@ class _ConversationsStoriesListsState extends State<ConversationsStoriesLists> {
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: BlocListener<ConversationsCubit, ConversationsState>(
-        // Listen for chats loading so we can seed the feed
         listenWhen: (prev, curr) =>
             prev.chatsState.status != curr.chatsState.status &&
             curr.chatsState.status == StateStatus.success,
@@ -65,14 +55,12 @@ class _ConversationsStoriesListsState extends State<ConversationsStoriesLists> {
               prev.myStoryState != curr.myStoryState ||
               prev.feedState != curr.feedState,
           builder: (context, state) {
-            // Try seeding in case chats were already loaded before this widget built
             _trySeedFeed(context);
 
             final uid = context.read<AuthCubit>().state.currentUser?.uid ?? '';
             final myItems = state.myStoryState.data ?? [];
             final feedStories = state.feedState.data ?? [];
 
-            // Nothing to show — hide the row entirely
             if (myItems.isEmpty && feedStories.isEmpty) {
               return _MyStoryItem(
                 uid: uid,
@@ -106,8 +94,6 @@ class _ConversationsStoriesListsState extends State<ConversationsStoriesLists> {
   }
 }
 
-// ─── My Story Item ────────────────────────────────────────────────────────────
-
 class _MyStoryItem extends StatelessWidget {
   final String uid;
   final List<StoryItemModel> myItems;
@@ -122,7 +108,7 @@ class _MyStoryItem extends StatelessWidget {
       photoUrl: context.read<ProfileCubit>().state.profile?.photoUrl,
       label: context.locale.you,
       hasStory: hasStory,
-      isSeen: false, // own story ring never shows as "seen"
+      isSeen: false,
       showAddButton: true,
       onAddTap: () => context.router.push(const AddStoryRoute()),
       onTap: hasStory
@@ -131,8 +117,6 @@ class _MyStoryItem extends StatelessWidget {
     );
   }
 }
-
-// ─── Contact Story Item ───────────────────────────────────────────────────────
 
 class _ContactStoryItem extends StatelessWidget {
   final StoryModel story;
@@ -154,12 +138,6 @@ class _ContactStoryItem extends StatelessWidget {
     );
   }
 }
-
-// ─── Story Ring ───────────────────────────────────────────────────────────────
-//
-//  Pure display widget — gradient ring when unseen, muted ring when seen.
-//  Optional + badge for "My Story" add button.
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _StoryRing extends StatelessWidget {
   final String? photoUrl;
@@ -193,7 +171,6 @@ class _StoryRing extends StatelessWidget {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              /* ─── Ring decoration ─── */
               Container(
                 padding: const EdgeInsets.all(3),
                 decoration: !hasStory || isSeen
@@ -225,7 +202,6 @@ class _StoryRing extends StatelessWidget {
                 ),
               ),
 
-              /* ─── Add button (my story only) ─── */
               if (showAddButton)
                 Positioned(
                   bottom: -3,
@@ -253,7 +229,6 @@ class _StoryRing extends StatelessWidget {
             ],
           ),
 
-          /* ─── Label ─── */
           SizedBox(
             width: 66,
             child: AppText(

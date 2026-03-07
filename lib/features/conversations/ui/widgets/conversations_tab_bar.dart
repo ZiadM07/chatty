@@ -1,4 +1,4 @@
-import 'package:chatty/core/constants/exports.dart';
+import 'package:Chatty/core/constants/exports.dart';
 
 class ConversationsTabBar extends StatelessWidget {
   const ConversationsTabBar({super.key, required TabController tabController})
@@ -31,7 +31,6 @@ class ConversationsTabBar extends StatelessWidget {
   }
 }
 
-
 class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabBar tabBar;
 
@@ -49,8 +48,6 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    // This container provides the background color that matches the scaffold,
-    // ensuring a seamless look when the TabBar sticks to the top.
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: tabBar,
@@ -59,7 +56,6 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
-    // Only rebuild if the TabBar instance itself has changed.
     return tabBar != oldDelegate.tabBar;
   }
 }

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:injectable/injectable.dart';
 
-import '../../../shared/data/storage_data_source.dart';
+import '../../../shared/data/data_sources/storage_data_source.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../data_source/profile_data_source.dart';
 

@@ -1,6 +1,4 @@
-import 'package:chatty/core/framework/storage_service.dart';
-
-// import '../../config/theme/app_themes.dart';
+import 'package:Chatty/core/framework/storage_service.dart';
 import '../../config/theme/app_theme.dart';
 import '../constants/app_constants.dart';
 
@@ -9,17 +7,11 @@ class AppPreferences {
 
   AppPreferences(this.storage);
 
-  // ===========================================================
-  // LANGUAGE
-  // ===========================================================
   String get language =>
       storage.get<String>(AppConstants.lang, AppConstants.enCode);
 
   set language(String value) => storage.save(AppConstants.lang, value);
 
-  // ===========================================================
-  // THEME MODE
-  // ===========================================================
   AppThemeMode get appThemeMode {
     final index = storage.get<int>(
       AppConstants.theme,
@@ -31,27 +23,18 @@ class AppPreferences {
   set appThemeMode(AppThemeMode value) =>
       storage.save(AppConstants.theme, value.index);
 
-  // ===========================================================
-  // AUTH TOKEN
-  // ===========================================================
   String get token => storage.get<String>(AppConstants.token, '');
 
   set token(String value) => storage.save(AppConstants.token, value);
 
   bool get isAuthenticated => token.isNotEmpty;
 
-  // ===========================================================
-  // COMPLETED PROFILE
-  // ===========================================================
   bool get hasCompletedProfile =>
       storage.get<bool>(AppConstants.completedProfile, false);
 
   set hasCompletedProfile(bool value) =>
       storage.save(AppConstants.completedProfile, value);
 
-  // ===========================================================
-  // NOTIFICATIONS SETTINGS
-  // ===========================================================
   bool get messageNotifications =>
       storage.get<bool>("message_notifications", true);
 
@@ -75,16 +58,48 @@ class AppPreferences {
 
   set sound(bool value) => storage.save("notification_sound", value);
 
-  // ===========================================================
-  // PRIVACY SETTINGS
-  // ===========================================================
+  bool get storyReplyNotifications =>
+      storage.get<bool>("story_reply_notifications", true);
+
+  set storyReplyNotifications(bool value) =>
+      storage.save("story_reply_notifications", value);
+
+  String get oneSignalPlayerId =>
+      storage.get<String>("onesignal_player_id", "");
+
+  set oneSignalPlayerId(String value) =>
+      storage.save("onesignal_player_id", value);
+
+  bool get inAppSound => storage.get<bool>("in_app_sound", true);
+
+  set inAppSound(bool value) => storage.save("in_app_sound", value);
+
+  Set<String> get mutedChatIds {
+    final raw = storage.get<String>("muted_chat_ids", "");
+    if (raw.isEmpty) return {};
+    return raw.split(',').toSet();
+  }
+
+  set mutedChatIds(Set<String> value) =>
+      storage.save("muted_chat_ids", value.join(','));
+
+  bool isChatMuted(String chatId) => mutedChatIds.contains(chatId);
+
+  void muteChatId(String chatId) {
+    mutedChatIds = {...mutedChatIds, chatId};
+  }
+
+  void unmuteChatId(String chatId) {
+    mutedChatIds = mutedChatIds.where((id) => id != chatId).toSet();
+  }
+
+  void toggleMuteChatId(String chatId) {
+    isChatMuted(chatId) ? unmuteChatId(chatId) : muteChatId(chatId);
+  }
+
   bool get readReceipts => storage.get<bool>("read_receipts", true);
 
   set readReceipts(bool value) => storage.save("read_receipts", value);
-
-  // ===========================================================
-  // CHAT WALLPAPER SETTINGS  (Local Only)
-  // ===========================================================
 
   String get chatWallpaperPath =>
       storage.get<String>("chat_wallpaper_path", "");
@@ -92,16 +107,11 @@ class AppPreferences {
   set chatWallpaperPath(String value) =>
       storage.save("chat_wallpaper_path", value);
 
-  /// Brightness: 0.0 → 1.0
   double get chatWallpaperBrightness =>
       storage.get<double>("chat_wallpaper_brightness", 0.5);
 
   set chatWallpaperBrightness(double value) =>
       storage.save("chat_wallpaper_brightness", value);
-
-  // ===========================================================
-  //  Enter Is Send   (Local Only)
-  // ===========================================================
 
   bool get enterIsSend => storage.get<bool>("enter_is_send", false);
 

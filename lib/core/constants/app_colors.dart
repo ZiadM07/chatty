@@ -13,7 +13,6 @@ class AppColors {
   static const Color switcherDisabledThumbColor = Color(0xFFFFFFFF);
   static const Color starsColor = Color(0xFFD9A25D);
 
-  // Navigation
   static const Color navigationBar = Color(0xFFC7C6CA);
   static const Color navigationSelected = Color(0xFF2684FC);
   static const Color navigationUnselected = Color(0xFF8B8B8B);

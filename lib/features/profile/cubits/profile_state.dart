@@ -4,16 +4,9 @@ import '../../../../core/state/app_state.dart';
 import '../../auth/data/models/user_model.dart';
 
 class ProfileState extends Equatable {
-  /// The currently loaded profile — updated after fetch and after any edit.
   final UserModel? profile;
-
-  /// Fetching the profile on screen load.
   final AppState<UserModel> fetchState;
-
-  /// Saving name + bio changes.
   final AppState<UserModel> updateInfoState;
-
-  /// Uploading + saving a new profile photo.
   final AppState<UserModel> updatePhotoState;
 
   const ProfileState({

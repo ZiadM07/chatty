@@ -1,7 +1,7 @@
-import 'package:chatty/config/router/app_router.gr.dart';
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/auth/data/models/user_model.dart';
-import 'package:chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/auth/data/models/user_model.dart';
+import 'package:Chatty/features/shared/widgets/app_image.dart';
 
 class UserItem extends StatelessWidget {
   final UserModel user;
@@ -18,7 +18,6 @@ class UserItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          /* ─── AVATAR + ONLINE DOT ─── */
           Stack(
             children: [
               AppImage(
@@ -27,29 +26,29 @@ class UserItem extends StatelessWidget {
                 height: 55,
                 borderRadius: 100,
               ),
-              if (user.isOnline)
-                Positioned(
-                  bottom: 1,
-                  right: 1,
-                  child: Container(
-                    width: 13,
-                    height: 13,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: context.colorScheme.primaryContainer,
-                        width: 2,
-                      ),
+              Positioned(
+                right: 2,
+                bottom: 0,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: (user.isOnline)
+                        ? context.colorScheme.success
+                        : context.colorScheme.onSurfaceDisabled,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: context.colorScheme.surfaceContainerHigh,
+                      width: 2,
                     ),
                   ),
                 ),
+              ),
             ],
           ),
 
           const SizedBox(width: 16),
 
-          /* ─── NAME + BIO ─── */
           Expanded(
             child: Column(
               spacing: 5,
@@ -76,7 +75,6 @@ class UserItem extends StatelessWidget {
             ),
           ),
 
-          /* ─── ARROW ─── */
           Icon(
             Icons.arrow_forward_ios_rounded,
             size: 18,
@@ -85,7 +83,7 @@ class UserItem extends StatelessWidget {
         ],
       ),
     ).addAction(
-      onTap: () => context.router.push(UserInfoRoute(uid: user.uid)),
+      onTap: () => context.router.push(ChatInfoRoute(uid: user.uid)),
       padding: const AppPadding.set(horizontal: 20),
     );
   }

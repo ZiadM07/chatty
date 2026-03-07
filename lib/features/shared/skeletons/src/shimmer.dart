@@ -1,17 +1,9 @@
-// Copyright 2020, the Flutter project authors. Please see the AUTHORS file
-// for details. All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-
 import 'package:flutter/material.dart';
 
 import 'stylings.dart';
 import 'theme.dart';
 
 class ShimmerWidget extends StatefulWidget {
-  // static ShimmerState? of(BuildContext context) {
-  //   return context.findAncestorStateOfType<ShimmerState>();
-  // }
-
   const ShimmerWidget({
     super.key,
     this.shimmerGradient,
@@ -34,24 +26,17 @@ class ShimmerWidget extends StatefulWidget {
 class ShimmerState extends State<ShimmerWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
-  // late LinearGradient _linearGradient;
 
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance?.addPostFrameCallback((_) => _setGradient());
-    _shimmerController = AnimationController.unbounded(vsync: this)..repeat(
-      min: -2.0,
-      max: 2,
-      period: widget.duration ?? const Duration(milliseconds: 1000),
-    );
+    _shimmerController = AnimationController.unbounded(vsync: this)
+      ..repeat(
+        min: -2.0,
+        max: 2,
+        period: widget.duration ?? const Duration(milliseconds: 1000),
+      );
   }
-
-  // _setGradient() {
-  //   _linearGradient = widget.linearGradient ??
-  //       SkeletonTheme.of(context)?.shimmerGradient ??
-  //       shimmerGradient;
-  // }
 
   @override
   void dispose() {
@@ -59,18 +44,17 @@ class ShimmerState extends State<ShimmerWidget>
     super.dispose();
   }
 
-  ThemeMode get _appThemeMode =>
-      Theme.of(context).brightness == Brightness.dark
-          ? ThemeMode.dark
-          : ThemeMode.light;
+  ThemeMode get _appThemeMode => Theme.of(context).brightness == Brightness.dark
+      ? ThemeMode.dark
+      : ThemeMode.light;
 
   LinearGradient get gradient =>
       ((widget.themeMode ??
-                  SkeletonTheme.of(context)?.themeMode ??
-                  _appThemeMode) ==
-              ThemeMode.dark)
-          ? _darkGradient
-          : _lightGradient;
+              SkeletonTheme.of(context)?.themeMode ??
+              _appThemeMode) ==
+          ThemeMode.dark)
+      ? _darkGradient
+      : _lightGradient;
 
   LinearGradient get _lightGradient =>
       widget.shimmerGradient ??
@@ -92,10 +76,9 @@ class ShimmerState extends State<ShimmerWidget>
     ),
   );
 
-  bool get isSized =>
-      context.findRenderObject() != null
-          ? (context.findRenderObject() as RenderBox).hasSize
-          : false;
+  bool get isSized => context.findRenderObject() != null
+      ? (context.findRenderObject() as RenderBox).hasSize
+      : false;
 
   Size get size => (context.findRenderObject() as RenderBox).size;
 

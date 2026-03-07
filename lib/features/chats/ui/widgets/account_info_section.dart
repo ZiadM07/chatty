@@ -1,6 +1,6 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/auth/data/models/user_model.dart';
-import 'package:chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/auth/data/models/user_model.dart';
+import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:intl/intl.dart';
 
 class AccountInfoSection extends StatelessWidget {
@@ -11,7 +11,6 @@ class AccountInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        /* ─── Avatar ─── */
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
@@ -27,16 +26,12 @@ class AccountInfoSection extends StatelessWidget {
         ),
 
         const SizedBox(height: 20),
-
-        /* ─── Name ─── */
         AppText(user.displayName, style: context.textTheme.headlineSmall),
 
         const SizedBox(height: 10),
 
-        /* ─── Email ─── */
         AppText(user.email, style: context.textTheme.bodyMedium),
 
-        /* ─── Bio ─── */
         if (user.hasBio) ...[
           const SizedBox(height: 20),
           Container(
@@ -48,10 +43,7 @@ class AccountInfoSection extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.format_quote,
-                  color: context.colorScheme.onSurface,
-                ),
+                Icon(Icons.format_quote, color: context.colorScheme.onSurface),
                 const SizedBox(width: 12),
                 Expanded(
                   child: AppText(
@@ -66,25 +58,17 @@ class AccountInfoSection extends StatelessWidget {
 
         const SizedBox(height: 20),
 
-        /* ─── Joined date ─── */
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: context.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                SolarIconsOutline.calendarMinimalistic,
-                size: 14,
-                color: context.colorScheme.onSurface,
-              ),
+            Icon(
+              SolarIconsOutline.calendarMinimalistic,
+              size: 14,
+              color: context.colorScheme.onSurface,
             ),
             const SizedBox(width: 8),
             AppText(
-              'Joined ${DateFormat('MMMM yyyy').format(user.createdAt)}',
+              '${context.locale.joined} ${DateFormat('MMMM yyyy').format(user.createdAt)}',
               style: context.textTheme.bodySmall?.copyWith(
                 color: context.colorScheme.textSecondary,
               ),

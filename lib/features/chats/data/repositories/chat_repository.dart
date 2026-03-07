@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:chatty/core/utils/enums.dart';
-import 'package:chatty/features/chats/data/data_source/chat_data_source.dart';
-import 'package:chatty/features/chats/data/models/chat_model.dart';
-import 'package:chatty/features/chats/data/models/message_model.dart';
+import 'package:Chatty/core/utils/enums.dart';
+import 'package:Chatty/features/chats/data/data_source/chat_data_source.dart';
+import 'package:Chatty/features/chats/data/models/chat_model.dart';
+import 'package:Chatty/features/chats/data/models/message_model.dart';
 import 'package:injectable/injectable.dart';
-import '../../../shared/data/storage_data_source.dart';
+import '../../../shared/data/data_sources/storage_data_source.dart';
 
 class _StoragePaths {
   static String chatMedia(String chatId) => 'chat_media/$chatId';
@@ -18,47 +18,55 @@ class ChatRepository {
 
   const ChatRepository(this._dataSource, this._storageDataSource);
 
-  // ─── Conversations ────────────────────────────────────────────────────────
-
   Stream<List<ChatModel>> watchChats({required String uid}) =>
       _dataSource.watchChats(uid: uid);
+
+  Stream<ChatModel?> watchChat({required String chatId}) =>
+      _dataSource.watchChat(chatId: chatId);
 
   Future<ChatModel?> getChat({required String chatId}) =>
       _dataSource.getChat(chatId: chatId);
 
-  /// Opens a 1-to-1 chat — creates it if it doesn't exist yet.
   Future<ChatModel> openOrCreateOneToOneChat({
     required String uid,
     required String otherUid,
+    required String uidName,
+    required String otherUidName,
   }) async {
     final existing = await _dataSource.findOneToOneChat(
       uid: uid,
       otherUid: otherUid,
     );
     return existing ??
-        await _dataSource.createOneToOneChat(uid: uid, otherUid: otherUid);
+        await _dataSource.createOneToOneChat(
+          uid: uid,
+          otherUid: otherUid,
+          uidName: uidName,
+          otherUidName: otherUidName,
+        );
   }
 
   Future<ChatModel> createGroupChat({
     required String createdBy,
     required List<String> memberIds,
+    required Map<String, String> memberNames,
     required String groupName,
+    String? groupDescription,
     File? groupPhotoFile,
   }) async {
     String? groupPhotoUrl;
-
     if (groupPhotoFile != null) {
-      // Use a temp path before we have the chatId — we'll update after creation
       groupPhotoUrl = await _storageDataSource.uploadFile(
         file: groupPhotoFile,
         path: 'group_photos/temp',
       );
     }
-
     return _dataSource.createGroupChat(
       createdBy: createdBy,
       memberIds: memberIds,
+      memberNames: memberNames,
       groupName: groupName,
+      groupDescription: groupDescription,
       groupPhotoUrl: groupPhotoUrl,
     );
   }
@@ -66,12 +74,9 @@ class ChatRepository {
   Future<void> deleteChat({required String chatId}) =>
       _dataSource.deleteChat(chatId: chatId);
 
-  // ─── Messages ─────────────────────────────────────────────────────────────
-
   Stream<List<MessageModel>> watchMessages({required String chatId}) =>
       _dataSource.watchMessages(chatId: chatId);
 
-  /// Send a text message.
   Future<MessageModel> sendTextMessage({
     required String chatId,
     required String senderId,
@@ -80,6 +85,7 @@ class ChatRepository {
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
+    MessageType? replyToType,
   }) => _dataSource.sendMessage(
     chatId: chatId,
     senderId: senderId,
@@ -89,9 +95,21 @@ class ChatRepository {
     replyToId: replyToId,
     replyToContent: replyToContent,
     replyToSenderId: replyToSenderId,
+    replyToType: replyToType,
   );
 
-  /// Upload media to Supabase then send as a message.
+  Future<void> reactToMessage({
+    required String chatId,
+    required String messageId,
+    required String uid,
+    required String? reaction,
+  }) => _dataSource.reactToMessage(
+    chatId: chatId,
+    messageId: messageId,
+    uid: uid,
+    reaction: reaction,
+  );
+
   Future<MessageModel> sendMediaMessage({
     required String chatId,
     required String senderId,
@@ -101,13 +119,13 @@ class ChatRepository {
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
+    MessageType? replyToType,
   }) async {
     final url = await _storageDataSource.uploadFile(
       file: file,
       path: _StoragePaths.chatMedia(chatId),
     );
 
-    // Extract audio duration if this is an audio message
     Map<String, dynamic>? metadata;
     if (type == MessageType.audio) {
       final player = AudioPlayer();
@@ -118,7 +136,6 @@ class ChatRepository {
           metadata = {'duration': duration.inMilliseconds};
         }
       } catch (_) {
-        // If duration extraction fails, send without metadata
       } finally {
         await player.dispose();
       }
@@ -134,6 +151,7 @@ class ChatRepository {
       replyToId: replyToId,
       replyToContent: replyToContent,
       replyToSenderId: replyToSenderId,
+      replyToType: replyToType,
     );
   }
 
@@ -145,12 +163,15 @@ class ChatRepository {
   Future<void> markChatAsRead({required String chatId, required String uid}) =>
       _dataSource.markChatAsRead(chatId: chatId, uid: uid);
 
+  Future<void> markMessagesSeenBy({
+    required String chatId,
+    required String uid,
+  }) => _dataSource.markMessagesSeenBy(chatId: chatId, uid: uid);
+
   Future<void> deleteMessage({
     required String chatId,
     required String messageId,
   }) => _dataSource.deleteMessage(chatId: chatId, messageId: messageId);
-
-  // ─── Media Messages ───────────────────────────────────────────────────────
 
   Future<List<MessageModel>> getMediaMessages({
     required String chatId,
@@ -164,13 +185,15 @@ class ChatRepository {
     lastMessageId: lastMessageId,
   );
 
-  // ─── Group Management ─────────────────────────────────────────────────────
-
   Future<void> addGroupMembers({
     required String chatId,
     required List<String> newMemberIds,
-  }) => _dataSource.addGroupMembers(chatId: chatId, newMemberIds: newMemberIds);
-
+    required Map<String, String> newMemberNames,
+  }) => _dataSource.addGroupMembers(
+    chatId: chatId,
+    newMemberIds: newMemberIds,
+    newMemberNames: newMemberNames,
+  );
   Future<void> removeGroupMember({
     required String chatId,
     required String memberId,
@@ -179,11 +202,11 @@ class ChatRepository {
   Future<void> updateGroupInfo({
     required String chatId,
     String? groupName,
+    String? groupDescription,
     File? groupPhotoFile,
     String? oldGroupPhotoUrl,
   }) async {
     String? newPhotoUrl;
-
     if (groupPhotoFile != null) {
       if (oldGroupPhotoUrl != null && oldGroupPhotoUrl.isNotEmpty) {
         try {
@@ -195,11 +218,29 @@ class ChatRepository {
         path: 'group_photos/$chatId',
       );
     }
-
     await _dataSource.updateGroupInfo(
       chatId: chatId,
       groupName: groupName,
+      groupDescription: groupDescription,
       groupPhotoUrl: newPhotoUrl,
     );
   }
+
+  Future<void> patchMemberNames({
+    required String chatId,
+    required Map<String, String> memberNames,
+  }) => _dataSource.patchMemberNames(chatId: chatId, memberNames: memberNames);
+
+  Future<void> leaveGroup({required String chatId, required String uid}) =>
+      _dataSource.leaveGroup(chatId: chatId, uid: uid);
+
+  Future<void> transferOwnershipAndLeave({
+    required String chatId,
+    required String newOwnerUid,
+    required String currentOwnerUid,
+  }) => _dataSource.transferOwnershipAndLeave(
+    chatId: chatId,
+    newOwnerUid: newOwnerUid,
+    currentOwnerUid: currentOwnerUid,
+  );
 }

@@ -113,7 +113,7 @@ class NavItem extends StatelessWidget {
     }
 
     return ShaderMask(
-      blendMode: BlendMode.srcIn, // important
+      blendMode: BlendMode.srcIn,
       shaderCallback: (Rect bounds) {
         return LinearGradient(
           colors: [primary, secondary],
@@ -123,9 +123,7 @@ class NavItem extends StatelessWidget {
       },
       child: AppText(
         title,
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: Colors.white, // neutral mask
-        ),
+        style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
       ),
     );
   }

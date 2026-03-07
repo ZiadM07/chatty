@@ -1,8 +1,5 @@
 part of 'widgets.dart';
 
-/*
-thanks to: https://flutter.dev/docs/cookbook/effects/shimmer-loading
-*/
 class Skeleton extends StatefulWidget {
   const Skeleton({
     super.key,
@@ -32,34 +29,27 @@ class _SkeletonState extends State<Skeleton> {
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 150),
-      child:
-          widget.isLoading
-              ? ShimmerWidget(
-                shimmerGradient: widget.shimmerGradient,
-                darkShimmerGradient: widget.darkShimmerGradient,
-                duration: widget.duration,
-                themeMode: widget.themeMode,
-                child: _SkeletonWidget(
-                  isLoading: widget.isLoading,
-                  // child: widget.child,
-                  skeleton: widget.skeleton,
-                ),
-              )
-              : widget.child,
+      child: widget.isLoading
+          ? ShimmerWidget(
+              shimmerGradient: widget.shimmerGradient,
+              darkShimmerGradient: widget.darkShimmerGradient,
+              duration: widget.duration,
+              themeMode: widget.themeMode,
+              child: _SkeletonWidget(
+                isLoading: widget.isLoading,
+                skeleton: widget.skeleton,
+              ),
+            )
+          : widget.child,
     );
   }
 }
 
 class _SkeletonWidget extends StatefulWidget {
-  const _SkeletonWidget({
-    required this.isLoading,
-    required this.skeleton,
-    // required this.child,
-  });
+  const _SkeletonWidget({required this.isLoading, required this.skeleton});
 
   final bool isLoading;
   final Widget skeleton;
-  // final Widget child;
 
   @override
   State<_SkeletonWidget> createState() => __SkeletonWidgetState();
@@ -88,23 +78,14 @@ class __SkeletonWidgetState extends State<_SkeletonWidget> {
 
   void _onShimmerChange() {
     if (widget.isLoading) {
-      setState(() {
-        // update the shimmer painting.
-      });
+      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // if (!widget.isLoading) {
-    //   return widget.child;
-    // }
-
-    // Collect ancestor shimmer info.
     final shimmer = Shimmer.of(context)!;
     if (!shimmer.isSized) {
-      // The ancestor Shimmer widget has not laid
-      // itself out yet. Return an empty box.
       return SizedBox();
     }
     final shimmerSize = shimmer.size;

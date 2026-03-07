@@ -1,19 +1,15 @@
-import 'package:chatty/core/constants/exports.dart';
+import 'package:Chatty/core/constants/exports.dart';
 
-/// Wraps any message bubble with swipe-to-reply and long-press-to-delete.
-/// All bubbles (text, voice, attachment) use this — keeping them dumb.
 class SwipeToReply extends StatefulWidget {
   final Widget child;
   final bool isMe;
   final VoidCallback? onSwipe;
-  final VoidCallback? onLongPress;
 
   const SwipeToReply({
     super.key,
     required this.child,
     required this.isMe,
     this.onSwipe,
-    this.onLongPress,
   });
 
   @override
@@ -70,7 +66,6 @@ class _SwipeToReplyState extends State<SwipeToReply>
     if (widget.onSwipe == null) return;
     final delta = details.primaryDelta ?? 0;
 
-    // Only allow swipe in the correct direction
     final isValidDirection = widget.isMe ? delta < 0 : delta > 0;
     if (!isValidDirection && _dragOffset == 0) return;
 
@@ -100,7 +95,6 @@ class _SwipeToReplyState extends State<SwipeToReply>
       widget.onSwipe!();
     }
 
-    // Snap back
     _controller.reverse();
     setState(() {
       _dragOffset = 0;
@@ -110,18 +104,16 @@ class _SwipeToReplyState extends State<SwipeToReply>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.onSwipe == null && widget.onLongPress == null) {
+    if (widget.onSwipe == null) {
       return widget.child;
     }
 
     return GestureDetector(
-      onLongPress: widget.onLongPress,
       onHorizontalDragUpdate: _onDragUpdate,
       onHorizontalDragEnd: _onDragEnd,
       child: Stack(
         alignment: widget.isMe ? Alignment.centerRight : Alignment.centerLeft,
         children: [
-          /* ─── Reply icon revealed behind the bubble ─── */
           FadeTransition(
             opacity: _iconFadeAnim,
             child: ScaleTransition(
@@ -139,16 +131,14 @@ class _SwipeToReplyState extends State<SwipeToReply>
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.reply_rounded,
+                    SolarIconsOutline.reply,
                     size: 18,
-                    color: context.colorScheme.primary,
+                    color: context.colorScheme.onPrimary,
                   ),
                 ),
               ),
             ),
           ),
-
-          /* ─── The bubble itself, slides on drag ─── */
           SlideTransition(position: _slideAnim, child: widget.child),
         ],
       ),

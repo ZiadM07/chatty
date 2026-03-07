@@ -1,6 +1,6 @@
-import 'package:chatty/config/router/app_router.gr.dart';
-import 'package:chatty/features/shared/widgets/app_asset_image.dart';
-import 'package:chatty/features/shared/widgets/app_gradient_button.dart';
+import 'package:Chatty/features/shared/widgets/app_asset_image.dart';
+import 'package:Chatty/features/shared/widgets/app_gradient_button.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
 
 import '../../../../core/constants/exports.dart';
 

@@ -1,6 +1,6 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/profile/ui/widgets/profile_app_bar.dart';
-import 'package:chatty/features/profile/ui/widgets/profile_body_list.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/profile/ui/widgets/profile_app_bar.dart';
+import 'package:Chatty/features/profile/ui/widgets/profile_body_list.dart';
 
 @RoutePage()
 class ProfileScreen extends StatelessWidget {

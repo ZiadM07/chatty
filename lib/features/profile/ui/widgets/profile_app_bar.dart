@@ -1,8 +1,9 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/profile/cubits/profile_cubit.dart';
-import 'package:chatty/features/profile/cubits/profile_state.dart';
-import 'package:chatty/features/shared/widgets/app_asset_image.dart';
-import 'package:chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/profile/cubits/profile_cubit.dart';
+import 'package:Chatty/features/profile/cubits/profile_state.dart';
+import 'package:Chatty/features/shared/widgets/app_asset_image.dart';
+import 'package:Chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/features/shared/widgets/profile_image_dialog.dart';
 
 class ProfileAppBar extends StatelessWidget {
   const ProfileAppBar({super.key});
@@ -22,7 +23,6 @@ class ProfileAppBar extends StatelessWidget {
       expandedHeight: 305,
       flexibleSpace: Stack(
         children: [
-          /* ──────────────── BACKGROUND ──────────────── */
           AppAssetImage(
             Pngs.profileBackground,
             height: 350,
@@ -30,7 +30,6 @@ class ProfileAppBar extends StatelessWidget {
             fit: BoxFit.cover,
           ),
 
-          /* ──────────────── USER INFO ROW ───────────── */
           Positioned(
             top: 130,
             left: isArabic ? null : 24,
@@ -41,23 +40,31 @@ class ProfileAppBar extends StatelessWidget {
                   prev.updatePhotoState != curr.updatePhotoState,
               builder: (context, state) {
                 final profile = state.profile;
+                final photoUrl = profile?.photoUrl ?? '';
+                final name = profile?.fullName ?? profile?.username ?? '';
+                final heroTag = 'profile_avatar_${profile?.uid ?? 'me'}';
 
                 return Row(
                   textDirection: isArabic
                       ? TextDirection.rtl
                       : TextDirection.ltr,
                   children: [
-                    /* ────────── AVATAR ────────── */
                     _ProfileAvatar(
-                      photoUrl: profile?.photoUrl,
+                      photoUrl: photoUrl,
+                      heroTag: heroTag,
                       isUploading:
                           state.updatePhotoState.status ==
                           StateStatus.loadingOverlay,
+                      onLongPress: () => ProfileImageDialog.show(
+                        context: context,
+                        imageUrl: photoUrl,
+                        name: name,
+                        heroTag: heroTag,
+                      ),
                     ),
 
                     const SizedBox(width: 16),
 
-                    /* ────────── NAME + BIO ─────── */
                     if (profile != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -108,45 +115,56 @@ class ProfileAppBar extends StatelessWidget {
   }
 }
 
-// ─── Avatar with upload spinner ───────────────────────────────────────────────
-
 class _ProfileAvatar extends StatelessWidget {
   final String? photoUrl;
   final bool isUploading;
+  final String heroTag;
+  final VoidCallback onLongPress;
 
-  const _ProfileAvatar({required this.photoUrl, required this.isUploading});
+  const _ProfileAvatar({
+    required this.photoUrl,
+    required this.isUploading,
+    required this.heroTag,
+    required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        AppImage(
-          imageUrl: photoUrl ?? AppConstants.fakeUserImage,
-          width: 56,
-          height: 56,
-          borderRadius: 100,
-        ),
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Hero(
+            tag: heroTag,
+            child: AppImage(
+              imageUrl: photoUrl ?? AppConstants.fakeUserImage,
+              width: 56,
+              height: 56,
+              borderRadius: 100,
+            ),
+          ),
 
-        if (isUploading) ...[
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.45),
-              shape: BoxShape.circle,
+          if (isUploading) ...[
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.45),
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
-          const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color: Colors.white,
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.white,
+              ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

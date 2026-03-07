@@ -1,43 +1,58 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chatty/features/chats/data/data_source/chat_data_source.dart';
+import 'package:Chatty/core/framework/failure.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/state/app_state.dart';
+import '../../users/data/repositories/users_repository.dart';
 import '../data/models/chat_model.dart';
 import '../data/repositories/chat_repository.dart';
 
 class ConversationsState extends Equatable {
   final AppState<List<ChatModel>> chatsState;
-
   final AppState<String> openChatState;
+  final String searchQuery;
+  final bool isSearching;
 
   const ConversationsState({
     this.chatsState = const AppState(),
     this.openChatState = const AppState(),
+    this.searchQuery = '',
+    this.isSearching = false,
   });
 
   ConversationsState copyWith({
     AppState<List<ChatModel>>? chatsState,
     AppState<String>? openChatState,
+    String? searchQuery,
+    bool? isSearching,
   }) => ConversationsState(
     chatsState: chatsState ?? this.chatsState,
     openChatState: openChatState ?? this.openChatState,
+    searchQuery: searchQuery ?? this.searchQuery,
+    isSearching: isSearching ?? this.isSearching,
   );
 
   @override
-  List<Object?> get props => [chatsState, openChatState];
+  List<Object?> get props => [
+    chatsState,
+    openChatState,
+    searchQuery,
+    isSearching,
+  ];
 }
 
 @injectable
 class ConversationsCubit extends Cubit<ConversationsState> {
   final ChatRepository _repository;
+  final UsersRepository _usersRepository;
   StreamSubscription<List<ChatModel>>? _chatsSub;
 
-  ConversationsCubit(this._repository) : super(const ConversationsState());
+  ConversationsCubit(this._repository, this._usersRepository)
+    : super(const ConversationsState());
 
   void watchChats({required String uid}) {
     emit(
@@ -52,8 +67,7 @@ class ConversationsCubit extends Cubit<ConversationsState> {
             chatsState: AppState(status: StateStatus.success, data: chats),
           ),
         );
-        // Mark messages as delivered for chats with unread counts —
-        // meaning the sender's message reached us but we haven't opened the chat yet
+
         for (final chat in chats) {
           if (chat.unreadCountFor(uid) > 0) {
             _repository.markMessagesDelivered(chatId: chat.id, uid: uid);
@@ -64,7 +78,7 @@ class ConversationsCubit extends Cubit<ConversationsState> {
         state.copyWith(
           chatsState: AppState(
             status: StateStatus.error,
-            message: e is ChatException ? e.message : 'Failed to load chats.',
+            message: e is Failure ? e.message : 'Failed to load chats.',
           ),
         ),
       ),
@@ -81,17 +95,21 @@ class ConversationsCubit extends Cubit<ConversationsState> {
       ),
     );
     try {
+      final currentUser = await _usersRepository.getUserById(uid: uid);
+      final otherUser = await _usersRepository.getUserById(uid: otherUid);
+
       final chat = await _repository.openOrCreateOneToOneChat(
         uid: uid,
         otherUid: otherUid,
+        uidName: currentUser?.displayName ?? uid,
+        otherUidName: otherUser?.displayName ?? otherUid,
       );
-      // Store only the id
       emit(
         state.copyWith(
           openChatState: AppState(status: StateStatus.success, data: chat.id),
         ),
       );
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           openChatState: AppState(
@@ -116,7 +134,9 @@ class ConversationsCubit extends Cubit<ConversationsState> {
     required String createdBy,
     required List<String> memberIds,
     required String groupName,
+    required Map<String, String> memberNames,
     File? groupPhotoFile,
+    String? groupDescription,
   }) async {
     emit(
       state.copyWith(
@@ -127,16 +147,18 @@ class ConversationsCubit extends Cubit<ConversationsState> {
       final chat = await _repository.createGroupChat(
         createdBy: createdBy,
         memberIds: memberIds,
+        memberNames: memberNames,
         groupName: groupName,
         groupPhotoFile: groupPhotoFile,
+        groupDescription:
+            groupDescription ?? 'this is the group description tap to edit',
       );
-      // Store only the id
       emit(
         state.copyWith(
           openChatState: AppState(status: StateStatus.success, data: chat.id),
         ),
       );
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           openChatState: AppState(
@@ -159,6 +181,15 @@ class ConversationsCubit extends Cubit<ConversationsState> {
 
   void resetOpenChatState() =>
       emit(state.copyWith(openChatState: const AppState()));
+
+  void search(String query) {
+    final trimmed = query.trim();
+    emit(state.copyWith(searchQuery: trimmed, isSearching: trimmed.isNotEmpty));
+  }
+
+  void clearSearch() {
+    emit(state.copyWith(searchQuery: '', isSearching: false));
+  }
 
   @override
   Future<void> close() {

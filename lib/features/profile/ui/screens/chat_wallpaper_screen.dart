@@ -1,9 +1,9 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/di/injectable.dart';
-import 'package:chatty/core/framework/pick_file.dart';
-import 'package:chatty/features/shared/cubits/app_cubit.dart';
-import 'package:chatty/features/shared/widgets/app_asset_image.dart';
-import 'package:chatty/features/shared/widgets/app_file_image.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/di/injectable.dart';
+import 'package:Chatty/core/framework/pick_file.dart';
+import 'package:Chatty/features/shared/cubits/app_cubit.dart';
+import 'package:Chatty/features/shared/widgets/app_asset_image.dart';
+import 'package:Chatty/features/shared/widgets/app_file_image.dart';
 
 @RoutePage()
 class ChatWallpaperScreen extends StatefulWidget {

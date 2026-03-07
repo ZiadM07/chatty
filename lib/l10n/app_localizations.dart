@@ -497,18 +497,6 @@ abstract class AppLocalizations {
   /// **'Edit Message'**
   String get editMessage;
 
-  /// No description provided for @deleteMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Message'**
-  String get deleteMessage;
-
-  /// No description provided for @deleteMessageConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete this message for you?'**
-  String get deleteMessageConfirm;
-
   /// No description provided for @deleteForEveryone.
   ///
   /// In en, this message translates to:
@@ -754,18 +742,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove from Group'**
   String get removeFromGroup;
-
-  /// No description provided for @leaveGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave Group'**
-  String get leaveGroup;
-
-  /// No description provided for @leaveGroupConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to leave this group?'**
-  String get leaveGroupConfirm;
 
   /// No description provided for @groupInfo.
   ///
@@ -1730,7 +1706,7 @@ abstract class AppLocalizations {
   /// No description provided for @step2Of2.
   ///
   /// In en, this message translates to:
-  /// **'Step 2 of 2 • Select team members'**
+  /// **'Step 2 of 2 • Select group members'**
   String get step2Of2;
 
   /// No description provided for @searchByNameOrEmail.
@@ -2171,18 +2147,6 @@ abstract class AppLocalizations {
   /// **'Notification Preferences'**
   String get notificationPreferences;
 
-  /// No description provided for @vibration.
-  ///
-  /// In en, this message translates to:
-  /// **'Vibration'**
-  String get vibration;
-
-  /// No description provided for @vibrationDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Vibrate on new notifications'**
-  String get vibrationDesc;
-
   /// No description provided for @showPreview.
   ///
   /// In en, this message translates to:
@@ -2194,18 +2158,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Display message content in notifications'**
   String get showPreviewDesc;
-
-  /// No description provided for @notificationSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Play Notification Sound'**
-  String get notificationSound;
-
-  /// No description provided for @notificationSoundDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Play sound for incoming notifications'**
-  String get notificationSoundDesc;
 
   /// No description provided for @accountInformation.
   ///
@@ -2657,12 +2609,6 @@ abstract class AppLocalizations {
   /// **'Liked'**
   String get liked;
 
-  /// No description provided for @viewed.
-  ///
-  /// In en, this message translates to:
-  /// **'Viewed'**
-  String get viewed;
-
   /// No description provided for @noViewersYet.
   ///
   /// In en, this message translates to:
@@ -2968,6 +2914,450 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No shared files'**
   String get noSharedFiles;
+
+  /// No description provided for @photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get photo;
+
+  /// No description provided for @attachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment'**
+  String get attachment;
+
+  /// No description provided for @am.
+  ///
+  /// In en, this message translates to:
+  /// **'AM'**
+  String get am;
+
+  /// No description provided for @pm.
+  ///
+  /// In en, this message translates to:
+  /// **'PM'**
+  String get pm;
+
+  /// No description provided for @storagePermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage permission denied'**
+  String get storagePermissionDenied;
+
+  /// No description provided for @downloadedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded successfully'**
+  String get downloadedSuccessfully;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed'**
+  String get downloadFailed;
+
+  /// No description provided for @now.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get now;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes ago'**
+  String get minutesAgo;
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'hours ago'**
+  String get hoursAgo;
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'days ago'**
+  String get daysAgo;
+
+  /// No description provided for @notificationsMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications muted'**
+  String get notificationsMuted;
+
+  /// No description provided for @videoPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Player'**
+  String get videoPlayer;
+
+  /// No description provided for @videoPlayerComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Player Coming Soon'**
+  String get videoPlayerComingSoon;
+
+  /// No description provided for @permissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied'**
+  String get permissionDenied;
+
+  /// No description provided for @createdAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created at'**
+  String get createdAt;
+
+  /// No description provided for @group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get group;
+
+  /// No description provided for @editGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group Name'**
+  String get editGroupName;
+
+  /// No description provided for @editGroupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group Description'**
+  String get editGroupDescription;
+
+  /// No description provided for @addGroupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Group Description'**
+  String get addGroupDescription;
+
+  /// No description provided for @editGroupPicture.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group Picture'**
+  String get editGroupPicture;
+
+  /// No description provided for @removeMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Member'**
+  String get removeMember;
+
+  /// No description provided for @removeMemberConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this member?'**
+  String get removeMemberConfirm;
+
+  /// No description provided for @removeMemberSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed successfully'**
+  String get removeMemberSuccess;
+
+  /// No description provided for @removeMemberFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove member'**
+  String get removeMemberFailed;
+
+  /// No description provided for @owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get owner;
+
+  /// No description provided for @storyReplyNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Story Reply Notifications'**
+  String get storyReplyNotifications;
+
+  /// No description provided for @storyReplyNotificationsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive notifications when someone replies to your story'**
+  String get storyReplyNotificationsDesc;
+
+  /// No description provided for @notificationSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Sound'**
+  String get notificationSound;
+
+  /// No description provided for @notificationSoundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the sound for your notifications'**
+  String get notificationSoundDesc;
+
+  /// No description provided for @vibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration'**
+  String get vibration;
+
+  /// No description provided for @vibrationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable or disable vibration for notifications'**
+  String get vibrationDesc;
+
+  /// No description provided for @messagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Preview'**
+  String get messagePreview;
+
+  /// No description provided for @messagePreviewDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Show a preview of the notification'**
+  String get messagePreviewDesc;
+
+  /// No description provided for @inAppSound.
+  ///
+  /// In en, this message translates to:
+  /// **'In-App Sound'**
+  String get inAppSound;
+
+  /// No description provided for @inAppSoundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play sound for incoming messages'**
+  String get inAppSoundDesc;
+
+  /// No description provided for @noStoryFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No story found'**
+  String get noStoryFound;
+
+  /// No description provided for @goBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get goBack;
+
+  /// No description provided for @paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get paused;
+
+  /// No description provided for @play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get play;
+
+  /// No description provided for @pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pause;
+
+  /// No description provided for @like.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get like;
+
+  /// No description provided for @unlike.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlike'**
+  String get unlike;
+
+  /// No description provided for @viewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewed'**
+  String get viewed;
+
+  /// No description provided for @viewers.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewers'**
+  String get viewers;
+
+  /// No description provided for @viewersSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewers'**
+  String get viewersSheetTitle;
+
+  /// No description provided for @viewersSheetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewers of this story'**
+  String get viewersSheetDescription;
+
+  /// No description provided for @tapToSeeWhoViewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see who viewed your story'**
+  String get tapToSeeWhoViewed;
+
+  /// No description provided for @replyToStory.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply to story...'**
+  String get replyToStory;
+
+  /// No description provided for @voiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Message'**
+  String get voiceMessage;
+
+  /// No description provided for @slideToCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide to cancel'**
+  String get slideToCancel;
+
+  /// No description provided for @releaseToCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Release to cancel'**
+  String get releaseToCancel;
+
+  /// No description provided for @deleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Message'**
+  String get deleteMessage;
+
+  /// No description provided for @deleteMessageConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this message?'**
+  String get deleteMessageConfirm;
+
+  /// No description provided for @deleteMessageSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Message deleted successfully'**
+  String get deleteMessageSuccess;
+
+  /// No description provided for @deleteMessageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete message'**
+  String get deleteMessageFailed;
+
+  /// No description provided for @pinchToZoomTapToClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinch to zoom  ·  Tap to close'**
+  String get pinchToZoomTapToClose;
+
+  /// No description provided for @chatInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Info'**
+  String get chatInfo;
+
+  /// No description provided for @minute.
+  ///
+  /// In en, this message translates to:
+  /// **'minute'**
+  String get minute;
+
+  /// No description provided for @hour.
+  ///
+  /// In en, this message translates to:
+  /// **'hour'**
+  String get hour;
+
+  /// No description provided for @day.
+  ///
+  /// In en, this message translates to:
+  /// **'day'**
+  String get day;
+
+  /// No description provided for @ago.
+  ///
+  /// In en, this message translates to:
+  /// **'ago'**
+  String get ago;
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get justNow;
+
+  /// No description provided for @noViewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No views yet'**
+  String get noViewsYet;
+
+  /// No description provided for @addCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ({count})'**
+  String addCount(Object count);
+
+  /// No description provided for @createCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create ({count})'**
+  String createCount(Object count);
+
+  /// No description provided for @leaveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Group'**
+  String get leaveGroup;
+
+  /// No description provided for @leaveGroupConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave this group?'**
+  String get leaveGroupConfirm;
+
+  /// No description provided for @leaveGroupOwnerConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'You are the owner. Ownership will be transferred to the next member when you leave.'**
+  String get leaveGroupOwnerConfirm;
+
+  /// No description provided for @leaveAndTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave & Transfer Ownership'**
+  String get leaveAndTransfer;
+
+  /// No description provided for @createAGroupWithThisUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a group with this user'**
+  String get createAGroupWithThisUser;
+
+  /// No description provided for @commonGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Groups'**
+  String get commonGroups;
+
+  /// No description provided for @emailOrPasswordIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or password incorrect'**
+  String get emailOrPasswordIncorrect;
+
+  /// No description provided for @thisOperationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This operation failed.'**
+  String get thisOperationFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

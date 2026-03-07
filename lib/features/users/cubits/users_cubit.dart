@@ -1,8 +1,8 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/users/cubits/users_state.dart';
-import 'package:chatty/features/users/data/data_sources/users_data_source.dart';
-import 'package:chatty/features/users/data/repositories/users_repository.dart';
+import 'package:Chatty/features/users/cubits/users_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/constants/exports.dart';
+import '../data/data_sources/users_data_source.dart';
+import '../data/repositories/users_repository.dart';
 
 @injectable
 class UsersCubit extends Cubit<UsersState> {
@@ -13,10 +13,7 @@ class UsersCubit extends Cubit<UsersState> {
 
   UsersCubit(this._repository) : super(const UsersState());
 
-  // ─── Load First Page ──────────────────────────────────────────────────────
-
   Future<void> loadUsers({required String currentUid}) async {
-    // Reset pagination
     _lastDocument = null;
 
     emit(
@@ -61,8 +58,6 @@ class UsersCubit extends Cubit<UsersState> {
       );
     }
   }
-
-  // ─── Load Next Page ───────────────────────────────────────────────────────
 
   Future<void> loadMore({required String currentUid}) async {
     if (!state.hasMore) return;
@@ -111,8 +106,6 @@ class UsersCubit extends Cubit<UsersState> {
     }
   }
 
-  // ─── Search ───────────────────────────────────────────────────────────────
-
   Future<void> search({
     required String query,
     required String currentUid,
@@ -120,7 +113,6 @@ class UsersCubit extends Cubit<UsersState> {
     final trimmed = query.trim();
 
     if (trimmed.isEmpty) {
-      // Back to full list
       emit(state.copyWith(isSearching: false, searchQuery: ''));
       await loadUsers(currentUid: currentUid);
       return;
@@ -144,7 +136,7 @@ class UsersCubit extends Cubit<UsersState> {
         state.copyWith(
           usersState: AppState(status: StateStatus.success, data: results),
           users: results,
-          hasMore: false, // no pagination during search
+          hasMore: false,
         ),
       );
     } on UsersException catch (e) {
@@ -169,8 +161,6 @@ class UsersCubit extends Cubit<UsersState> {
     emit(state.copyWith(isSearching: false, searchQuery: ''));
     loadUsers(currentUid: currentUid);
   }
-
-  // ─── Helper: get Firestore DocumentSnapshot for pagination cursor ─────────
 
   Future<DocumentSnapshot?> _getLastSnapshot(String uid) async {
     try {

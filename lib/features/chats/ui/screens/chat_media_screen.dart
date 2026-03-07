@@ -1,11 +1,12 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/di/injectable.dart';
-import 'package:chatty/core/utils/enums.dart';
-import 'package:chatty/features/chats/cubits/chat_media_cubit.dart';
-import 'package:chatty/features/chats/ui/widgets/chat_media_app_bar.dart';
-import 'package:chatty/features/chats/ui/widgets/chat_media_empty_state.dart';
-import 'package:chatty/features/chats/ui/widgets/chat_media_grid.dart';
-import 'package:chatty/features/shared/widgets/app_loading.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/di/injectable.dart';
+import 'package:Chatty/core/utils/enums.dart';
+import 'package:Chatty/features/chats/cubits/chat_media_cubit.dart';
+import 'package:Chatty/features/chats/ui/widgets/chat_media_app_bar.dart';
+import 'package:Chatty/features/chats/ui/widgets/chat_media_empty_state.dart';
+import 'package:Chatty/features/chats/ui/widgets/chat_media_grid.dart';
+import 'package:Chatty/features/shared/widgets/app_loading.dart';
+import 'package:Chatty/features/shared/widgets/app_toast.dart';
 
 @RoutePage()
 class ChatMediaScreen extends StatefulWidget implements AutoRouteWrapper {
@@ -101,10 +102,9 @@ class _ChatMediaScreenState extends State<ChatMediaScreen>
           }
 
           if (state.mediaState.isError) {
-            return Center(
-              child: Text(
-                state.mediaState.message ?? context.locale.unexpectedError,
-              ),
+            AppToast.showError(
+              message: context.locale.thisOperationFailed,
+              context: context,
             );
           }
 

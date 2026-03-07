@@ -1,9 +1,5 @@
-import 'dart:io';
-
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../core/state/app_state.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import '../../../core/framework/notification_service.dart';
 import '../data/data_sources/auth_data_source.dart';
 import '../data/models/user_model.dart';
 import '../data/repositories/auth_repositories.dart';
@@ -12,28 +8,32 @@ import 'auth_state.dart';
 @lazySingleton
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _repository;
+  final NotificationService _notificationService;
 
-  AuthCubit(this._repository) : super(AuthState.initial()) {
+  AuthCubit(this._repository, this._notificationService)
+    : super(AuthState.initial()) {
     _watchAuthState();
   }
 
-  // ─── Watch Firebase Auth Stream ───────────────────────────────────────────
-
   void _watchAuthState() {
     _repository.authStateChanges.listen(
-      (authModel) => emit(
-        state.copyWith(
-          currentUser: authModel,
-          clearCurrentUser: authModel == null,
-          authReady: true, // ← first real Firebase response received
-        ),
-      ),
+      (authModel) async {
+        emit(
+          state.copyWith(
+            currentUser: authModel,
+            clearCurrentUser: authModel == null,
+            authReady: true,
+          ),
+        );
+        if (authModel != null) {
+          await _notificationService.login(authModel.uid);
+          await setOnline();
+        }
+      },
       onError: (_) =>
           emit(state.copyWith(clearCurrentUser: true, authReady: true)),
     );
   }
-
-  // ─── Sign Up ──────────────────────────────────────────────────────────────
 
   Future<void> signUp({required String email, required String password}) async {
     emit(
@@ -68,8 +68,6 @@ class AuthCubit extends Cubit<AuthState> {
       );
     }
   }
-
-  // ─── Login ────────────────────────────────────────────────────────────────
 
   Future<void> login({required String email, required String password}) async {
     emit(
@@ -187,6 +185,7 @@ class AuthCubit extends Cubit<AuthState> {
       ),
     );
     try {
+      await _notificationService.logout();
       await _repository.signOut();
       emit(
         AuthState.initial().copyWith(
@@ -223,6 +222,7 @@ class AuthCubit extends Cubit<AuthState> {
     );
 
     try {
+      await _notificationService.logout();
       await _repository.deleteAccount(uid: uid);
       emit(AuthState.initial().copyWith(authReady: true));
     } on AuthException catch (e) {
@@ -247,12 +247,14 @@ class AuthCubit extends Cubit<AuthState> {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
     await _repository.updateUserPresence(uid: uid, isOnline: true);
+    kPrint('user is online');
   }
 
   Future<void> setOffline() async {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
     await _repository.updateUserPresence(uid: uid, isOnline: false);
+    kPrint('user is offline');
   }
 
   void resetLoginState() => emit(state.copyWith(loginState: const AppState()));

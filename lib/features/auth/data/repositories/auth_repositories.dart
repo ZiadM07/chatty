@@ -3,17 +3,13 @@ import 'dart:io';
 import 'package:injectable/injectable.dart';
 
 import '../../data/data_sources/auth_data_source.dart';
-import '../../../shared/data/storage_data_source.dart';
+import '../../../shared/data/data_sources/storage_data_source.dart';
 import '../../data/models/auth_model.dart';
 import '../../data/models/user_model.dart';
-
-// ─── Storage Path Helpers ─────────────────────────────────────────────────────
 
 class _StoragePaths {
   static String profileFolder(String uid) => 'profiles/$uid';
 }
-
-// ─── Repository ───────────────────────────────────────────────────────────────
 
 @lazySingleton
 class AuthRepository {
@@ -50,7 +46,6 @@ class AuthRepository {
     String? photoUrl;
 
     if (imageFile != null) {
-      // Pass the folder — impl appends timestamped filename automatically
       photoUrl = await _storageDataSource.uploadFile(
         file: imageFile,
         path: _StoragePaths.profileFolder(user.uid),

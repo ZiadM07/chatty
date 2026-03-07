@@ -126,7 +126,7 @@ class SkeletonListTileStyle {
 
   const SkeletonListTileStyle({
     this.hasLeading = true,
-    this.leadingStyle, //  = const SkeletonAvatarStyle(padding: EdgeInsets.all(0)),
+    this.leadingStyle,
     this.titleStyle = const SkeletonLineStyle(
       padding: EdgeInsets.all(0),
       height: 22,

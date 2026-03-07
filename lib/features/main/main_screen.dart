@@ -1,5 +1,5 @@
-import 'package:chatty/config/router/app_router.gr.dart';
-import 'package:chatty/features/main/widgets/bottom_nav_widget.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/features/main/widgets/bottom_nav_widget.dart';
 
 import '../../core/constants/exports.dart';
 
@@ -21,7 +21,7 @@ class MainScreen extends StatelessWidget {
             tabsRouter.setActiveIndex(index);
           },
           items: [
-            NavModel(name: context.locale.chats, icon: Svgs.chat,),
+            NavModel(name: context.locale.chats, icon: Svgs.chat),
             NavModel(name: context.locale.contacts, icon: Svgs.message),
             NavModel(name: context.locale.profile, icon: Svgs.profile),
           ],

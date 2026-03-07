@@ -1,5 +1,5 @@
-import 'package:chatty/features/stories/data/data_sources/story_data_source.dart';
-import 'package:chatty/features/stories/data/models/story_item_model.dart';
+import 'package:Chatty/features/stories/data/data_sources/story_data_source.dart';
+import 'package:Chatty/features/stories/data/models/story_item_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -8,23 +8,15 @@ import '../../../../core/state/app_state.dart';
 import '../data/models/story_model.dart';
 import '../data/repositories/story_repository.dart';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-
 class StoryViewerState extends Equatable {
-  /// The story currently being displayed.
   final StoryModel? story;
 
-  /// Index of the currently active item within [story.items].
   final int currentIndex;
 
-  /// Whether the story is paused (e.g. user holding down).
   final bool isPaused;
-
-  /// Fetch state — loading while resolving the story from repository.
   final AppState<StoryModel> storyState;
 
-  /// Reply send state — drives the reply input loading indicator.
-  final AppState<String> replyState; // data = chatId on success
+  final AppState<String> replyState;
 
   const StoryViewerState({
     this.story,
@@ -69,20 +61,11 @@ class StoryViewerState extends Equatable {
   ];
 }
 
-// ─── Cubit ────────────────────────────────────────────────────────────────────
-//
-//  Provided at route level via AutoRouteWrapper — one instance per viewer session.
-//  The viewer screen passes [ownerUid] + [currentUid] on open.
-//  Starting index = first unseen item so viewers resume naturally.
-// ─────────────────────────────────────────────────────────────────────────────
-
 @injectable
 class StoryViewerCubit extends Cubit<StoryViewerState> {
   final StoryRepository _repository;
 
   StoryViewerCubit(this._repository) : super(const StoryViewerState());
-
-  // ─── Load Story ───────────────────────────────────────────────────────────
 
   Future<void> loadStory({
     required String ownerUid,
@@ -120,7 +103,6 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
         ),
       );
 
-      // Mark the first item as viewed immediately
       _markCurrentViewed(currentUid);
     } on StoryException catch (e) {
       emit(
@@ -140,9 +122,6 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
     }
   }
 
-  // ─── Navigation ───────────────────────────────────────────────────────────
-
-  /// Move to next item. Returns false if this was the last item (viewer should close).
   bool nextItem({required String currentUid}) {
     if (state.isLastItem) return false;
 
@@ -151,21 +130,13 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
     return true;
   }
 
-  /// Move to previous item. No-op if already at first.
   void previousItem() {
     if (state.isFirstItem) return;
     emit(state.copyWith(currentIndex: state.currentIndex - 1));
   }
 
-  // ─── Pause / Resume ───────────────────────────────────────────────────────
-
   void pause() => emit(state.copyWith(isPaused: true));
   void resume() => emit(state.copyWith(isPaused: false));
-
-  // ─── Mark viewed ─────────────────────────────────────────────────────────
-  //
-  //  Fire-and-forget — we never block UI on this.
-  // ─────────────────────────────────────────────────────────────────────────
 
   void _markCurrentViewed(String currentUid) {
     final item = state.currentItem;
@@ -181,7 +152,6 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
         .catchError((_) {});
   }
 
-  /// Manually mark a specific item as viewed (e.g. after timer completes).
   void markItemViewed({required String currentUid, required String itemId}) {
     final story = state.story;
     if (story == null) return;
@@ -195,19 +165,27 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
         .catchError((_) {});
   }
 
-  // ─── Toggle Like ─────────────────────────────────────────────────────────
-  //
-  //  Optimistic: we don't block the UI, fire-and-forget.
-  // ─────────────────────────────────────────────────────────────────────────
-
   void toggleLike({required String viewerUid}) {
     final item = state.currentItem;
     final story = state.story;
     if (item == null || story == null) return;
-    // Don't like your own story
     if (story.uid == viewerUid) return;
 
     final isLiked = item.isLikedBy(viewerUid);
+
+    final updatedLikeIds = isLiked
+        ? item.likeIds.where((id) => id != viewerUid).toList()
+        : [...item.likeIds, viewerUid];
+
+    final updatedItem = item.copyWith(likeIds: updatedLikeIds);
+
+    final updatedItems = story.items.map((i) {
+      return i.id == item.id ? updatedItem : i;
+    }).toList();
+
+    final updatedStory = story.copyWith(items: updatedItems);
+
+    emit(state.copyWith(story: updatedStory));
 
     _repository
         .toggleLike(
@@ -218,8 +196,6 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
         )
         .catchError((_) {});
   }
-
-  // ─── Reply to Story ───────────────────────────────────────────────────────
 
   Future<void> replyToStory({
     required String senderUid,

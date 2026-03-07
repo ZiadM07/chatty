@@ -1,3 +1,4 @@
+import 'package:Chatty/features/chats/data/models/chat_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
@@ -30,4 +31,9 @@ class UsersRepository {
 
   Stream<UserModel?> watchUser({required String uid}) =>
       _dataSource.watchUser(uid: uid);
+
+  Future<List<ChatModel>> getCommonGroups({
+    required String currentUid,
+    required String otherUid,
+  }) => _dataSource.getCommonGroups(currentUid: currentUid, otherUid: otherUid);
 }

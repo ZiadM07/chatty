@@ -1,4 +1,4 @@
-import 'package:chatty/core/utils/enums.dart';
+import 'package:Chatty/core/utils/enums.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -119,9 +119,6 @@ class UserModel extends Equatable {
     );
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
-  /// Display name fallback: fullName → username → email prefix
   String get displayName => fullName.isNotEmpty
       ? fullName
       : username.isNotEmpty

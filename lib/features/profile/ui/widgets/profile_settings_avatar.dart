@@ -1,9 +1,9 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/framework/pick_file.dart';
-import 'package:chatty/features/auth/cubits/auth_cubit.dart';
-import 'package:chatty/features/profile/cubits/profile_cubit.dart';
-import 'package:chatty/features/profile/cubits/profile_state.dart';
-import 'package:chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/framework/pick_file.dart';
+import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
+import 'package:Chatty/features/profile/cubits/profile_cubit.dart';
+import 'package:Chatty/features/profile/cubits/profile_state.dart';
+import 'package:Chatty/features/shared/widgets/app_image.dart';
 
 class ProfileSettingsAvatar extends StatelessWidget {
   const ProfileSettingsAvatar({super.key});

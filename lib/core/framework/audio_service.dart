@@ -2,346 +2,196 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  AudioService
-// ─────────────────────────────────────────────────────────────────────────────
-//
-//  Enhanced singleton service with:
-//  - Recording with amplitude monitoring (for visual feedback)
-//  - Playback with detailed state management
-//  - Automatic resource cleanup
-//  - One active player at a time (global playback control)
-// ─────────────────────────────────────────────────────────────────────────────
-
-@singleton
-class AudioService {
-  final AudioRecorder _recorder = AudioRecorder();
-  AudioPlayer? _activePlayer;
-  String? _currentlyPlayingUrl;
-  Timer? _amplitudeTimer;
-
-  final _recordingStateController =
-      StreamController<RecordingState>.broadcast();
-  final _playbackStateController = StreamController<PlaybackState>.broadcast();
-
-  Stream<RecordingState> get recordingState => _recordingStateController.stream;
-  Stream<PlaybackState> get playbackState => _playbackStateController.stream;
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RECORDING
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /// Check if recording permission is granted.
-  Future<bool> hasRecordPermission() async {
-    return _recorder.hasPermission();
-  }
-
-  /// Start recording with amplitude monitoring for visual feedback.
-  Future<RecordingResult> startRecording() async {
-    try {
-      if (!await hasRecordPermission()) {
-        throw AudioException('Microphone permission denied');
-      }
-
-      // Stop any active playback before recording
-      await stopPlayback();
-
-      final tempDir = await getTemporaryDirectory();
-      final fileName = 'voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      final path = '${tempDir.path}/$fileName';
-
-      await _recorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          bitRate: 128000,
-          sampleRate: 44100,
-        ),
-        path: path,
-      );
-
-      final startTime = DateTime.now();
-
-      // Monitor amplitude and duration during recording
-      _amplitudeTimer?.cancel();
-      _amplitudeTimer = Timer.periodic(const Duration(milliseconds: 100), (
-        timer,
-      ) async {
-        if (!await _recorder.isRecording()) {
-          timer.cancel();
-          return;
-        }
-
-        final amplitude = await _recorder.getAmplitude();
-        final duration = DateTime.now().difference(startTime);
-
-        _recordingStateController.add(
-          RecordingState(
-            isRecording: true,
-            duration: duration,
-            amplitude: amplitude.current.clamp(-160.0, 0.0), // dB range
-            path: path,
-          ),
-        );
-      });
-
-      return RecordingResult.success(path);
-    } catch (e) {
-      return RecordingResult.error(e.toString());
-    }
-  }
-
-  /// Stop recording and return the file + duration.
-  Future<RecordingResult> stopRecording() async {
-    try {
-      _amplitudeTimer?.cancel();
-
-      final path = await _recorder.stop();
-      if (path == null) {
-        return RecordingResult.error('Recording failed');
-      }
-
-      final file = File(path);
-      if (!file.existsSync()) {
-        return RecordingResult.error('Recording file not found');
-      }
-
-      // Get duration by creating a temporary player
-      final tempPlayer = AudioPlayer();
-      Duration duration = Duration.zero;
-
-      try {
-        await tempPlayer.setSourceDeviceFile(path);
-        duration = await tempPlayer.getDuration() ?? Duration.zero;
-      } finally {
-        await tempPlayer.dispose();
-      }
-
-      _recordingStateController.add(RecordingState.idle());
-
-      return RecordingResult.success(path, file: file, duration: duration);
-    } catch (e) {
-      return RecordingResult.error(e.toString());
-    }
-  }
-
-  /// Cancel recording without saving.
-  Future<void> cancelRecording() async {
-    try {
-      _amplitudeTimer?.cancel();
-      final path = await _recorder.stop();
-      if (path != null) {
-        final file = File(path);
-        if (file.existsSync()) await file.delete();
-      }
-      _recordingStateController.add(RecordingState.idle());
-    } catch (_) {}
-  }
-
-  /// Check if currently recording.
-  Future<bool> isRecording() => _recorder.isRecording();
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PLAYBACK
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /// Play audio from URL or file path. Stops any currently playing audio.
-  Future<void> play(String source) async {
-    try {
-      // Stop previous player if playing different source
-      if (_currentlyPlayingUrl != source) {
-        await stopPlayback();
-      } else if (_activePlayer != null) {
-        // Same source — resume if paused
-        await resume();
-        return;
-      }
-
-      _activePlayer = AudioPlayer();
-      _currentlyPlayingUrl = source;
-
-      // Set source (URL or file)
-      if (source.startsWith('http')) {
-        await _activePlayer!.setSourceUrl(source);
-      } else {
-        await _activePlayer!.setSourceDeviceFile(source);
-      }
-
-      final duration = await _activePlayer!.getDuration() ?? Duration.zero;
-
-      // Listen to position changes
-      _activePlayer!.onPositionChanged.listen((position) {
-        _playbackStateController.add(
-          PlaybackState(
-            url: source,
-            isPlaying: true,
-            position: position,
-            duration: duration,
-          ),
-        );
-      });
-
-      // Listen to state changes (completion, errors)
-      _activePlayer!.onPlayerStateChanged.listen((state) {
-        if (state == PlayerState.completed) {
-          _playbackStateController.add(
-            PlaybackState(
-              url: source,
-              isPlaying: false,
-              position: Duration.zero,
-              duration: duration,
-            ),
-          );
-          stopPlayback();
-        }
-      });
-
-      await _activePlayer!.resume();
-    } catch (e) {
-      _playbackStateController.add(PlaybackState.error(source, e.toString()));
-    }
-  }
-
-  /// Resume playback if paused.
-  Future<void> resume() async {
-    await _activePlayer?.resume();
-  }
-
-  /// Pause playback.
-  Future<void> pause() async {
-    await _activePlayer?.pause();
-  }
-
-  /// Seek to a specific position.
-  Future<void> seek(Duration position) async {
-    await _activePlayer?.seek(position);
-  }
-
-  /// Stop and dispose current player.
-  Future<void> stopPlayback() async {
-    await _activePlayer?.stop();
-    await _activePlayer?.dispose();
-    _activePlayer = null;
-    _currentlyPlayingUrl = null;
-  }
-
-  /// Check if a specific URL is currently playing.
-  bool isPlaying(String url) =>
-      _currentlyPlayingUrl == url &&
-      _activePlayer?.state == PlayerState.playing;
-
-  /// Get current playing URL.
-  String? get currentlyPlayingUrl => _currentlyPlayingUrl;
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CLEANUP
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<void> dispose() async {
-    _amplitudeTimer?.cancel();
-    await _recorder.dispose();
-    await stopPlayback();
-    await _recordingStateController.close();
-    await _playbackStateController.close();
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Models
-// ─────────────────────────────────────────────────────────────────────────────
-
-@immutable
-class RecordingState {
-  final bool isRecording;
-  final Duration duration;
-  final double amplitude; // dB value: -160 (silence) to 0 (loud)
-  final String? path;
-  final String? error;
-
-  const RecordingState({
-    required this.isRecording,
-    required this.duration,
-    required this.amplitude,
-    this.path,
-    this.error,
-  });
-
-  const RecordingState.idle()
-    : isRecording = false,
-      duration = Duration.zero,
-      amplitude = -160,
-      path = null,
-      error = null;
-
-  /// Normalized amplitude 0.0 (silence) to 1.0 (loud)
-  double get normalizedAmplitude => ((amplitude + 160) / 160).clamp(0.0, 1.0);
-}
-
-@immutable
 class RecordingResult {
-  final bool success;
-  final String? path;
   final File? file;
   final Duration duration;
-  final String? error;
-
-  const RecordingResult({
-    required this.success,
-    this.path,
-    this.file,
-    required this.duration,
-    this.error,
-  });
-
-  const RecordingResult.success(
-    this.path, {
-    this.file,
-    this.duration = Duration.zero,
-  }) : success = true,
-       error = null;
-
-  const RecordingResult.error(this.error)
-    : success = false,
-      path = null,
-      file = null,
-      duration = Duration.zero;
+  const RecordingResult({this.file, this.duration = Duration.zero});
 }
 
-@immutable
-class PlaybackState {
-  final String url;
+class AudioPlaybackState {
+  final String? activeUrl;
   final bool isPlaying;
   final Duration position;
   final Duration duration;
-  final String? error;
 
-  const PlaybackState({
-    required this.url,
-    required this.isPlaying,
-    required this.position,
-    required this.duration,
-    this.error,
+  const AudioPlaybackState({
+    this.activeUrl,
+    this.isPlaying = false,
+    this.position = Duration.zero,
+    this.duration = Duration.zero,
   });
 
-  const PlaybackState.error(this.url, this.error)
-    : isPlaying = false,
-      position = Duration.zero,
-      duration = Duration.zero;
+  bool get isIdle => activeUrl == null;
 
-  double get progress => duration.inMilliseconds > 0
-      ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
-      : 0.0;
-
-  Duration get remaining => duration - position;
+  AudioPlaybackState copyWith({
+    String? activeUrl,
+    bool? isPlaying,
+    Duration? position,
+    Duration? duration,
+  }) => AudioPlaybackState(
+    activeUrl: activeUrl ?? this.activeUrl,
+    isPlaying: isPlaying ?? this.isPlaying,
+    position: position ?? this.position,
+    duration: duration ?? this.duration,
+  );
 }
 
-class AudioException implements Exception {
-  final String message;
-  const AudioException(this.message);
-  @override
-  String toString() => 'AudioException: $message';
+@lazySingleton
+class AudioService {
+  AudioService();
+
+  final _player = AudioPlayer();
+  String? _activeUrl;
+
+  final _stateController = StreamController<AudioPlaybackState>.broadcast();
+  StreamSubscription<void>? _completeSub;
+  StreamSubscription<PlayerState>? _stateSub;
+  StreamSubscription<Duration>? _positionSub;
+  StreamSubscription<Duration>? _durationSub;
+
+  AudioPlaybackState _current = const AudioPlaybackState();
+
+  final _recorder = AudioRecorder();
+  DateTime? _recordingStart;
+
+  Stream<AudioPlaybackState> get playbackState => _stateController.stream;
+  AudioPlaybackState get currentState => _current;
+
+  Future<void> play(String url) async {
+    if (_activeUrl == url &&
+        _current.isPlaying == false &&
+        _current.position > Duration.zero) {
+      await _player.resume();
+      return;
+    }
+
+    await _stopInternal();
+
+    _activeUrl = url;
+    _emit(
+      _current.copyWith(
+        activeUrl: url,
+        isPlaying: true,
+        position: Duration.zero,
+        duration: Duration.zero,
+      ),
+    );
+
+    _subscribeToPlayer();
+    await _player.play(UrlSource(url));
+  }
+
+  Future<void> pause() async {
+    await _player.pause();
+  }
+
+  Future<void> resume() async {
+    if (_activeUrl != null) await _player.resume();
+  }
+
+  Future<void> stop() async {
+    await _stopInternal();
+    _activeUrl = null;
+    _emit(const AudioPlaybackState());
+  }
+
+  Future<void> seek(Duration position) async {
+    await _player.seek(position);
+    _emit(_current.copyWith(position: position));
+  }
+
+  Future<bool> hasRecordPermission() async {
+    final status = await Permission.microphone.status;
+    if (status.isGranted) return true;
+    return (await Permission.microphone.request()).isGranted;
+  }
+
+  Future<void> startRecording() async {
+    if (_current.isPlaying) await _player.pause();
+
+    final dir = await getTemporaryDirectory();
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    final path = '${dir.path}/voice_$ts.m4a';
+    _recordingStart = DateTime.now();
+
+    await _recorder.start(
+      const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000),
+      path: path,
+    );
+  }
+
+  Future<RecordingResult> stopRecording() async {
+    if (!await _recorder.isRecording()) return const RecordingResult();
+
+    final path = await _recorder.stop();
+    final duration = _recordingStart != null
+        ? DateTime.now().difference(_recordingStart!)
+        : Duration.zero;
+    _recordingStart = null;
+
+    if (path == null) return const RecordingResult();
+    final file = File(path);
+    if (!await file.exists()) return const RecordingResult();
+
+    return RecordingResult(file: file, duration: duration);
+  }
+
+  Future<void> cancelRecording() async {
+    if (await _recorder.isRecording()) await _recorder.cancel();
+    _recordingStart = null;
+  }
+
+  void _subscribeToPlayer() {
+    _cancelSubscriptions();
+
+    _stateSub = _player.onPlayerStateChanged.listen((state) {
+      final playing = state == PlayerState.playing;
+      _emit(_current.copyWith(isPlaying: playing));
+    });
+
+    _positionSub = _player.onPositionChanged.listen((pos) {
+      _emit(_current.copyWith(position: pos));
+    });
+
+    _durationSub = _player.onDurationChanged.listen((dur) {
+      if (dur > Duration.zero) _emit(_current.copyWith(duration: dur));
+    });
+
+    _completeSub = _player.onPlayerComplete.listen((_) {
+      _emit(_current.copyWith(isPlaying: false, position: _current.duration));
+    });
+  }
+
+  Future<void> _stopInternal() async {
+    _cancelSubscriptions();
+    await _player.stop();
+  }
+
+  void _cancelSubscriptions() {
+    _stateSub?.cancel();
+    _positionSub?.cancel();
+    _durationSub?.cancel();
+    _completeSub?.cancel();
+    _stateSub = null;
+    _positionSub = null;
+    _durationSub = null;
+    _completeSub = null;
+  }
+
+  void _emit(AudioPlaybackState state) {
+    _current = state;
+    if (!_stateController.isClosed) _stateController.add(state);
+  }
+
+  Future<void> dispose() async {
+    _cancelSubscriptions();
+    await _player.dispose();
+    await _recorder.dispose();
+    await _stateController.close();
+  }
 }

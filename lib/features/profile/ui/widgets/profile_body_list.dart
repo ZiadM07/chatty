@@ -1,9 +1,9 @@
-import 'package:chatty/config/router/app_router.gr.dart';
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/auth/cubits/auth_cubit.dart';
-import 'package:chatty/features/auth/cubits/auth_state.dart';
-import 'package:chatty/features/shared/widgets/app_gradient_button.dart';
-import 'package:chatty/features/shared/widgets/app_toast.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
+import 'package:Chatty/features/auth/cubits/auth_state.dart';
+import 'package:Chatty/features/shared/widgets/app_gradient_button.dart';
+import 'package:Chatty/features/shared/widgets/app_toast.dart';
 
 class ProfileBodyList extends StatelessWidget {
   const ProfileBodyList({super.key});
@@ -85,9 +85,8 @@ void _confirmLogout(BuildContext context) {
             if (state.signOutState.status == StateStatus.error) {
               ctx.router.pop();
               AppToast.showError(
-                message:
-                    state.signOutState.message ??
-                    context.locale.unexpectedError,
+                message: context.locale.thisOperationFailed,
+
                 context: context,
               );
             }

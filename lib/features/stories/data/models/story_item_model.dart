@@ -1,31 +1,19 @@
-// ─── Story Item Model ─────────────────────────────────────────────────────────
-//
-//  A single slide inside a story. One user's story is a list of these.
-//  Firestore path: stories/{uid}/items/{itemId}
-// ─────────────────────────────────────────────────────────────────────────────
-
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/utils/enums.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/utils/enums.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-// ─── Story Item Model ─────────────────────────────────────────────────────────
-//
-//  A single slide inside a story. One user's story is a list of these.
-//  Firestore path: stories/{uid}/items/{itemId}
-// ─────────────────────────────────────────────────────────────────────────────
 
 class StoryItemModel extends Equatable {
   final String id;
-  final String uid; // owner
+  final String uid;
   final StoryItemType type;
-  final String url; // Supabase public URL (image/video) or empty for text
-  final String? caption; // optional text overlay / text story content
-  final String? thumbnailUrl; // for video items
-  final Color? backgroundColor; // for text stories
+  final String url;
+  final String? caption;
+  final String? thumbnailUrl;
+  final Color? backgroundColor;
   final DateTime createdAt;
-  final DateTime expiresAt; // always createdAt + 24 hours
-  final List<String> viewerIds; // uids who have seen this item
-  final List<String> likeIds; // uids who liked this item
+  final DateTime expiresAt;
+  final List<String> viewerIds;
+  final List<String> likeIds;
 
   const StoryItemModel({
     required this.id,
@@ -47,7 +35,6 @@ class StoryItemModel extends Equatable {
   int get viewCount => viewerIds.length;
   int get likeCount => likeIds.length;
 
-  /// Remaining time before expiry — useful for the progress ring on the avatar.
   Duration get timeRemaining {
     final remaining = expiresAt.difference(DateTime.now());
     return remaining.isNegative ? Duration.zero : remaining;

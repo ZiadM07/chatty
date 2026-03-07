@@ -212,12 +212,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editMessage => 'Edit Message';
 
   @override
-  String get deleteMessage => 'Delete Message';
-
-  @override
-  String get deleteMessageConfirm => 'Delete this message for you?';
-
-  @override
   String get deleteForEveryone => 'Delete for everyone';
 
   @override
@@ -339,12 +333,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeFromGroup => 'Remove from Group';
-
-  @override
-  String get leaveGroup => 'Leave Group';
-
-  @override
-  String get leaveGroupConfirm => 'Are you sure you want to leave this group?';
 
   @override
   String get groupInfo => 'Group Info';
@@ -831,7 +819,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addMembers => 'Add Members';
 
   @override
-  String get step2Of2 => 'Step 2 of 2 • Select team members';
+  String get step2Of2 => 'Step 2 of 2 • Select group members';
 
   @override
   String get searchByNameOrEmail => 'Search by name or email...';
@@ -1061,22 +1049,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationPreferences => 'Notification Preferences';
 
   @override
-  String get vibration => 'Vibration';
-
-  @override
-  String get vibrationDesc => 'Vibrate on new notifications';
-
-  @override
   String get showPreview => 'Show Message Preview';
 
   @override
   String get showPreviewDesc => 'Display message content in notifications';
-
-  @override
-  String get notificationSound => 'Play Notification Sound';
-
-  @override
-  String get notificationSoundDesc => 'Play sound for incoming notifications';
 
   @override
   String get accountInformation => 'Account Information';
@@ -1322,9 +1298,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liked => 'Liked';
 
   @override
-  String get viewed => 'Viewed';
-
-  @override
   String get noViewersYet => 'No viewers yet';
 
   @override
@@ -1482,4 +1455,230 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noSharedFiles => 'No shared files';
+
+  @override
+  String get photo => 'Photo';
+
+  @override
+  String get attachment => 'Attachment';
+
+  @override
+  String get am => 'AM';
+
+  @override
+  String get pm => 'PM';
+
+  @override
+  String get storagePermissionDenied => 'Storage permission denied';
+
+  @override
+  String get downloadedSuccessfully => 'Downloaded successfully';
+
+  @override
+  String get downloadFailed => 'Download failed';
+
+  @override
+  String get now => 'now';
+
+  @override
+  String get minutesAgo => 'minutes ago';
+
+  @override
+  String get hoursAgo => 'hours ago';
+
+  @override
+  String get daysAgo => 'days ago';
+
+  @override
+  String get notificationsMuted => 'Notifications muted';
+
+  @override
+  String get videoPlayer => 'Video Player';
+
+  @override
+  String get videoPlayerComingSoon => 'Video Player Coming Soon';
+
+  @override
+  String get permissionDenied => 'Permission denied';
+
+  @override
+  String get createdAt => 'Created at';
+
+  @override
+  String get group => 'Group';
+
+  @override
+  String get editGroupName => 'Edit Group Name';
+
+  @override
+  String get editGroupDescription => 'Edit Group Description';
+
+  @override
+  String get addGroupDescription => 'Add Group Description';
+
+  @override
+  String get editGroupPicture => 'Edit Group Picture';
+
+  @override
+  String get removeMember => 'Remove Member';
+
+  @override
+  String get removeMemberConfirm => 'Are you sure you want to remove this member?';
+
+  @override
+  String get removeMemberSuccess => 'Member removed successfully';
+
+  @override
+  String get removeMemberFailed => 'Failed to remove member';
+
+  @override
+  String get owner => 'Owner';
+
+  @override
+  String get storyReplyNotifications => 'Story Reply Notifications';
+
+  @override
+  String get storyReplyNotificationsDesc => 'Receive notifications when someone replies to your story';
+
+  @override
+  String get notificationSound => 'Notification Sound';
+
+  @override
+  String get notificationSoundDesc => 'Choose the sound for your notifications';
+
+  @override
+  String get vibration => 'Vibration';
+
+  @override
+  String get vibrationDesc => 'Enable or disable vibration for notifications';
+
+  @override
+  String get messagePreview => 'Message Preview';
+
+  @override
+  String get messagePreviewDesc => 'Show a preview of the notification';
+
+  @override
+  String get inAppSound => 'In-App Sound';
+
+  @override
+  String get inAppSoundDesc => 'Play sound for incoming messages';
+
+  @override
+  String get noStoryFound => 'No story found';
+
+  @override
+  String get goBack => 'Go Back';
+
+  @override
+  String get paused => 'Paused';
+
+  @override
+  String get play => 'Play';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String get like => 'Like';
+
+  @override
+  String get unlike => 'Unlike';
+
+  @override
+  String get viewed => 'Viewed';
+
+  @override
+  String get viewers => 'Viewers';
+
+  @override
+  String get viewersSheetTitle => 'Viewers';
+
+  @override
+  String get viewersSheetDescription => 'Viewers of this story';
+
+  @override
+  String get tapToSeeWhoViewed => 'Tap to see who viewed your story';
+
+  @override
+  String get replyToStory => 'Reply to story...';
+
+  @override
+  String get voiceMessage => 'Voice Message';
+
+  @override
+  String get slideToCancel => 'Slide to cancel';
+
+  @override
+  String get releaseToCancel => 'Release to cancel';
+
+  @override
+  String get deleteMessage => 'Delete Message';
+
+  @override
+  String get deleteMessageConfirm => 'Are you sure you want to delete this message?';
+
+  @override
+  String get deleteMessageSuccess => 'Message deleted successfully';
+
+  @override
+  String get deleteMessageFailed => 'Failed to delete message';
+
+  @override
+  String get pinchToZoomTapToClose => 'Pinch to zoom  ·  Tap to close';
+
+  @override
+  String get chatInfo => 'Chat Info';
+
+  @override
+  String get minute => 'minute';
+
+  @override
+  String get hour => 'hour';
+
+  @override
+  String get day => 'day';
+
+  @override
+  String get ago => 'ago';
+
+  @override
+  String get justNow => 'just now';
+
+  @override
+  String get noViewsYet => 'No views yet';
+
+  @override
+  String addCount(Object count) {
+    return 'Add ($count)';
+  }
+
+  @override
+  String createCount(Object count) {
+    return 'Create ($count)';
+  }
+
+  @override
+  String get leaveGroup => 'Leave Group';
+
+  @override
+  String get leaveGroupConfirm => 'Are you sure you want to leave this group?';
+
+  @override
+  String get leaveGroupOwnerConfirm => 'You are the owner. Ownership will be transferred to the next member when you leave.';
+
+  @override
+  String get leaveAndTransfer => 'Leave & Transfer Ownership';
+
+  @override
+  String get createAGroupWithThisUser => 'Create a group with this user';
+
+  @override
+  String get commonGroups => 'Common Groups';
+
+  @override
+  String get emailOrPasswordIncorrect => 'Email or password incorrect';
+
+  @override
+  String get thisOperationFailed => 'This operation failed.';
 }

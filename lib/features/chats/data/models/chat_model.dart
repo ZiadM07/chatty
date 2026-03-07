@@ -1,24 +1,20 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/utils/enums.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/utils/enums.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatModel extends Equatable {
   final String id;
   final ChatType type;
   final List<String> memberIds;
-
-  // Group only
+  final Map<String, String> memberNames;
   final String? groupName;
   final String? groupPhotoUrl;
   final String? groupCreatedBy;
-
-  // Last message preview
+  final String? groupDescription;
   final String? lastMessage;
   final MessageType? lastMessageType;
   final String? lastMessageSenderId;
   final DateTime? lastMessageAt;
-
-  // uid → unread count
   final Map<String, int> unreadCounts;
   final DateTime createdAt;
 
@@ -26,9 +22,11 @@ class ChatModel extends Equatable {
     required this.id,
     required this.type,
     required this.memberIds,
+    this.memberNames = const {},
     this.groupName,
     this.groupPhotoUrl,
     this.groupCreatedBy,
+    this.groupDescription,
     this.lastMessage,
     this.lastMessageType,
     this.lastMessageSenderId,
@@ -45,9 +43,11 @@ class ChatModel extends Equatable {
         orElse: () => ChatType.oneToOne,
       ),
       memberIds: List<String>.from(data['memberIds'] as List? ?? []),
+      memberNames: Map<String, String>.from(data['memberNames'] as Map? ?? {}),
       groupName: data['groupName'] as String?,
       groupPhotoUrl: data['groupPhotoUrl'] as String?,
       groupCreatedBy: data['groupCreatedBy'] as String?,
+      groupDescription: data['groupDescription'] as String?,
       lastMessage: data['lastMessage'] as String?,
       lastMessageType: data['lastMessageType'] != null
           ? MessageType.values.firstWhere(
@@ -65,9 +65,11 @@ class ChatModel extends Equatable {
   Map<String, dynamic> toFirestore() => {
     'type': type.name,
     'memberIds': memberIds,
+    'memberNames': memberNames,
     'groupName': groupName,
     'groupPhotoUrl': groupPhotoUrl,
     'groupCreatedBy': groupCreatedBy,
+    'groupDescription': groupDescription,
     'lastMessage': lastMessage,
     'lastMessageType': lastMessageType?.name,
     'lastMessageSenderId': lastMessageSenderId,
@@ -82,9 +84,11 @@ class ChatModel extends Equatable {
     String? id,
     ChatType? type,
     List<String>? memberIds,
+    Map<String, String>? memberNames,
     String? groupName,
     String? groupPhotoUrl,
     String? groupCreatedBy,
+    String? groupDescription,
     String? lastMessage,
     MessageType? lastMessageType,
     String? lastMessageSenderId,
@@ -95,9 +99,11 @@ class ChatModel extends Equatable {
     id: id ?? this.id,
     type: type ?? this.type,
     memberIds: memberIds ?? this.memberIds,
+    memberNames: memberNames ?? this.memberNames,
     groupName: groupName ?? this.groupName,
     groupPhotoUrl: groupPhotoUrl ?? this.groupPhotoUrl,
     groupCreatedBy: groupCreatedBy ?? this.groupCreatedBy,
+    groupDescription: groupDescription ?? this.groupDescription,
     lastMessage: lastMessage ?? this.lastMessage,
     lastMessageType: lastMessageType ?? this.lastMessageType,
     lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
@@ -110,6 +116,7 @@ class ChatModel extends Equatable {
   bool get isOneToOne => type == ChatType.oneToOne;
   String otherMemberId(String uid) =>
       memberIds.firstWhere((id) => id != uid, orElse: () => '');
+  String nameFor(String uid) => memberNames[uid] ?? uid;
   int unreadCountFor(String uid) => unreadCounts[uid] ?? 0;
 
   @override
@@ -117,9 +124,11 @@ class ChatModel extends Equatable {
     id,
     type,
     memberIds,
+    memberNames,
     groupName,
     groupPhotoUrl,
     groupCreatedBy,
+    groupDescription,
     lastMessage,
     lastMessageType,
     lastMessageSenderId,

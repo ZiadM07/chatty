@@ -1,14 +1,12 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/utils/enums.dart';
-import 'package:chatty/features/chats/data/data_source/chat_data_source.dart';
-import 'package:chatty/features/chats/data/models/message_model.dart';
-import 'package:chatty/features/chats/data/repositories/chat_repository.dart';
-
-// ─── State ────────────────────────────────────────────────────────────────────
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/framework/failure.dart';
+import 'package:Chatty/core/utils/enums.dart';
+import 'package:Chatty/features/chats/data/models/message_model.dart';
+import 'package:Chatty/features/chats/data/repositories/chat_repository.dart';
 
 class ChatMediaState extends Equatable {
   final AppState<List<MessageModel>> mediaState;
-  final MessageType? selectedType; // null = all media
+  final MessageType? selectedType;
   final bool hasMore;
   final String? lastMessageId;
   final int count;
@@ -48,15 +46,11 @@ class ChatMediaState extends Equatable {
   ];
 }
 
-// ─── Cubit ────────────────────────────────────────────────────────────────────
-
 @injectable
 class ChatMediaCubit extends Cubit<ChatMediaState> {
   final ChatRepository _repository;
 
   ChatMediaCubit(this._repository) : super(const ChatMediaState());
-
-  // ─── Load Media ───────────────────────────────────────────────────────────
 
   Future<void> loadMedia({required String chatId, MessageType? type}) async {
     emit(
@@ -81,7 +75,7 @@ class ChatMediaCubit extends Cubit<ChatMediaState> {
           lastMessageId: messages.isEmpty ? null : messages.last.id,
         ),
       );
-    } on ChatException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           mediaState: AppState(status: StateStatus.error, message: e.message),
@@ -98,8 +92,6 @@ class ChatMediaCubit extends Cubit<ChatMediaState> {
       );
     }
   }
-
-  // ─── Load More ────────────────────────────────────────────────────────────
 
   Future<void> loadMore({required String chatId}) async {
     if (!state.hasMore || state.mediaState.isLoading) return;
@@ -123,9 +115,7 @@ class ChatMediaCubit extends Cubit<ChatMediaState> {
               : newMessages.last.id,
         ),
       );
-    } catch (_) {
-      // Silent fail on pagination - keep existing data
-    }
+    } catch (_) {}
   }
 
   Future<void> changeType({

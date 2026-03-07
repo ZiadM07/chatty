@@ -21,6 +21,15 @@ class PickFile {
     return null;
   }
 
+  static Future<File?> camera({ImageSource? source}) async {
+    final media = await picker.pickImage(
+      source: source ?? ImageSource.camera,
+      imageQuality: 50,
+    );
+    if (media != null) return File(media.path);
+    return null;
+  }
+
   static Future<List<File>> multiImage() async {
     final files = await picker.pickMultiImage(imageQuality: 50);
     return files.map((item) => File(item.path)).toList();

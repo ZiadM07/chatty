@@ -1,14 +1,15 @@
-import 'package:chatty/core/framework/pick_file.dart';
-import 'package:chatty/core/utils/enums.dart';
-import 'package:chatty/features/auth/cubits/auth_cubit.dart';
-import 'package:chatty/features/auth/cubits/auth_state.dart';
-import 'package:chatty/features/auth/data/models/user_model.dart';
-import 'package:chatty/features/shared/widgets/app_asset_image.dart';
-import 'package:chatty/features/shared/widgets/app_file_image.dart';
-import 'package:chatty/features/shared/widgets/app_gradient_button.dart';
-import 'package:chatty/features/shared/widgets/app_image.dart';
-import 'package:chatty/features/shared/widgets/app_text_form_field.dart';
-import 'package:chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/core/framework/pick_file.dart';
+import 'package:Chatty/core/utils/enums.dart';
+import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
+import 'package:Chatty/features/auth/cubits/auth_state.dart';
+import 'package:Chatty/features/auth/data/models/user_model.dart';
+import 'package:Chatty/features/shared/widgets/app_asset_image.dart';
+import 'package:Chatty/features/shared/widgets/app_file_image.dart';
+import 'package:Chatty/features/shared/widgets/app_gradient_button.dart';
+import 'package:Chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/features/shared/widgets/app_text_form_field.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
+
 import '../../../../core/constants/exports.dart';
 import '../../../shared/widgets/app_toast.dart';
 
@@ -75,7 +76,7 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
   void _onFailure(AuthState state) {
     context.read<AuthCubit>().resetFillProfileState();
     AppToast.showError(
-      message: state.fillProfileState.message ?? context.locale.unexpectedError,
+      message: context.locale.thisOperationFailed,
       context: context,
     );
   }

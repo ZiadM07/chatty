@@ -1,19 +1,17 @@
-import 'package:chatty/features/shared/widgets/app_loading.dart';
+import 'package:Chatty/features/shared/widgets/app_gradient_button.dart';
+import 'package:Chatty/features/shared/widgets/app_loading.dart';
 import '../constants/exports.dart';
 
 class StateHandler extends StatefulWidget {
   final AppState state;
 
-  /// Main UI builder (screen content)
   final Widget Function(BuildContext context, AppState state) builder;
 
-  /// Optional widgets
   final Widget? loadingWidget;
   final Widget? failureWidget;
   final Widget? loadingOverlayWidget;
   final Widget? emptyWidget;
 
-  /// Side-effect callbacks
   final VoidCallback? onSuccess;
   final VoidCallback? onFailure;
   final VoidCallback? onLoading;
@@ -47,10 +45,6 @@ class _StateHandlerState extends State<StateHandler> {
     super.dispose();
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*                               Overlay Logic                                */
-  /* -------------------------------------------------------------------------- */
-
   void _showOverlay() {
     if (_overlayEntry != null) return;
 
@@ -83,10 +77,6 @@ class _StateHandlerState extends State<StateHandler> {
     });
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*                              Side-Effect Hooks                              */
-  /* -------------------------------------------------------------------------- */
-
   void _handleCallbacks() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -112,23 +102,16 @@ class _StateHandlerState extends State<StateHandler> {
     });
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*                                   Build                                    */
-  /* -------------------------------------------------------------------------- */
-
   @override
   Widget build(BuildContext context) {
     _handleOverlay();
     _handleCallbacks();
 
     switch (widget.state.status) {
-      /* --------------------------- RENDER MAIN UI --------------------------- */
       case StateStatus.initial:
       case StateStatus.success:
       case StateStatus.loadingOverlay:
         return widget.builder(context, widget.state);
-
-      /* ------------------------- FULL SCREEN LOADING ------------------------ */
       case StateStatus.loading:
         return widget.loadingWidget ??
             AppScaffold(
@@ -137,29 +120,28 @@ class _StateHandlerState extends State<StateHandler> {
               body: Center(child: Loading.loader(context)),
             );
 
-      /* ------------------------------ FAILURE ------------------------------- */
       case StateStatus.error:
         return widget.failureWidget ??
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    widget.state.message ?? 'Something went wrong',
-                    textAlign: TextAlign.center,
+                  AppText(
+                    widget.state.message ?? context.locale.unexpectedError,
+                    align: TextAlign.center,
                   ),
                   if (widget.onRetry != null) ...[
                     const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: widget.onRetry,
-                      child: const Text('Retry'),
+                    AppButton(
+                      onTap: widget.onRetry!,
+                      text: context.locale.retry,
+                      type: AppButtonType.gradient,
                     ),
                   ],
                 ],
               ),
             );
 
-      /* ------------------------------- EMPTY -------------------------------- */
       case StateStatus.none:
         return widget.emptyWidget ?? const SizedBox.shrink();
     }

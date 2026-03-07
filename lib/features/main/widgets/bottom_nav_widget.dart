@@ -1,5 +1,5 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/main/widgets/nav_item.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/main/widgets/nav_item.dart';
 
 class BottomNavWidget extends StatelessWidget {
   final ValueChanged onChanged;

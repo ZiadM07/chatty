@@ -23,24 +23,26 @@ import '../../features/auth/cubits/auth_cubit.dart' as _i554;
 import '../../features/auth/data/data_sources/auth_data_source.dart' as _i933;
 import '../../features/auth/data/repositories/auth_repositories.dart' as _i613;
 import '../../features/chats/cubits/chat_cubit.dart' as _i1008;
+import '../../features/chats/cubits/chat_info_cubit.dart' as _i239;
+import '../../features/chats/cubits/chat_media_cubit.dart' as _i180;
 import '../../features/chats/cubits/conversations_cubit.dart' as _i1021;
-import '../../features/chats/cubits/chat_media_cubit.dart' as _i938;
 import '../../features/chats/data/data_source/chat_data_source.dart' as _i206;
 import '../../features/chats/data/repositories/chat_repository.dart' as _i737;
+import '../../features/profile/cubits/notifications_cubit.dart' as _i769;
 import '../../features/profile/cubits/profile_cubit.dart' as _i877;
 import '../../features/profile/data/data_source/profile_data_source.dart'
     as _i519;
 import '../../features/profile/data/repositories/profile_repositories.dart'
     as _i996;
 import '../../features/shared/cubits/app_cubit.dart' as _i564;
-import '../../features/shared/data/storage_data_source.dart' as _i543;
+import '../../features/shared/data/data_sources/storage_data_source.dart'
+    as _i120;
 import '../../features/stories/cubits/stories_cubit.dart' as _i149;
 import '../../features/stories/cubits/story_viewer_cubit.dart' as _i24;
 import '../../features/stories/data/data_sources/story_data_source.dart'
     as _i422;
 import '../../features/stories/data/repositories/story_repository.dart'
     as _i621;
-import '../../features/users/cubits/user_info_cubit.dart' as _i847;
 import '../../features/users/cubits/users_cubit.dart' as _i921;
 import '../../features/users/data/data_sources/users_data_source.dart' as _i295;
 import '../../features/users/data/repositories/users_repository.dart' as _i190;
@@ -48,7 +50,9 @@ import '../constants/exports.dart' as _i600;
 import '../framework/api_executor.dart' as _i142;
 import '../framework/audio_service.dart' as _i946;
 import '../framework/firestore_offline_helper.dart' as _i279;
+import '../framework/in_app_sound_service.dart' as _i967;
 import '../framework/network.dart' as _i159;
+import '../framework/notification_service.dart' as _i39;
 import '../framework/permissions.dart' as _i349;
 import '../framework/storage_service.dart' as _i942;
 import 'injectable.dart' as _i1027;
@@ -76,21 +80,19 @@ extension GetItInjectableX on _i174.GetIt {
       () => injectionModule.providePrefs(),
       preResolve: true,
     );
-    gh.singleton<_i946.AudioService>(() => _i946.AudioService());
+    gh.singleton<_i600.GlobalKey<_i600.NavigatorState>>(
+      () => injectionModule.navigatorKey,
+    );
+    gh.singleton<_i967.InAppSoundService>(() => _i967.InAppSoundService());
     gh.lazySingleton<_i59.FirebaseAuth>(() => injectionModule.firebaseAuth);
     gh.lazySingleton<_i974.FirebaseFirestore>(() => injectionModule.firestore);
     gh.lazySingleton<_i454.SupabaseClient>(() => injectionModule.client);
+    gh.lazySingleton<_i946.AudioService>(() => _i946.AudioService());
     gh.singleton<_i942.StorageService>(
       () => injectionModule.storageService(gh<_i600.SharedPreferences>()),
     );
-    gh.singleton<_i600.AppPreferences>(
-      () => injectionModule.appPreferences(gh<_i942.StorageService>()),
-    );
-    gh.singleton<_i564.AppCubit>(
-      () => _i564.AppCubit(gh<_i600.AppPreferences>()),
-    );
-    gh.lazySingleton<_i543.StorageDataSource>(
-      () => _i543.SupabaseStorageDataSourceImpl(gh<_i454.SupabaseClient>()),
+    gh.lazySingleton<_i120.StorageDataSource>(
+      () => _i120.SupabaseStorageDataSourceImpl(gh<_i454.SupabaseClient>()),
     );
     gh.lazySingleton<_i933.AuthDataSource>(
       () => _i933.AuthDataSourceImpl(
@@ -98,85 +100,110 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
-    gh.singleton<_i600.AppRouter>(
-      () => injectionModule.router(gh<_i600.AppPreferences>()),
-    );
-    gh.lazySingleton<_i349.Permissions>(
-      () => _i349.PermissionsInfo(location: gh<_i645.Location>()),
-    );
-    gh.lazySingleton<_i295.UsersDataSource>(
-      () => _i295.UsersDataSourceImpl(gh<_i974.FirebaseFirestore>()),
-    );
-    gh.factory<_i159.NetworkInfo>(
-      () => _i159.NetworkInfoImpl(gh<_i161.InternetConnection>()),
-    );
     gh.lazySingleton<_i206.ChatDataSource>(
       () => _i206.ChatDataSourceImpl(gh<_i974.FirebaseFirestore>()),
-    );
-    gh.lazySingleton<_i422.StoryDataSource>(
-      () => _i422.StoryDataSourceImpl(gh<_i974.FirebaseFirestore>()),
-    );
-    gh.lazySingleton<_i519.ProfileDataSource>(
-      () => _i519.ProfileDataSourceImpl(gh<_i974.FirebaseFirestore>()),
-    );
-    gh.lazySingleton<_i142.ApiExecutor>(
-      () => _i142.ApiExecutorImpl(gh<_i159.NetworkInfo>()),
-    );
-    gh.lazySingleton<_i279.FirestoreOfflineHelper>(
-      () => _i279.FirestoreOfflineHelper(gh<_i159.NetworkInfo>()),
-    );
-    gh.lazySingleton<_i190.UsersRepository>(
-      () => _i190.UsersRepository(gh<_i295.UsersDataSource>()),
     );
     gh.lazySingleton<_i613.AuthRepository>(
       () => _i613.AuthRepository(
         gh<_i933.AuthDataSource>(),
-        gh<_i543.StorageDataSource>(),
+        gh<_i120.StorageDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i422.StoryDataSource>(
+      () => _i422.StoryDataSourceImpl(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i737.ChatRepository>(
+      () => _i737.ChatRepository(
+        gh<_i206.ChatDataSource>(),
+        gh<_i120.StorageDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i349.Permissions>(
+      () => _i349.PermissionsInfo(location: gh<_i645.Location>()),
+    );
+    gh.factory<_i180.ChatMediaCubit>(
+      () => _i180.ChatMediaCubit(gh<_i737.ChatRepository>()),
+    );
+    gh.lazySingleton<_i519.ProfileDataSource>(
+      () => _i519.ProfileDataSourceImpl(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.factory<_i159.NetworkInfo>(
+      () => _i159.NetworkInfoImpl(gh<_i161.InternetConnection>()),
+    );
+    gh.lazySingleton<_i295.UsersDataSource>(
+      () => _i295.UsersDataSourceImpl(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i142.ApiExecutor>(
+      () => _i142.ApiExecutorImpl(gh<_i159.NetworkInfo>()),
+    );
+    gh.singleton<_i600.AppPreferences>(
+      () => injectionModule.appPreferences(gh<_i942.StorageService>()),
+    );
+    gh.singleton<_i600.AppRouter>(
+      () => injectionModule.router(gh<_i600.AppPreferences>()),
+    );
+    gh.singleton<_i39.NotificationService>(
+      () => _i39.NotificationService(gh<_i600.AppPreferences>()),
+    );
+    gh.lazySingleton<_i996.ProfileRepository>(
+      () => _i996.ProfileRepository(
+        gh<_i519.ProfileDataSource>(),
+        gh<_i120.StorageDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i279.FirestoreOfflineHelper>(
+      () => _i279.FirestoreOfflineHelper(gh<_i159.NetworkInfo>()),
+    );
+    gh.lazySingleton<_i554.AuthCubit>(
+      () => _i554.AuthCubit(
+        gh<_i613.AuthRepository>(),
+        gh<_i39.NotificationService>(),
+      ),
+    );
+    gh.factory<_i1008.ChatCubit>(
+      () => _i1008.ChatCubit(
+        gh<_i737.ChatRepository>(),
+        gh<_i39.NotificationService>(),
+      ),
+    );
+    gh.singleton<_i564.AppCubit>(
+      () => _i564.AppCubit(gh<_i600.AppPreferences>()),
+    );
+    gh.lazySingleton<_i190.UsersRepository>(
+      () => _i190.UsersRepository(gh<_i295.UsersDataSource>()),
+    );
+    gh.factory<_i877.ProfileCubit>(
+      () => _i877.ProfileCubit(gh<_i996.ProfileRepository>()),
+    );
+    gh.singleton<_i769.NotificationsCubit>(
+      () => _i769.NotificationsCubit(
+        gh<_i600.AppPreferences>(),
+        gh<_i39.NotificationService>(),
       ),
     );
     gh.factory<_i921.UsersCubit>(
       () => _i921.UsersCubit(gh<_i190.UsersRepository>()),
     );
-    gh.lazySingleton<_i996.ProfileRepository>(
-      () => _i996.ProfileRepository(
-        gh<_i519.ProfileDataSource>(),
-        gh<_i543.StorageDataSource>(),
-      ),
-    );
-    gh.lazySingleton<_i737.ChatRepository>(
-      () => _i737.ChatRepository(
-        gh<_i206.ChatDataSource>(),
-        gh<_i543.StorageDataSource>(),
-      ),
-    );
-    gh.factory<_i847.UserInfoCubit>(
-      () => _i847.UserInfoCubit(
-        gh<_i190.UsersRepository>(),
-        gh<_i737.ChatRepository>(),
-      ),
-    );
-    gh.lazySingleton<_i554.AuthCubit>(
-      () => _i554.AuthCubit(gh<_i613.AuthRepository>()),
-    );
-    gh.factory<_i877.ProfileCubit>(
-      () => _i877.ProfileCubit(gh<_i996.ProfileRepository>()),
-    );
     gh.lazySingleton<_i621.StoryRepository>(
       () => _i621.StoryRepository(
         gh<_i422.StoryDataSource>(),
-        gh<_i543.StorageDataSource>(),
+        gh<_i120.StorageDataSource>(),
         gh<_i190.UsersRepository>(),
         gh<_i737.ChatRepository>(),
       ),
     );
-    gh.factory<_i1008.ChatCubit>(
-      () => _i1008.ChatCubit(gh<_i737.ChatRepository>()),
+    gh.factory<_i239.ChatInfoCubit>(
+      () => _i239.ChatInfoCubit(
+        gh<_i190.UsersRepository>(),
+        gh<_i737.ChatRepository>(),
+        gh<_i600.AppPreferences>(),
+      ),
     );
     gh.factory<_i1021.ConversationsCubit>(
-      () => _i1021.ConversationsCubit(gh<_i737.ChatRepository>()),
-    );
-    gh.factory<_i938.ChatMediaCubit>(
-      () => _i938.ChatMediaCubit(gh<_i737.ChatRepository>()),
+      () => _i1021.ConversationsCubit(
+        gh<_i737.ChatRepository>(),
+        gh<_i190.UsersRepository>(),
+      ),
     );
     gh.factory<_i149.StoriesCubit>(
       () => _i149.StoriesCubit(gh<_i621.StoryRepository>()),

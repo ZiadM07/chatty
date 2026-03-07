@@ -1,7 +1,7 @@
-import 'package:chatty/config/router/app_router.gr.dart';
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/profile/ui/widgets/settings_tile.dart';
-import 'package:chatty/features/shared/cubits/app_cubit.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/profile/ui/widgets/settings_tile.dart';
+import 'package:Chatty/features/shared/cubits/app_cubit.dart';
 
 @RoutePage()
 class ChatsSettingsScreen extends StatelessWidget {

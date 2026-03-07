@@ -1,7 +1,14 @@
-import 'package:chatty/core/constants/exports.dart';
+import 'package:Chatty/core/constants/exports.dart';
 
 class NotificationsSection extends StatelessWidget {
-  const NotificationsSection({super.key});
+  final bool isMuted;
+  final VoidCallback onToggleMute;
+
+  const NotificationsSection({
+    super.key,
+    required this.isMuted,
+    required this.onToggleMute,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +28,7 @@ class NotificationsSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
-            SolarIconsBold.bell,
+            isMuted ? SolarIconsOutline.bellOff : SolarIconsBold.bell,
             size: 25,
             color: context.colorScheme.onPrimary,
           ),
@@ -29,7 +36,6 @@ class NotificationsSection extends StatelessWidget {
         const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
             AppText(
               context.locale.muteNotifications,
@@ -38,7 +44,9 @@ class NotificationsSection extends StatelessWidget {
               ),
             ),
             AppText(
-              context.locale.silenceAlerts,
+              isMuted
+                  ? context.locale.notificationsMuted
+                  : context.locale.silenceAlerts,
               style: context.textTheme.bodySmall?.copyWith(
                 color: context.colorScheme.textSecondary,
                 fontWeight: FontWeight.w400,
@@ -47,7 +55,7 @@ class NotificationsSection extends StatelessWidget {
           ],
         ),
         const Spacer(),
-        Switch(value: true, onChanged: (value) {}),
+        Switch(value: isMuted, onChanged: (_) => onToggleMute()),
       ],
     ).addPadding(horizontal: 20, vertical: 5);
   }

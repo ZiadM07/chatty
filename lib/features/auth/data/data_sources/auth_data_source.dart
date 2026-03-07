@@ -5,57 +5,39 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class AuthDataSource {
-  /// Returns the current signed-in [AuthModel] or null if not authenticated.
   Future<AuthModel?> getCurrentUser();
 
-  /// Signs up a new user with [email] and [password].
-  /// Returns the created [AuthModel].
   Future<AuthModel> signUpWithEmailAndPassword({
     required String email,
     required String password,
   });
 
-  /// Signs in an existing user with [email] and [password].
-  /// Returns the signed-in [AuthModel].
   Future<AuthModel> signInWithEmailAndPassword({
     required String email,
     required String password,
   });
 
-  /// Signs out the current user.
   Future<void> signOut();
 
-  /// Sends a password reset email to [email].
   Future<void> sendPasswordResetEmail({required String email});
 
-  /// Sends an email verification to the current user.
   Future<void> sendEmailVerification();
 
-  /// Saves or updates the full user profile in Firestore after FillProfile.
   Future<void> saveUserProfile({required UserModel user});
 
-  /// Fetches the [UserModel] from Firestore by [uid].
   Future<UserModel?> getUserProfile({required String uid});
 
-  /// Marks the current user's profile as complete in both
-  /// Firestore and the local [AuthModel].
   Future<void> markProfileComplete({required String uid});
 
-  /// Updates the user's online presence (isOnline + lastSeen) in Firestore.
   Future<void> updateUserPresence({
     required String uid,
     required bool isOnline,
   });
 
-  /// Deletes the current user's account from Firebase Auth and Firestore.
   Future<void> deleteAccount({required String uid});
 
-  /// Stream that emits [AuthModel] whenever auth state changes
-  /// (sign in, sign out, token refresh).
   Stream<AuthModel?> get authStateChanges;
 }
-
-// ─── Implementation ────────────────────────────────────────────────────────
 
 @LazySingleton(as: AuthDataSource)
 class AuthDataSourceImpl implements AuthDataSource {
@@ -64,9 +46,6 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   const AuthDataSourceImpl(this._firebaseAuth, this._firestore);
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
-  /// Converts a Firebase [User] into an [AuthModel].
   AuthModel _mapFirebaseUser(User user, {bool isProfileComplete = false}) {
     return AuthModel(
       uid: user.uid,
@@ -81,7 +60,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     );
   }
 
-  /// Fetches [isProfileComplete] flag from Firestore for [uid].
   Future<bool> _fetchIsProfileComplete(String uid) async {
     try {
       final doc = await _firestore
@@ -121,7 +99,6 @@ class AuthDataSourceImpl implements AuthDataSource {
 
       final user = credential.user!;
 
-      // Send verification email right after signup
       await user.sendEmailVerification();
 
       return _mapFirebaseUser(user, isProfileComplete: false);
@@ -155,7 +132,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     try {
       final uid = _firebaseAuth.currentUser?.uid;
 
-      // Mark user offline before signing out
       if (uid != null) {
         await updateUserPresence(uid: uid, isOnline: false);
       }
@@ -194,7 +170,6 @@ class AuthDataSourceImpl implements AuthDataSource {
           .doc(user.uid)
           .set(user.toFirestore(), SetOptions(merge: true));
 
-      // Also update Firebase Auth display name and photo
       final firebaseUser = _firebaseAuth.currentUser;
       if (firebaseUser != null) {
         await firebaseUser.updateDisplayName(user.fullName);
@@ -252,10 +227,8 @@ class AuthDataSourceImpl implements AuthDataSource {
   @override
   Future<void> deleteAccount({required String uid}) async {
     try {
-      // Delete Firestore data first
       await _firestore.collection(_Collections.users).doc(uid).delete();
 
-      // Then delete the Firebase Auth account
       final user = _firebaseAuth.currentUser;
       if (user != null) await user.delete();
     } on FirebaseAuthException catch (e) {

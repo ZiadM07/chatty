@@ -20,18 +20,12 @@ class AppCubit extends Cubit<AppState> {
 
   static int get randomId => Random().nextInt(999999);
 
-  // ----------------------------
-  // AUTH LISTENER
-  // ----------------------------
   bool get isAuthenticated => _preferences.isAuthenticated;
 
   void refreshAuth() {
     emit(state.copyWith(data: randomId));
   }
 
-  // ----------------------------
-  // LANGUAGE
-  // ----------------------------
   void changeLang(String lang) {
     locale = Locale(lang);
     _preferences.language = lang;
@@ -39,9 +33,6 @@ class AppCubit extends Cubit<AppState> {
     emit(state.copyWith(data: randomId));
   }
 
-  // ----------------------------
-  // THEME
-  // ----------------------------
   void changeThemeMode(int index) {
     _preferences.appThemeMode = getAppThemeModeFromIndex(index);
     appThemeMode = _preferences.appThemeMode;
@@ -55,8 +46,8 @@ class AppCubit extends Cubit<AppState> {
   }
 
   void toggleEnterIsSend(bool value) {
-    enterIsSend = value; // runtime update
-    _preferences.enterIsSend = value; // persist
-    emit(state.copyWith(data: randomId)); // notify UI
+    enterIsSend = value;
+    _preferences.enterIsSend = value;
+    emit(state.copyWith(data: randomId));
   }
 }

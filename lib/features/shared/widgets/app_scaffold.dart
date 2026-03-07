@@ -14,6 +14,7 @@ class AppScaffold extends StatefulWidget {
   final FloatingActionButtonLocation floatingActionButtonLocation;
   final bool resizeToAvoidBottomInset;
   final bool extendBodyBehindAppBar;
+  final bool showAppBar;
   const AppScaffold({
     super.key,
     required this.body,
@@ -29,6 +30,7 @@ class AppScaffold extends StatefulWidget {
         FloatingActionButtonLocation.startDocked,
     this.resizeToAvoidBottomInset = true,
     this.extendBodyBehindAppBar = false,
+    this.showAppBar = true,
   });
 
   @override
@@ -42,50 +44,55 @@ class _AppScaffoldState extends State<AppScaffold> {
       extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
       backgroundColor: widget.backgroundColor,
       resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-      appBar: PreferredSize(
-        preferredSize: Size(double.infinity, widget.appbarSize),
-        child: Container(
-          color: widget.backgroundColor ?? context.colorScheme.surface,
-          alignment: Alignment.center,
-          child: SafeArea(
-            child: Row(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        if (widget.showBackButton)
-                          AppWidgetDirection(
-                            child:
-                                Icon(
-                                  SolarIconsOutline.altArrowLeft,
-                                  size: 26.0,
-                                  color: context.colorScheme.onSurface,
-                                ).addAction(
-                                  padding: AppPadding.set(horizontal: 12.0),
-                                  onBounce:
-                                      widget.onBackPress ??
-                                      () => AutoRouterX(context).maybePop(),
+      appBar: widget.showAppBar
+          ? PreferredSize(
+              preferredSize: Size(double.infinity, widget.appbarSize),
+              child: Container(
+                color: widget.backgroundColor ?? context.colorScheme.surface,
+                alignment: Alignment.center,
+                child: SafeArea(
+                  child: Row(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              if (widget.showBackButton)
+                                AppWidgetDirection(
+                                  child:
+                                      Icon(
+                                        SolarIconsOutline.altArrowLeft,
+                                        size: 26.0,
+                                        color: context.colorScheme.onSurface,
+                                      ).addAction(
+                                        padding: AppPadding.set(
+                                          horizontal: 12.0,
+                                        ),
+                                        onBounce:
+                                            widget.onBackPress ??
+                                            () =>
+                                                AutoRouterX(context).maybePop(),
+                                      ),
                                 ),
+                              AppText(
+                                widget.title ?? "",
+                                style: context.textTheme.titleMedium,
+                              ).addPadding(start: 8.0),
+                            ],
                           ),
-                        AppText(
-                          widget.title ?? "",
-                          style: context.textTheme.titleMedium,
-                        ).addPadding(start: 8.0),
-                      ],
-                    ),
-                    if (widget.action != null) widget.action!,
-                  ],
-                ).addPadding(top: 12.0),
-                if (widget.appbarChild != null)
-                  widget.appbarChild!.addPadding(horizontal: 6.0),
-              ],
-            ),
-          ),
-        ),
-      ),
+                          if (widget.action != null) widget.action!,
+                        ],
+                      ).addPadding(top: 12.0),
+                      if (widget.appbarChild != null)
+                        widget.appbarChild!.addPadding(horizontal: 6.0),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: widget.body,
       floatingActionButton: widget.floatingActionButton,
       floatingActionButtonLocation: widget.floatingActionButtonLocation,

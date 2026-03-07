@@ -31,8 +31,24 @@ class AppMessageText extends StatefulWidget {
 class _AppMessageTextState extends State<AppMessageText> {
   bool _isExpanded = false;
 
+  final List<TapGestureRecognizer> _recognizers = [];
+
+  @override
+  void dispose() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+
     final normalStyle = widget.textStyle ?? const TextStyle(fontSize: 16);
     final emojiStyle =
         widget.emojiStyle ??
@@ -40,9 +56,8 @@ class _AppMessageTextState extends State<AppMessageText> {
     final linkStyle =
         widget.linkStyle ??
         TextStyle(
-          color: widget.isMe ? const Color(0xFF2040F6) : Colors.blue,
-          fontSize: 16,
-          decoration: TextDecoration.underline,
+          color: widget.isMe ? Colors.cyanAccent : Colors.blue,
+          fontSize: 12,
           fontWeight: FontWeight.w500,
         );
 
@@ -52,32 +67,36 @@ class _AppMessageTextState extends State<AppMessageText> {
       emojiStyle,
       linkStyle,
     );
+
     final needsTrimming = _textLength(spans) > widget.trimLength;
     final visibleSpans = needsTrimming && !_isExpanded
         ? _truncateWithEllipsis(spans, widget.trimLength, normalStyle)
-        : spans;
+        : List<TextSpan>.from(spans);
 
-    return RichText(
+    if (needsTrimming) {
+      final toggleRecognizer = TapGestureRecognizer()
+        ..onTap = () => setState(() => _isExpanded = !_isExpanded);
+      _recognizers.add(toggleRecognizer);
+
+      visibleSpans.add(
+        TextSpan(
+          text: _isExpanded
+              ? '  ${widget.lessText}'
+              : ' ... ${widget.moreText}',
+          style: linkStyle.copyWith(
+            decoration: TextDecoration.none,
+            color: Colors.cyan,
+          ),
+          recognizer: toggleRecognizer,
+        ),
+      );
+    }
+
+    return Text.rich(
+      TextSpan(children: visibleSpans),
       textDirection: isArabic(widget.content)
           ? TextDirection.rtl
           : TextDirection.ltr,
-      text: TextSpan(
-        children: [
-          ...visibleSpans,
-          if (needsTrimming)
-            TextSpan(
-              text: _isExpanded
-                  ? "  ${widget.lessText}"
-                  : ' ... ${widget.moreText}',
-              style: linkStyle.copyWith(
-                decoration: TextDecoration.none,
-                color: Colors.cyan,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => setState(() => _isExpanded = !_isExpanded),
-            ),
-        ],
-      ),
     );
   }
 
@@ -100,21 +119,20 @@ class _AppMessageTextState extends State<AppMessageText> {
 
       final url = match.group(0);
       if (url != null) {
-        spans.add(
-          TextSpan(
-            text: url,
-            style: linkStyle,
+        final linkRecognizer = TapGestureRecognizer()
+          ..onTap = () async {
+            final uri = Uri.tryParse(url);
+            if (uri == null) return;
+            try {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } catch (e) {
+              debugPrint('Could not launch $url: $e');
+            }
+          };
+        _recognizers.add(linkRecognizer);
 
-            recognizer: TapGestureRecognizer()
-              ..onTap = () async {
-                final uri = Uri.tryParse(url);
-                if (uri != null && await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                } else {
-                  debugPrint('Could not launch $url');
-                }
-              },
-          ),
+        spans.add(
+          TextSpan(text: url, style: linkStyle, recognizer: linkRecognizer),
         );
       }
 
@@ -178,7 +196,6 @@ class _AppMessageTextState extends State<AppMessageText> {
             style: span.style ?? fallbackStyle,
           ),
         );
-        // Add ellipsis as separate span to ensure it shows
         result.add(
           TextSpan(
             text: '...',
@@ -193,12 +210,9 @@ class _AppMessageTextState extends State<AppMessageText> {
   }
 
   bool isArabic(String text) {
-    // Arabic Unicode character ranges
     final arabicRegex = RegExp(
       r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]',
     );
-
-    // Check if the string contains Arabic characters
     return arabicRegex.hasMatch(text);
   }
 }

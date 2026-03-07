@@ -1,6 +1,6 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/auth/cubits/auth_cubit.dart';
-import 'package:chatty/features/users/cubits/users_cubit.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
+import 'package:Chatty/features/users/cubits/users_cubit.dart';
 
 class UsersAppBar extends StatefulWidget {
   const UsersAppBar({super.key});
@@ -66,12 +66,9 @@ class _UsersAppBarState extends State<UsersAppBar>
           builder: (context, _) {
             return Row(
               children: [
-                // Title and search field crossfade in the same Expanded slot
                 Expanded(
                   child: Stack(
-                    alignment: Alignment.centerLeft,
                     children: [
-                      // Title — fades out
                       Opacity(
                         opacity: (1 - _expand.value).clamp(0.0, 1.0),
                         child: IgnorePointer(
@@ -83,7 +80,6 @@ class _UsersAppBarState extends State<UsersAppBar>
                         ),
                       ),
 
-                      // Search field — fades + slides in from the right
                       Opacity(
                         opacity: _expand.value.clamp(0.0, 1.0),
                         child: Transform.translate(
@@ -106,7 +102,6 @@ class _UsersAppBarState extends State<UsersAppBar>
 
                 const SizedBox(width: 8),
 
-                // Icon toggles between search and close
                 _AppBarAction(
                   isClose: _showSearch,
                   onTap: _showSearch ? _closeSearch : _openSearch,
@@ -119,8 +114,6 @@ class _UsersAppBarState extends State<UsersAppBar>
     );
   }
 }
-
-// ─── Search Bar ───────────────────────────────────────────────────────────────
 
 class _SearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -172,8 +165,6 @@ class _SearchBar extends StatelessWidget {
     );
   }
 }
-
-// ─── App Bar Action (search / close toggle) ───────────────────────────────────
 
 class _AppBarAction extends StatelessWidget {
   final bool isClose;

@@ -1,4 +1,4 @@
-import 'package:chatty/core/constants/exports.dart';
+import 'package:Chatty/core/constants/exports.dart';
 
 import '../../../shared/cubits/app_cubit.dart';
 

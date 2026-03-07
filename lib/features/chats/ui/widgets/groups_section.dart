@@ -1,5 +1,5 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/shared/widgets/app_image.dart';
 
 class GroupsSection extends StatelessWidget {
   const GroupsSection({super.key});

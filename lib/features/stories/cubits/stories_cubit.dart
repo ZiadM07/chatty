@@ -1,24 +1,17 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:chatty/features/stories/data/data_sources/story_data_source.dart';
-import 'package:chatty/features/stories/data/models/story_item_model.dart';
-import 'package:chatty/features/stories/data/models/story_model.dart';
-import 'package:chatty/features/stories/data/repositories/story_repository.dart';
+import 'package:Chatty/features/stories/data/data_sources/story_data_source.dart';
+import 'package:Chatty/features/stories/data/models/story_item_model.dart';
+import 'package:Chatty/features/stories/data/models/story_model.dart';
+import 'package:Chatty/features/stories/data/repositories/story_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/state/app_state.dart';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-
 class StoriesState extends Equatable {
-  /// Feed stories from contacts — drives the story rings row.
   final AppState<List<StoryModel>> feedState;
-
-  /// Current user's own story items — drives the "My Story" ring.
   final AppState<List<StoryItemModel>> myStoryState;
-
-  /// Upload progress state — drives the loading indicator when posting.
   final AppState<StoryItemModel> uploadState;
 
   const StoriesState({
@@ -41,12 +34,6 @@ class StoriesState extends Equatable {
   List<Object?> get props => [feedState, myStoryState, uploadState];
 }
 
-// ─── Cubit ────────────────────────────────────────────────────────────────────
-//
-//  Lives at the Authenticated shell level — same lifetime as ConversationsCubit.
-//  This means story rings stay updated even when the user is on a different tab.
-// ─────────────────────────────────────────────────────────────────────────────
-
 @injectable
 class StoriesCubit extends Cubit<StoriesState> {
   final StoryRepository _repository;
@@ -56,18 +43,10 @@ class StoriesCubit extends Cubit<StoriesState> {
 
   StoriesCubit(this._repository) : super(const StoriesState());
 
-  // ─── Watch My Story ───────────────────────────────────────────────────────
-  //
-  //  Called once from Authenticated shell with the current user's uid.
-  //  Prunes expired items first, then starts the real-time stream.
-  // ─────────────────────────────────────────────────────────────────────────
-
   Future<void> watchMyStory({required String uid}) async {
     emit(
       state.copyWith(myStoryState: const AppState(status: StateStatus.loading)),
     );
-
-    // Prune expired before watching — keeps UI clean on cold start
     await _repository.deleteExpiredItems(uid: uid).catchError((_) {});
 
     _myStorySub?.cancel();
@@ -89,13 +68,6 @@ class StoriesCubit extends Cubit<StoriesState> {
           ),
         );
   }
-
-  // ─── Watch Feed Stories ───────────────────────────────────────────────────
-  //
-  //  [contactUids] = all uids the current user has chats with.
-  //  Pass this from ConversationsCubit's chat list for a natural "people
-  //  you talk to" feed — no separate social graph needed.
-  // ─────────────────────────────────────────────────────────────────────────
 
   void watchFeedStories({
     required String uid,
@@ -119,7 +91,6 @@ class StoriesCubit extends Cubit<StoriesState> {
         .watchFeedStories(uid: uid, contactUids: contactUids)
         .listen(
           (stories) {
-            // Sort: unseen first → seen last, then by recency within each group
             final unseen =
                 stories.where((s) => !s.isFullyViewedBy(uid)).toList()
                   ..sort((a, b) => b.lastUpdatedAt.compareTo(a.lastUpdatedAt));
@@ -146,8 +117,6 @@ class StoriesCubit extends Cubit<StoriesState> {
           ),
         );
   }
-
-  // ─── Post Image Story ─────────────────────────────────────────────────────
 
   Future<void> addImageStory({
     required String uid,
@@ -187,8 +156,6 @@ class StoriesCubit extends Cubit<StoriesState> {
       );
     }
   }
-
-  // ─── Post Video Story ─────────────────────────────────────────────────────
 
   Future<void> addVideoStory({
     required String uid,
@@ -231,8 +198,6 @@ class StoriesCubit extends Cubit<StoriesState> {
     }
   }
 
-  // ─── Post Text Story ──────────────────────────────────────────────────────
-
   Future<void> addTextStory({
     required String uid,
     required String text,
@@ -272,8 +237,6 @@ class StoriesCubit extends Cubit<StoriesState> {
     }
   }
 
-  // ─── Delete Item ──────────────────────────────────────────────────────────
-
   Future<void> deleteStoryItem({
     required String uid,
     required StoryItemModel item,
@@ -289,8 +252,6 @@ class StoriesCubit extends Cubit<StoriesState> {
     }
   }
 
-  // ─── Clear My Story ───────────────────────────────────────────────────────
-
   Future<void> clearMyStory({required String uid}) async {
     final items = state.myStoryState.data ?? [];
     try {
@@ -303,8 +264,6 @@ class StoriesCubit extends Cubit<StoriesState> {
       );
     }
   }
-
-  // ─── Reset upload state ───────────────────────────────────────────────────
 
   void resetUploadState() =>
       emit(state.copyWith(uploadState: const AppState()));

@@ -1,7 +1,8 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/chats/cubits/conversations_cubit.dart';
-import 'package:chatty/features/stories/cubits/stories_cubit.dart';
-import 'package:chatty/features/users/cubits/users_cubit.dart';
+import 'package:Chatty/core/constants/exports.dart' hide TestRoute;
+import 'package:Chatty/features/chats/cubits/conversations_cubit.dart';
+import 'package:Chatty/features/stories/cubits/stories_cubit.dart';
+import 'package:Chatty/features/users/cubits/users_cubit.dart';
+import '../../core/constants/exports.dart';
 import '../../core/di/injectable.dart';
 import '../../features/auth/cubits/auth_cubit.dart';
 import '../../features/profile/cubits/profile_cubit.dart';
@@ -15,129 +16,124 @@ class AppRouter extends RootStackRouter {
 
   @override
   List<AutoRoute> get routes => [
-    // ── Startup: decides which shell to land on ─────────────────────────
     CustomRoute(
-      page: StartupRedirectRoute.page,
+      page: SplashRoute.page,
       initial: true,
       transitionsBuilder: TransitionsBuilders.fadeIn,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 220),
     ),
 
-    // ── Unauthenticated shell ───────────────────────────────────────────
     CustomRoute(
       page: UnauthenticatedRoutes.page,
       transitionsBuilder: TransitionsBuilders.fadeIn,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 220),
       children: [
         CustomRoute(
           page: WelcomeRoute.page,
           initial: true,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: LoginRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: SignupRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: FillProfileRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
       ],
     ),
 
-    // ── Authenticated shell ─────────────────────────────────────────────
     CustomRoute(
       page: AuthenticatedRoutes.page,
       transitionsBuilder: TransitionsBuilders.fadeIn,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 220),
       children: [
         CustomRoute(
           page: MainRoute.page,
           initial: true,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
           children: [
             CustomRoute(
               page: ConversationsRoute.page,
               transitionsBuilder: TransitionsBuilders.fadeIn,
-              duration: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 220),
             ),
             CustomRoute(
               page: UsersRoute.page,
               transitionsBuilder: TransitionsBuilders.fadeIn,
-              duration: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 220),
             ),
             CustomRoute(
               page: ProfileRoute.page,
               transitionsBuilder: TransitionsBuilders.fadeIn,
-              duration: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 220),
             ),
           ],
         ),
         CustomRoute(
           page: ChatRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
-          page: UserInfoRoute.page,
+          page: ChatInfoRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: ChatsSettingsRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: LanguageSettingsRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: NotificationSettingsRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: ProfileSettingsRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: AddStoryRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: StoryViewerRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: ChatMediaRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
           page: ChatWallpaperRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 220),
         ),
       ],
     ),
   ];
 }
-
-// ─── Shell wrappers ───────────────────────────────────────────────────────────
 
 @RoutePage(name: 'UnauthenticatedRoutes')
 class Unauthenticated extends AutoRouter {
@@ -154,31 +150,15 @@ class Authenticated extends AutoRouter implements AutoRouteWrapper {
 
     return MultiBlocProvider(
       providers: [
-        // ── Profile ────────────────────────────────────────────────────────
-        // Loaded once, shared across all authenticated screens.
         BlocProvider(
           create: (_) => getIt<ProfileCubit>()..loadProfile(uid: uid),
         ),
-
-        // ── Conversations ──────────────────────────────────────────────────
-        // Persistent real-time stream of all chats.
-        // Lives here so the unread badge on the tab bar always stays updated
-        // even when the user is on a different tab.
         BlocProvider(
           create: (_) => getIt<ConversationsCubit>()..watchChats(uid: uid),
         ),
-
-        // ── Users ──────────────────────────────────────────────────────────
-        // First page loaded here so the users tab is instant on first visit.
         BlocProvider(
           create: (_) => getIt<UsersCubit>()..loadUsers(currentUid: uid),
         ),
-
-        // ── Stories ────────────────────────────────────────────────────────
-        // My story + feed stories streamed here so the rings row and
-        // "My Story" avatar stay live on any tab.
-        // Feed contacts are seeded from the chats list via ConversationsCubit
-        // in the conversations screen once chats are loaded.
         BlocProvider(
           create: (_) => getIt<StoriesCubit>()..watchMyStory(uid: uid),
         ),

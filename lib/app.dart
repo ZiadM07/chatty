@@ -1,4 +1,4 @@
-import 'package:chatty/route_observer.dart';
+import 'package:Chatty/route_observer.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/constants/exports.dart';
@@ -37,6 +37,23 @@ class _ChattyAppState extends State<ChattyApp> with WidgetsBindingObserver {
   void didChangePlatformBrightness() {
     _appCubit.applyPlatformThemeMode();
     super.didChangePlatformBrightness();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _authCubit.setOnline();
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        _authCubit.setOffline();
+        break;
+      case AppLifecycleState.inactive:
+        break;
+    }
   }
 
   @override

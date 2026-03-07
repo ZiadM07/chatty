@@ -131,7 +131,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get myUsers => 'المستخدمين';
 
   @override
-  String get conversations => 'conversations';
+  String get conversations => 'المحادثات';
 
   @override
   String get addStory => 'إضافة قصة';
@@ -210,12 +210,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get editMessage => 'تعديل الرسالة';
-
-  @override
-  String get deleteMessage => 'حذف الرسالة';
-
-  @override
-  String get deleteMessageConfirm => 'حذف هذه الرسالة لك فقط؟';
 
   @override
   String get deleteForEveryone => 'حذف للجميع';
@@ -339,12 +333,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get removeFromGroup => 'إزالة من المجموعة';
-
-  @override
-  String get leaveGroup => 'مغادرة المجموعة';
-
-  @override
-  String get leaveGroupConfirm => 'هل أنت متأكد أنك تريد مغادرة المجموعة؟';
 
   @override
   String get groupInfo => 'معلومات المجموعة';
@@ -831,7 +819,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addMembers => 'إضافة أعضاء';
 
   @override
-  String get step2Of2 => 'الخطوة 2 من 2 • حدد أعضاء الفريق';
+  String get step2Of2 => 'الخطوة 2 من 2 • حدد أعضاء المجموعة';
 
   @override
   String get searchByNameOrEmail => 'ابحث بالاسم أو البريد الإلكتروني...';
@@ -1061,22 +1049,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationPreferences => 'إعدادات الإشعارات';
 
   @override
-  String get vibration => 'الاهتزاز';
-
-  @override
-  String get vibrationDesc => 'اهتزاز عند وصول إشعار';
-
-  @override
   String get showPreview => 'عرض محتوى الرسالة';
 
   @override
   String get showPreviewDesc => 'إظهار نص الرسالة داخل الإشعار';
-
-  @override
-  String get notificationSound => 'صوت الإشعار';
-
-  @override
-  String get notificationSoundDesc => 'تشغيل صوت للإشعارات';
 
   @override
   String get accountInformation => 'معلومات الحساب';
@@ -1322,9 +1298,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get liked => 'أعجبوا';
 
   @override
-  String get viewed => 'تمت المشاهدة';
-
-  @override
   String get noViewersYet => 'لا يوجد مشاهدون بعد';
 
   @override
@@ -1482,4 +1455,230 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noSharedFiles => 'لا توجد ملفات مشتركة';
+
+  @override
+  String get photo => 'الصورة';
+
+  @override
+  String get attachment => 'الإرفاق';
+
+  @override
+  String get am => 'صباحا';
+
+  @override
+  String get pm => 'مساء';
+
+  @override
+  String get storagePermissionDenied => 'تم رفض إذن تخزين';
+
+  @override
+  String get downloadedSuccessfully => 'تم التحميل بنجاح';
+
+  @override
+  String get downloadFailed => 'فشل التحميل';
+
+  @override
+  String get now => 'الآن';
+
+  @override
+  String get minutesAgo => 'دقائق مضت';
+
+  @override
+  String get hoursAgo => 'ساعات مضت';
+
+  @override
+  String get daysAgo => 'أيام مضت';
+
+  @override
+  String get notificationsMuted => 'تم إغلاق الإشعارات';
+
+  @override
+  String get videoPlayer => 'مشغل الفيديو';
+
+  @override
+  String get videoPlayerComingSoon => 'مشغل الفيديو قريبا';
+
+  @override
+  String get permissionDenied => 'تم رفض إذن';
+
+  @override
+  String get createdAt => 'أنشئ في';
+
+  @override
+  String get group => 'مجموعة';
+
+  @override
+  String get editGroupName => 'تعديل اسم المجموعة';
+
+  @override
+  String get editGroupDescription => 'تعديل وصف المجموعة';
+
+  @override
+  String get addGroupDescription => 'إضافة وصف للمجموعة';
+
+  @override
+  String get editGroupPicture => 'تعديل صورة المجموعة';
+
+  @override
+  String get removeMember => 'إزالة عضو';
+
+  @override
+  String get removeMemberConfirm => 'هل أنت متأكد من رغبتك في إزالة هذا العضو؟';
+
+  @override
+  String get removeMemberSuccess => 'تم إزالة العضو بنجاح';
+
+  @override
+  String get removeMemberFailed => 'فشل إزالة العضو';
+
+  @override
+  String get owner => 'المالك';
+
+  @override
+  String get storyReplyNotifications => 'إشعارات الرد على القصص';
+
+  @override
+  String get storyReplyNotificationsDesc => 'Receive notifications when someone replies to your story';
+
+  @override
+  String get notificationSound => 'صوت الإشعارات';
+
+  @override
+  String get notificationSoundDesc => 'اختر الصوت للإشعارات';
+
+  @override
+  String get vibration => 'الاهتزاز';
+
+  @override
+  String get vibrationDesc => 'تمكين أو تعطيل الاهتزاز للإشعارات';
+
+  @override
+  String get messagePreview => 'معاينة الرسالة';
+
+  @override
+  String get messagePreviewDesc => 'عرض معاينة للرسالة';
+
+  @override
+  String get inAppSound => 'صوت داخل التطبيق';
+
+  @override
+  String get inAppSoundDesc => 'تشغيل صوت للرسائل الواردة';
+
+  @override
+  String get noStoryFound => 'لا توجد قصة';
+
+  @override
+  String get goBack => 'العودة';
+
+  @override
+  String get paused => 'متوقف';
+
+  @override
+  String get play => 'تشغيل';
+
+  @override
+  String get pause => 'إيقاف';
+
+  @override
+  String get like => 'إعجاب';
+
+  @override
+  String get unlike => 'إلغاء الإعجاب';
+
+  @override
+  String get viewed => 'تمت المشاهدة';
+
+  @override
+  String get viewers => 'المشاهدين';
+
+  @override
+  String get viewersSheetTitle => 'المشاهدين';
+
+  @override
+  String get viewersSheetDescription => 'المشاهدين لهذه القصة';
+
+  @override
+  String get tapToSeeWhoViewed => 'اضغط لعرض من قرأ هذه القصة';
+
+  @override
+  String get replyToStory => 'رد على القصة...';
+
+  @override
+  String get voiceMessage => 'رسالة صوتية';
+
+  @override
+  String get slideToCancel => 'اسحب للإلغاء';
+
+  @override
+  String get releaseToCancel => 'اترك للإلغاء';
+
+  @override
+  String get deleteMessage => 'حذف الرسالة';
+
+  @override
+  String get deleteMessageConfirm => 'هل أنت متأكد من رغبتك في حذف هذه الرسالة؟';
+
+  @override
+  String get deleteMessageSuccess => 'تم حذف الرسالة بنجاح';
+
+  @override
+  String get deleteMessageFailed => 'فشل حذف الرسالة';
+
+  @override
+  String get pinchToZoomTapToClose => 'اسحب للتكبير · اضغط للإغلاق';
+
+  @override
+  String get chatInfo => 'معلومات الدردشة';
+
+  @override
+  String get minute => 'دقيقة';
+
+  @override
+  String get hour => 'ساعة';
+
+  @override
+  String get day => 'يوم';
+
+  @override
+  String get ago => 'مضت';
+
+  @override
+  String get justNow => 'الآن';
+
+  @override
+  String get noViewsYet => 'لا توجد مشاهدات بعد';
+
+  @override
+  String addCount(Object count) {
+    return 'إضافة ($count)';
+  }
+
+  @override
+  String createCount(Object count) {
+    return 'إنشاء ($count)';
+  }
+
+  @override
+  String get leaveGroup => 'مغادرة المجموعة';
+
+  @override
+  String get leaveGroupConfirm => 'هل أنت متأكد من رغبتك في مغادرة هذه المجموعة؟';
+
+  @override
+  String get leaveGroupOwnerConfirm => 'أنت المالك. سيتم نقل الملكية إلى العضو التالي عند المغادرة.';
+
+  @override
+  String get leaveAndTransfer => 'مغادرة ونقل الملكية';
+
+  @override
+  String get createAGroupWithThisUser => 'أنشئ مجموعة مع هذا المستخدم';
+
+  @override
+  String get commonGroups => 'المجموعات المشتركة';
+
+  @override
+  String get emailOrPasswordIncorrect => 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+
+  @override
+  String get thisOperationFailed => 'فشلت هذه العملية.';
 }

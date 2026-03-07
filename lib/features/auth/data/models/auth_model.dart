@@ -78,10 +78,8 @@ class AuthModel extends Equatable {
     );
   }
 
-  /// Returns true if the user needs to be redirected to FillProfile screen.
   bool get needsProfileSetup => !isProfileComplete;
 
-  /// Returns a display-friendly name, falling back to email prefix.
   String get name =>
       displayName?.isNotEmpty == true ? displayName! : email.split('@').first;
 

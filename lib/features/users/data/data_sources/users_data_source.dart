@@ -1,29 +1,30 @@
+import 'package:Chatty/features/chats/data/models/chat_model.dart';
+
 import '../../../auth/data/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class UsersDataSource {
-  /// Fetch a paginated list of users excluding [currentUid].
-  /// [lastDocument] is used for cursor-based pagination.
   Future<List<UserModel>> getUsers({
     required String currentUid,
     int limit = 20,
-    Object? lastDocument, // DocumentSnapshot for Firestore cursor
+    Object? lastDocument,
   });
 
-  /// Search users by [query] matching username or fullName.
   Future<List<UserModel>> searchUsers({
     required String query,
     required String currentUid,
     int limit = 20,
   });
 
-  /// Fetch a single user by [uid].
   Future<UserModel?> getUserById({required String uid});
 
-  /// Real-time stream of a single user — used in user info screen
-  /// to reflect online status changes live.
   Stream<UserModel?> watchUser({required String uid});
+
+  Future<List<ChatModel>> getCommonGroups({
+    required String currentUid,
+    required String otherUid,
+  });
 }
 
 @LazySingleton(as: UsersDataSource)
@@ -35,7 +36,8 @@ class UsersDataSourceImpl implements UsersDataSource {
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('users');
 
-  // ─── Get Users (paginated) ────────────────────────────────────────────────
+  CollectionReference<Map<String, dynamic>> get _chats =>
+      _firestore.collection('chats');
 
   @override
   Future<List<UserModel>> getUsers({
@@ -46,7 +48,7 @@ class UsersDataSourceImpl implements UsersDataSource {
     try {
       var query = _users
           .where('uid', isNotEqualTo: currentUid)
-          .orderBy('uid') // required when using isNotEqualTo
+          .orderBy('uid')
           .orderBy('username')
           .limit(limit);
 
@@ -64,13 +66,6 @@ class UsersDataSourceImpl implements UsersDataSource {
     }
   }
 
-  // ─── Search Users ─────────────────────────────────────────────────────────
-  //
-  //  Firestore doesn't support full-text search natively.
-  //  We use >= / <= range queries on username for prefix matching,
-  //  then do a second query on fullName and merge client-side.
-  // ─────────────────────────────────────────────────────────────────────────
-
   @override
   Future<List<UserModel>> searchUsers({
     required String query,
@@ -85,21 +80,18 @@ class UsersDataSourceImpl implements UsersDataSource {
           normalised.substring(0, normalised.length - 1) +
           String.fromCharCode(normalised.codeUnitAt(normalised.length - 1) + 1);
 
-      // Search by username prefix
       final byUsername = await _users
           .where('username', isGreaterThanOrEqualTo: normalised)
           .where('username', isLessThan: end)
           .limit(limit)
           .get();
 
-      // Search by fullName prefix
       final byFullName = await _users
           .where('fullName', isGreaterThanOrEqualTo: normalised)
           .where('fullName', isLessThan: end)
           .limit(limit)
           .get();
 
-      // Merge + deduplicate + exclude current user
       final seen = <String>{};
       final results = <UserModel>[];
 
@@ -115,8 +107,6 @@ class UsersDataSourceImpl implements UsersDataSource {
     }
   }
 
-  // ─── Get User By ID ───────────────────────────────────────────────────────
-
   @override
   Future<UserModel?> getUserById({required String uid}) async {
     try {
@@ -128,8 +118,6 @@ class UsersDataSourceImpl implements UsersDataSource {
     }
   }
 
-  // ─── Watch User ───────────────────────────────────────────────────────────
-
   @override
   Stream<UserModel?> watchUser({required String uid}) {
     return _users.doc(uid).snapshots().map((doc) {
@@ -137,9 +125,37 @@ class UsersDataSourceImpl implements UsersDataSource {
       return UserModel.fromFirestore(doc.data()!, uid);
     });
   }
-}
 
-// ─── Exception ────────────────────────────────────────────────────────────────
+  @override
+  Future<List<ChatModel>> getCommonGroups({
+    required String currentUid,
+    required String otherUid,
+  }) async {
+    try {
+      final snap = await _chats
+          .where('type', isEqualTo: 'group')
+          .where('memberIds', arrayContains: currentUid)
+          .get();
+
+      if (snap.docs.isEmpty) return [];
+
+      final commonGroups = snap.docs
+          .where((doc) {
+            final data = doc.data();
+            final members = List<String>.from(data['memberIds'] ?? []);
+            return members.contains(otherUid);
+          })
+          .map((doc) {
+            return ChatModel.fromFirestore(doc.data(), doc.id);
+          })
+          .toList();
+
+      return commonGroups;
+    } on FirebaseException catch (e) {
+      throw UsersException(e.message ?? 'Failed to fetch common groups.');
+    }
+  }
+}
 
 class UsersException implements Exception {
   final String message;

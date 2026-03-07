@@ -1,26 +1,28 @@
-import 'package:chatty/config/router/app_router.gr.dart';
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/framework/pick_file.dart';
-import 'package:chatty/features/auth/cubits/auth_cubit.dart';
-import 'package:chatty/features/auth/data/models/user_model.dart';
-import 'package:chatty/features/chats/cubits/conversations_cubit.dart';
-import 'package:chatty/features/shared/widgets/app_file_image.dart';
-import 'package:chatty/features/shared/widgets/app_gradient_button.dart';
-import 'package:chatty/features/shared/widgets/app_image.dart';
-import 'package:chatty/features/shared/widgets/app_text_form_field.dart';
-import 'package:chatty/features/shared/widgets/app_toast.dart';
-import 'package:chatty/features/users/cubits/users_cubit.dart';
-import 'package:chatty/features/users/cubits/users_state.dart';
+import 'package:Chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/framework/pick_file.dart';
+import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
+import 'package:Chatty/features/auth/data/models/user_model.dart';
+import 'package:Chatty/features/chats/cubits/conversations_cubit.dart';
+import 'package:Chatty/features/shared/widgets/app_file_image.dart';
+import 'package:Chatty/features/shared/widgets/app_gradient_button.dart';
+import 'package:Chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/features/shared/widgets/app_text_form_field.dart';
+import 'package:Chatty/features/shared/widgets/app_toast.dart';
+import 'package:Chatty/features/users/cubits/users_cubit.dart';
 
 class CreateGroupBottomSheet extends StatefulWidget {
-  const CreateGroupBottomSheet({super.key});
+  final UserModel? preSelectedUser;
 
-  static void show(BuildContext context) {
+  const CreateGroupBottomSheet({super.key, this.preSelectedUser});
+
+  static void show(BuildContext context, {UserModel? preSelectedUser}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const CreateGroupBottomSheet(),
+      builder: (context) =>
+          CreateGroupBottomSheet(preSelectedUser: preSelectedUser),
     );
   }
 
@@ -36,19 +38,21 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
 
   File? _selectedImage;
   int _step = 1;
-  final Set<String> _selectedMemberIds = {};
-  List<UserModel> _filteredUsers = [];
+  final Set<String> _selectedIds = {};
+  List<UserModel> _allUsers = [];
+  List<UserModel> _filtered = [];
+  bool _loadingUsers = false;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearchChanged);
+    _searchController.addListener(_onSearch);
 
-    // Load users when bottom sheet opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final currentUid = context.read<AuthCubit>().state.currentUser?.uid ?? '';
-      context.read<UsersCubit>().loadUsers(currentUid: currentUid);
-    });
+    if (widget.preSelectedUser != null) {
+      _selectedIds.add(widget.preSelectedUser!.uid);
+      _allUsers = [widget.preSelectedUser!];
+      _filtered = [widget.preSelectedUser!];
+    }
   }
 
   @override
@@ -59,18 +63,38 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    final query = _searchController.text.toLowerCase();
-    final allUsers = context.read<UsersCubit>().state.users;
-    final currentUid = context.read<AuthCubit>().state.currentUser?.uid ?? '';
+  Future<void> _loadUsersIfNeeded() async {
+    if (_loadingUsers) return;
+    setState(() => _loadingUsers = true);
 
+    final currentUid = context.read<AuthCubit>().state.currentUser?.uid ?? '';
+    await context.read<UsersCubit>().loadUsers(currentUid: currentUid);
+    if (!mounted) return;
+
+    final users = context
+        .read<UsersCubit>()
+        .state
+        .users
+        .where((u) => u.uid != currentUid)
+        .toList();
+
+    if (!mounted) return;
     setState(() {
-      _filteredUsers = allUsers.where((user) {
-        if (user.uid == currentUid) return false; // Exclude current user
-        if (query.isEmpty) return true;
-        return user.displayName.toLowerCase().contains(query) ||
-            (user.email.toLowerCase().contains(query));
-      }).toList();
+      _allUsers = users;
+      _filtered = users;
+      _loadingUsers = false;
+    });
+  }
+
+  void _onSearch() {
+    final q = _searchController.text.trim().toLowerCase();
+    setState(() {
+      _filtered = q.isEmpty
+          ? _allUsers
+          : _allUsers.where((u) {
+              return u.displayName.toLowerCase().contains(q) ||
+                  u.username.toLowerCase().contains(q);
+            }).toList();
     });
   }
 
@@ -79,18 +103,16 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
     if (file != null) setState(() => _selectedImage = file);
   }
 
-  void _toggleMember(String uid) {
+  void _toggle(String uid) {
     setState(() {
-      if (_selectedMemberIds.contains(uid)) {
-        _selectedMemberIds.remove(uid);
-      } else {
-        _selectedMemberIds.add(uid);
-      }
+      _selectedIds.contains(uid)
+          ? _selectedIds.remove(uid)
+          : _selectedIds.add(uid);
     });
   }
 
   Future<void> _createGroup() async {
-    if (_selectedMemberIds.isEmpty) {
+    if (_selectedIds.isEmpty) {
       AppToast.showError(
         message: context.locale.selectAtLeastOneMember,
         context: context,
@@ -98,47 +120,39 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
       return;
     }
 
-    final currentUid = context.read<AuthCubit>().state.currentUser?.uid;
-    if (currentUid == null) return;
+    final currentUser = context.read<AuthCubit>().state.currentUser;
+    if (currentUser == null) return;
 
-    // Show loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
+    final memberNames = <String, String>{
+      currentUser.uid: currentUser.name,
+      for (final u in _allUsers.where((u) => _selectedIds.contains(u.uid)))
+        u.uid: u.displayName,
+    };
 
     try {
       await context.read<ConversationsCubit>().createGroupChat(
         groupName: _nameController.text.trim(),
-        memberIds: _selectedMemberIds.toList(),
+        memberIds: _selectedIds.toList(),
+        memberNames: memberNames,
         groupPhotoFile: _selectedImage,
-        createdBy: currentUid,
+        createdBy: currentUser.uid,
+        groupDescription: _descriptionController.text.trim().isNotEmpty
+            ? _descriptionController.text.trim()
+            : null,
       );
-
-      // Close loading dialog
-      if (mounted) Navigator.pop(context);
-
-      // Close bottom sheet
-      if (mounted) Navigator.pop(context);
-
-      // Show success message
-      if (mounted) {
-        AppToast.showSuccess(
-          message: context.locale.groupCreated,
-          context: context,
-        );
-      }
     } catch (e) {
-      // Close loading dialog
-      if (mounted) Navigator.pop(context);
-
-      // Show error
-      if (mounted) {
-        AppToast.showError(message: e.toString(), context: context);
-      }
+      if (mounted) AppToast.showError(message: e.toString(), context: context);
     }
   }
+
+  void _goToStep2() {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() => _step = 2);
+      _loadUsersIfNeeded();
+    }
+  }
+
+  void _goToStep1() => setState(() => _step = 1);
 
   @override
   Widget build(BuildContext context) {
@@ -159,22 +173,14 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
         if (!mounted) return;
 
         if (openState.isSuccess) {
-          // Close loading dialog safely
           if (Navigator.of(context, rootNavigator: true).canPop()) {
             Navigator.of(context, rootNavigator: true).pop();
           }
-
-          // Close bottom sheet safely
           if (Navigator.of(context).canPop()) {
             Navigator.of(context).pop();
           }
-
           final chatId = openState.data;
-
-          if (chatId != null) {
-            context.router.push(ChatRoute(chatId: chatId));
-          }
-
+          if (chatId != null) context.router.push(ChatRoute(chatId: chatId));
           context.read<ConversationsCubit>().resetOpenChatState();
           return;
         }
@@ -183,119 +189,148 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
           if (Navigator.of(context, rootNavigator: true).canPop()) {
             Navigator.of(context, rootNavigator: true).pop();
           }
-
           AppToast.showError(
-            message: openState.message ?? 'Failed to create group',
+            message: context.locale.thisOperationFailed,
             context: context,
           );
-
           context.read<ConversationsCubit>().resetOpenChatState();
         }
       },
-
       child: Container(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        height: MediaQuery.of(context).size.height * 0.8,
+        height: MediaQuery.of(context).size.height * 0.7,
         decoration: BoxDecoration(
           color: context.colorScheme.surface,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: SafeArea(
           top: false,
           child: Column(
             children: [
-              // Drag handle
-              Container(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+              const SizedBox(height: 12),
+              Center(
                 child: Container(
-                  width: 60,
+                  width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        context.colorScheme.primary,
-                        context.colorScheme.secondary,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
+                    color: context.colorScheme.outline.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-
-              Expanded(child: _step == 1 ? _buildStep1() : _buildStep2()),
+              const SizedBox(height: 20),
+              Expanded(
+                child: _step == 1
+                    ? _GroupInfoStep(
+                        formKey: _formKey,
+                        nameController: _nameController,
+                        descriptionController: _descriptionController,
+                        selectedImage: _selectedImage,
+                        onPickImage: _pickImage,
+                        onNext: _goToStep2,
+                      )
+                    : _SelectMembersStep(
+                        searchController: _searchController,
+                        allUsers: _allUsers,
+                        filtered: _filtered,
+                        selectedIds: _selectedIds,
+                        loadingUsers: _loadingUsers,
+                        onToggle: _toggle,
+                        onCreate: _createGroup,
+                        onBack: _goToStep1,
+                      ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildStep1() {
+class _GroupInfoStep extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController nameController;
+  final TextEditingController descriptionController;
+  final File? selectedImage;
+  final VoidCallback onPickImage;
+  final VoidCallback onNext;
+
+  const _GroupInfoStep({
+    required this.formKey,
+    required this.nameController,
+    required this.descriptionController,
+    required this.selectedImage,
+    required this.onPickImage,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Form(
-      key: _formKey,
+      key: formKey,
       child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
-          const SizedBox(height: 15),
           AppText(
             context.locale.createGroup,
             style: context.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
             ),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           AppText(
             context.locale.step1Of2,
-            style: context.textTheme.bodyMedium!.copyWith(
+            style: context.textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.textSecondary,
             ),
           ),
-          const SizedBox(height: 50),
+          const SizedBox(height: 32),
 
-          // Group photo picker
           Center(
             child: Stack(
               children: [
-                _selectedImage != null
+                selectedImage != null
                     ? AppFileImage(
-                        _selectedImage!,
-                        width: 120,
-                        height: 120,
+                        selectedImage!,
+                        width: 110,
+                        height: 110,
                         fit: BoxFit.cover,
                         borderRadius: 100,
                       )
                     : AppImage(
                         imageUrl: AppConstants.fakeUserImage,
-                        width: 120,
-                        height: 120,
+                        width: 110,
+                        height: 110,
                         borderRadius: 100,
                       ),
                 Positioned(
                   bottom: 0,
                   right: 0,
-                  child: Container(
-                    width: 35,
-                    height: 35,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          context.colorScheme.primary,
-                          context.colorScheme.secondary,
-                        ],
+                  child: GestureDetector(
+                    onTap: onPickImage,
+                    child: Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            context.colorScheme.primary,
+                            context.colorScheme.secondary,
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: context.colorScheme.surface,
+                          width: 2,
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: IconButton(
-                      onPressed: _pickImage,
-                      icon: Icon(
+                      child: Icon(
                         SolarIconsOutline.cameraAdd,
-                        size: 20,
+                        size: 16,
                         color: context.colorScheme.onPrimary,
                       ),
                     ),
@@ -304,11 +339,10 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
               ],
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 32),
 
-          // Group name
           AppTextFormField(
-            controller: _nameController,
+            controller: nameController,
             label: context.locale.groupName,
             hintText: context.locale.enterGroupName,
             maxLength: 50,
@@ -319,11 +353,10 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
                 ? context.locale.requiredField
                 : null,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
-          // Description (optional)
           AppTextFormField(
-            controller: _descriptionController,
+            controller: descriptionController,
             label: '${context.locale.description} (${context.locale.optional})',
             hintText: context.locale.groupDescriptionHint,
             maxLength: 100,
@@ -331,243 +364,331 @@ class _CreateGroupBottomSheetState extends State<CreateGroupBottomSheet> {
             autocorrect: false,
             enableSuggestions: false,
           ),
-          const SizedBox(height: 50),
+          const SizedBox(height: 32),
 
-          // Next button
-          AppButton(
-            text: context.locale.nextAddMembers,
-            onTap: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                setState(() => _step = 2);
-                _onSearchChanged(); // Initialize filtered users
-              }
-            },
-          ),
+          AppButton(text: context.locale.nextAddMembers, onTap: onNext),
+          const SizedBox(height: 20),
         ],
-      ).addPadding(horizontal: 15),
+      ),
     );
   }
+}
 
-  Widget _buildStep2() {
-    return BlocBuilder<UsersCubit, UsersState>(
-      buildWhen: (prev, curr) => prev.usersState != curr.usersState,
-      builder: (context, state) {
-        if (_filteredUsers.isEmpty && _searchController.text.isEmpty) {
-          _filteredUsers = state.users
-              .where(
-                (u) =>
-                    u.uid != context.read<AuthCubit>().state.currentUser?.uid,
-              )
-              .toList();
-        }
+class _SelectMembersStep extends StatelessWidget {
+  final TextEditingController searchController;
+  final List<UserModel> allUsers;
+  final List<UserModel> filtered;
+  final Set<String> selectedIds;
+  final bool loadingUsers;
+  final void Function(String uid) onToggle;
+  final VoidCallback onCreate;
+  final VoidCallback onBack;
 
-        return ListView(
-          children: [
-            const SizedBox(height: 15),
-            AppText(
-              context.locale.addMembers,
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 10),
-            AppText(
-              context.locale.step2Of2,
-              style: context.textTheme.bodyMedium!.copyWith(
-                color: context.colorScheme.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 40),
+  const _SelectMembersStep({
+    required this.searchController,
+    required this.allUsers,
+    required this.filtered,
+    required this.selectedIds,
+    required this.loadingUsers,
+    required this.onToggle,
+    required this.onCreate,
+    required this.onBack,
+  });
 
-            // Search bar
-            Container(
-              height: 48,
-              decoration: BoxDecoration(
-                color: context.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 10),
-                  Icon(
-                    SolarIconsOutline.magnifier,
-                    color: context.colorScheme.textSecondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      keyboardType: TextInputType.text,
-                      cursorColor: context.colorScheme.primary,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.textPrimary,
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppText(
+                      context.locale.addMembers,
+                      style: context.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
                       ),
-                      decoration: InputDecoration(
-                        hintText: context.locale.searchByNameOrEmail,
-                        hintStyle: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.textSecondary,
-                        ),
-                        border: InputBorder.none,
-                        isDense: true,
+                    ),
+                    AppText(
+                      context.locale.step2Of2,
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (selectedIds.isNotEmpty)
+                GestureDetector(
+                  onTap: onCreate,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          context.colorScheme.primary,
+                          context.colorScheme.secondary,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: AppText(
+                      context.locale.createCount(selectedIds.length),
+                      style: context.textTheme.labelLarge?.copyWith(
+                        color: context.colorScheme.onPrimary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
 
-            // Selected count
-            AnimatedOpacity(
-              opacity: _selectedMemberIds.isNotEmpty ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    SolarIconsOutline.checkCircle,
-                    color: context.colorScheme.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  AppText(
-                    context.locale.membersSelected(_selectedMemberIds.length),
-                    style: context.textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            height: 44,
+            decoration: BoxDecoration(
+              color: context.colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(14),
             ),
-            const SizedBox(height: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              children: [
+                Icon(
+                  SolarIconsOutline.magnifier,
+                  size: 18,
+                  color: context.colorScheme.textSecondary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: searchController,
+                    style: context.textTheme.bodyLarge,
+                    decoration: InputDecoration(
+                      hintText: context.locale.searchUsers,
+                      hintStyle: context.textTheme.bodyLarge?.copyWith(
+                        color: context.colorScheme.textSecondary,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
 
-            // Users list
-            if (state.usersState.isLoading)
-              const Center(child: CircularProgressIndicator())
-            else if (_filteredUsers.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
+        if (selectedIds.isNotEmpty) ...[
+          SizedBox(
+            height: 44,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              children: allUsers
+                  .where((u) => selectedIds.contains(u.uid))
+                  .map(
+                    (u) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _SelectedChip(
+                        user: u,
+                        onRemove: () => onToggle(u.uid),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+
+        Expanded(
+          child: loadingUsers
+              ? const Center(child: CircularProgressIndicator())
+              : filtered.isEmpty
+              ? Center(
                   child: AppText(
-                    _searchController.text.isEmpty
+                    searchController.text.isEmpty
                         ? context.locale.noUsersFound
                         : context.locale.noResultsFound,
                     style: context.textTheme.bodyMedium?.copyWith(
                       color: context.colorScheme.textSecondary,
                     ),
                   ),
-                ),
-              )
-            else
-              SizedBox(
-                height: 350,
-                child: ListView.builder(
-                  itemCount: _filteredUsers.length,
-                  itemBuilder: (context, index) {
-                    final user = _filteredUsers[index];
-                    final isSelected = _selectedMemberIds.contains(user.uid);
-
-                    return GestureDetector(
-                      onTap: () => _toggleMember(user.uid),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15,
-                          vertical: 10,
-                        ),
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 15,
-                          vertical: 5,
-                        ),
-                        height: 65,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? context.colorScheme.primaryContainer.withValues(
-                                  alpha: 0.3,
-                                )
-                              : context.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(18),
-                          border: isSelected
-                              ? Border.all(
-                                  color: context.colorScheme.primary,
-                                  width: 2,
-                                )
-                              : null,
-                        ),
-                        child: Row(
-                          children: [
-                            AppImage(
-                              imageUrl:
-                                  user.photoUrl ?? AppConstants.fakeUserImage,
-                              width: 40,
-                              height: 40,
-                              borderRadius: 100,
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  AppText(
-                                    user.displayName,
-                                    style: context.textTheme.bodyMedium
-                                        ?.copyWith(
-                                          color:
-                                              context.colorScheme.textPrimary,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                  ),
-                                  AppText(
-                                    user.email,
-                                    style: context.textTheme.bodySmall
-                                        ?.copyWith(
-                                          color:
-                                              context.colorScheme.textSecondary,
-                                        ),
-                                    maxLines: 1,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Icon(
-                              isSelected
-                                  ? Icons.check_circle
-                                  : Icons.circle_outlined,
-                              color: isSelected
-                                  ? context.colorScheme.primary
-                                  : context.colorScheme.outline,
-                              size: 24,
-                            ),
-                          ],
-                        ),
-                      ),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, i) => Divider(
+                    height: 1,
+                    color: context.colorScheme.outline.withValues(alpha: 0.08),
+                  ),
+                  itemBuilder: (_, i) {
+                    final user = filtered[i];
+                    return _UserSelectTile(
+                      user: user,
+                      selected: selectedIds.contains(user.uid),
+                      onTap: () => onToggle(user.uid),
                     );
                   },
                 ),
-              ),
-            const SizedBox(height: 20),
+        ),
 
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton(
-                    type: AppGradientButtonType.normal,
-                    text: context.locale.back,
-                    onTap: () => setState(() => _step = 1),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+          child: AppButton(
+            type: AppButtonType.normal,
+            text: context.locale.back,
+            onTap: onBack,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SelectedChip extends StatelessWidget {
+  final UserModel user;
+  final VoidCallback onRemove;
+
+  const _SelectedChip({required this.user, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: context.colorScheme.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: context.colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppImage(
+            imageUrl: user.photoUrl ?? AppConstants.fakeUserImage,
+            width: 22,
+            height: 22,
+            borderRadius: 100,
+          ),
+          const SizedBox(width: 6),
+          AppText(
+            user.displayName,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: onRemove,
+            child: Icon(
+              Icons.close_rounded,
+              size: 14,
+              color: context.colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UserSelectTile extends StatelessWidget {
+  final UserModel user;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _UserSelectTile({
+    required this.user,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        child: Row(
+          children: [
+            AppImage(
+              imageUrl: user.photoUrl ?? AppConstants.fakeUserImage,
+              width: 46,
+              height: 46,
+              borderRadius: 100,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    user.displayName,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: AppButton(
-                    type: AppGradientButtonType.gradient,
-                    text: context.locale.create,
-                    onTap: _createGroup,
+                  AppText(
+                    '@${user.username}',
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: selected
+                    ? LinearGradient(
+                        colors: [
+                          context.colorScheme.primary,
+                          context.colorScheme.secondary,
+                        ],
+                      )
+                    : null,
+                border: selected
+                    ? null
+                    : Border.all(
+                        color: context.colorScheme.outline.withValues(
+                          alpha: 0.4,
+                        ),
+                        width: 2,
+                      ),
+              ),
+              child: selected
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 15,
+                      color: Colors.white,
+                    )
+                  : null,
             ),
           ],
-        ).addPadding(horizontal: 15);
-      },
+        ),
+      ),
     );
   }
 }

@@ -1,12 +1,12 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/core/utils/enums.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/core/utils/enums.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessageModel extends Equatable {
   final String id;
   final String chatId;
   final String senderId;
-  final String content; // text OR media URL after upload
+  final String content;
   final MessageType type;
   final MessageStatus status;
   final DateTime createdAt;
@@ -15,9 +15,9 @@ class MessageModel extends Equatable {
   final String? replyToId;
   final String? replyToContent;
   final String? replyToSenderId;
-  final Map<String, dynamic>?
-  metadata; // duration for audio, dimensions for images, etc.
-
+  final MessageType? replyToType;
+  final Map<String, dynamic>? metadata;
+  final Map<String, String> reactions;
   const MessageModel({
     required this.id,
     required this.chatId,
@@ -31,7 +31,9 @@ class MessageModel extends Equatable {
     this.replyToId,
     this.replyToContent,
     this.replyToSenderId,
+    this.replyToType,
     this.metadata,
+    this.reactions = const {},
   });
 
   factory MessageModel.fromFirestore(
@@ -39,6 +41,14 @@ class MessageModel extends Equatable {
     String id,
     String chatId,
   ) {
+    MessageType? parseReplyToType(String? raw) {
+      if (raw == null) return null;
+      for (final v in MessageType.values) {
+        if (v.name == raw) return v;
+      }
+      return null;
+    }
+
     return MessageModel(
       id: id,
       chatId: chatId,
@@ -58,7 +68,9 @@ class MessageModel extends Equatable {
       replyToId: data['replyToId'] as String?,
       replyToContent: data['replyToContent'] as String?,
       replyToSenderId: data['replyToSenderId'] as String?,
+      replyToType: parseReplyToType(data['replyToType'] as String?),
       metadata: data['metadata'] as Map<String, dynamic>?,
+      reactions: Map<String, String>.from(data['reactions'] as Map? ?? {}),
     );
   }
 
@@ -73,6 +85,9 @@ class MessageModel extends Equatable {
     'replyToId': replyToId,
     'replyToContent': replyToContent,
     'replyToSenderId': replyToSenderId,
+    'replyToType': replyToType?.name,
+    if (metadata != null) 'metadata': metadata,
+    'reactions': reactions,
   };
 
   MessageModel copyWith({
@@ -88,7 +103,9 @@ class MessageModel extends Equatable {
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
+    MessageType? replyToType,
     Map<String, dynamic>? metadata,
+    Map<String, String>? reactions,
   }) => MessageModel(
     id: id ?? this.id,
     chatId: chatId ?? this.chatId,
@@ -102,7 +119,9 @@ class MessageModel extends Equatable {
     replyToId: replyToId ?? this.replyToId,
     replyToContent: replyToContent ?? this.replyToContent,
     replyToSenderId: replyToSenderId ?? this.replyToSenderId,
+    replyToType: replyToType ?? this.replyToType,
     metadata: metadata ?? this.metadata,
+    reactions: reactions ?? this.reactions,
   );
 
   bool get isMedia => type != MessageType.text;
@@ -122,5 +141,7 @@ class MessageModel extends Equatable {
     replyToId,
     replyToContent,
     replyToSenderId,
+    replyToType,
+    reactions,
   ];
 }

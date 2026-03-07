@@ -1,5 +1,5 @@
 import 'package:bouncing_widget/bouncing_widget.dart';
-import 'package:chatty/l10n/app_localizations.dart';
+import 'package:Chatty/l10n/app_localizations.dart';
 import 'package:intl/intl.dart' as localization;
 
 import '../../../core/constants/exports.dart';

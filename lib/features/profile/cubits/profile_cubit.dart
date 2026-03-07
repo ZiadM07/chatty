@@ -14,8 +14,6 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   ProfileCubit(this._repository) : super(ProfileState.initial());
 
-  // ─── Load Profile ─────────────────────────────────────────────────────────
-
   Future<void> loadProfile({required String uid}) async {
     emit(
       state.copyWith(fetchState: const AppState(status: StateStatus.loading)),
@@ -59,8 +57,6 @@ class ProfileCubit extends Cubit<ProfileState> {
       );
     }
   }
-
-  // ─── Update Full Name ─────────────────────────────────────────────────────
 
   Future<void> updateFullName({
     required String uid,
@@ -108,8 +104,6 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  // ─── Update Bio ───────────────────────────────────────────────────────────
-
   Future<void> updateBio({required String uid, required String bio}) async {
     emit(
       state.copyWith(
@@ -153,8 +147,6 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  // ─── Update Photo ─────────────────────────────────────────────────────────
-
   Future<void> updateProfilePhoto({
     required String uid,
     required File imageFile,
@@ -169,7 +161,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       final newPhotoUrl = await _repository.updateProfilePhoto(
         uid: uid,
         imageFile: imageFile,
-        oldPhotoUrl: state.profile?.photoUrl, // ← pass current URL for deletion
+        oldPhotoUrl: state.profile?.photoUrl,
       );
 
       final updated = state.profile?.copyWith(photoUrl: newPhotoUrl);
@@ -205,8 +197,6 @@ class ProfileCubit extends Cubit<ProfileState> {
       );
     }
   }
-
-  // ─── Reset States ─────────────────────────────────────────────────────────
 
   void resetUpdateInfoState() =>
       emit(state.copyWith(updateInfoState: const AppState()));

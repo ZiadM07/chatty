@@ -1,10 +1,10 @@
-import 'package:chatty/core/constants/exports.dart';
-import 'package:chatty/features/auth/cubits/auth_cubit.dart';
-import 'package:chatty/features/users/cubits/users_cubit.dart';
-import 'package:chatty/features/users/cubits/users_state.dart';
-import 'package:chatty/features/users/ui/widgets/user_item.dart';
-import 'package:chatty/features/users/ui/widgets/users_actions_row.dart';
-import 'package:chatty/features/users/ui/widgets/users_app_bar.dart';
+import 'package:Chatty/core/constants/exports.dart';
+import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
+import 'package:Chatty/features/users/cubits/users_cubit.dart';
+import 'package:Chatty/features/users/cubits/users_state.dart';
+import 'package:Chatty/features/users/ui/widgets/user_item.dart';
+import 'package:Chatty/features/users/ui/widgets/users_actions_row.dart';
+import 'package:Chatty/features/users/ui/widgets/users_app_bar.dart';
 
 @RoutePage()
 class UsersScreen extends StatefulWidget {
@@ -51,13 +51,8 @@ class _UsersScreenState extends State<UsersScreen> {
           body: CustomScrollView(
             controller: _scrollController,
             slivers: [
-              /* ─────── APP BAR ─────── */
               const UsersAppBar(),
-
-              /* ─────── ACTIONS ROW ─── */
               const UsersActionsRow(),
-
-              /* ─────── HEADER ────────*/
               SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +76,6 @@ class _UsersScreenState extends State<UsersScreen> {
                 ).addPadding(horizontal: 30),
               ),
 
-              /* ─────── BODY ──────────*/
               if (state.usersState.status == StateStatus.loading &&
                   state.users.isEmpty)
                 const SliverFillRemaining(
@@ -121,13 +115,13 @@ class _UsersScreenState extends State<UsersScreen> {
                 )
               else ...[
                 SliverList.separated(
-                  separatorBuilder: (context, index) => const SizedBox(height: 20),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 20),
                   itemCount: state.users.length,
                   itemBuilder: (context, index) =>
                       UserItem(user: state.users[index]),
                 ),
 
-                // Load-more spinner
                 if (state.hasMore &&
                     state.usersState.status == StateStatus.loading)
                   const SliverToBoxAdapter(
