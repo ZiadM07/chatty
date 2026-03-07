@@ -16,8 +16,6 @@ class ChatMediaAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = context.colorScheme;
-
     return AppBar(
       elevation: 0,
       title: AnimatedSwitcher(
@@ -31,7 +29,7 @@ class ChatMediaAppBar extends StatelessWidget implements PreferredSizeWidget {
                   hintText: context.locale.searchMedia,
                   border: InputBorder.none,
                   hintStyle: TextStyle(
-                    color: cs.onSurface.withValues(alpha: 0.6),
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               )
