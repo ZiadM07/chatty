@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:Chatty/core/utils/enums.dart';
 import 'package:Chatty/features/chats/data/models/message_model.dart';
-import '../../../../core/constants/exports.dart';
+import '../../../../../core/constants/exports.dart';
 
 TextStyle _emojiStyle(double size) => TextStyle(
   fontSize: size,
@@ -132,9 +132,9 @@ class _ReactionPanelState extends State<_ReactionPanel>
   late final Animation<double> _blurAnim;
   late final Animation<double> _fadeAnim;
   late final Animation<double> _scaleAnim;
-  late final Animation<double> _bubbleScaleAnim; // subtle lift effect on ghost
-  late final Animation<Offset> _slideUp; // element slides up into position
-  late final Animation<Offset> _slideDown; // element slides down into position
+  late final Animation<double> _bubbleScaleAnim;
+  late final Animation<Offset> _slideUp;
+  late final Animation<Offset> _slideDown;
 
   late Map<String, String> _localReactions;
 
@@ -154,19 +154,16 @@ class _ReactionPanelState extends State<_ReactionPanel>
     _fadeAnim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
     _scaleAnim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack);
 
-    // Ghost bubble scales from 1.0 → 1.05 — subtle "lifted off screen" feel
     _bubbleScaleAnim = Tween<double>(
       begin: 1.0,
       end: 1.05,
     ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
 
-    // Slides from below upward (for elements below the bubble)
     _slideUp = Tween<Offset>(
       begin: const Offset(0, 0.25),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
 
-    // Slides from above downward (for elements above the bubble)
     _slideDown = Tween<Offset>(
       begin: const Offset(0, -0.25),
       end: Offset.zero,
@@ -201,15 +198,6 @@ class _ReactionPanelState extends State<_ReactionPanel>
     Future.delayed(const Duration(milliseconds: 200), _dismiss);
   }
 
-  // ── Layout computation ──────────────────────────────────────────────────────
-  //
-  // Four modes depending on how much space is available around the bubble:
-  //
-  //  NORMAL : space above AND below  →  EMOJI ╌ BUBBLE ╌ MENU
-  //  TOP    : near top, no space above →  BUBBLE ╌ EMOJI ╌ MENU
-  //  BOTTOM : near bottom, no space below →  MENU ╌ EMOJI ╌ BUBBLE
-  //  TIGHT  : no space either side   →  centred, EMOJI ╌ BUBBLE ╌ MENU
-  //
   _LayoutResult _computeLayout(MediaQueryData mq) {
     final screenH = mq.size.height;
     final safeTop = mq.padding.top;
@@ -230,12 +218,10 @@ class _ReactionPanelState extends State<_ReactionPanel>
     double menuTop;
 
     if (isNearTop && !isNearBot) {
-      // ── TOP: bubble stays, emoji + menu stack below ──────────────────────
       emojiTop = rawBot + _gap;
       menuTop = emojiTop + _emojiBarH + _gap;
       if (menuTop + _menuEstH > bandBot) menuTop = bandBot - _menuEstH;
     } else if (isNearBot && !isNearTop) {
-      // ── BOTTOM: menu + emoji stack above, bubble stays ───────────────────
       menuTop = rawTop - _gap - _menuEstH;
       emojiTop = menuTop - _gap - _emojiBarH;
       if (emojiTop < bandTop) {
@@ -243,14 +229,12 @@ class _ReactionPanelState extends State<_ReactionPanel>
         menuTop = emojiTop + _emojiBarH + _gap;
       }
     } else if (isNearTop && isNearBot) {
-      // ── TIGHT: centre the whole group ────────────────────────────────────
       final totalH =
           _emojiBarH + _gap + widget.anchorSize.height + _gap + _menuEstH;
       final start = bandTop + ((bandH - totalH) / 2).clamp(0.0, bandH);
       emojiTop = start;
       menuTop = start + _emojiBarH + _gap + widget.anchorSize.height + _gap;
     } else {
-      // ── NORMAL: emoji above bubble, menu below ────────────────────────────
       emojiTop = rawTop - _emojiBarH - _gap;
       menuTop = rawBot + _gap;
     }
@@ -270,7 +254,6 @@ class _ReactionPanelState extends State<_ReactionPanel>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final layout = _computeLayout(mq);
 
-    // Horizontal — same side as the message bubble
     double emojiLeft = widget.isMe ? screenW - _emojiBarW - _edgePad : _edgePad;
     emojiLeft = emojiLeft.clamp(_edgePad, screenW - _emojiBarW - _edgePad);
 
@@ -280,13 +263,10 @@ class _ReactionPanelState extends State<_ReactionPanel>
     return AnimatedBuilder(
       animation: _blurAnim,
       builder: (ctx, _) => Material(
-        // Material ancestor is required — without it bare Text widgets render
-        // with Flutter's yellow-underline DefaultTextStyle fallback.
         color: Colors.transparent,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // ── Full-screen blur + dim tap-to-dismiss ──────────────────────
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: _dismiss,
@@ -300,22 +280,6 @@ class _ReactionPanelState extends State<_ReactionPanel>
                 ),
               ),
             ),
-
-            // ── Ghost bubble ───────────────────────────────────────────────
-            //
-            // We use a plain Positioned with the pixel-perfect coordinates
-            // captured at long-press time (anchorGlobalPos / anchorSize).
-            //
-            // WHY NOT CompositedTransformFollower:
-            //   The target is placed on the GestureDetector which is
-            //   full-width (MessageBubbleShell wraps in Align internally),
-            //   so the follower's origin is the screen left-edge, not the
-            //   bubble pill's left-edge. Using the captured globalPos is
-            //   exact and avoids any Align/margin offset confusion.
-            //
-            // The bubble is rendered at full screen-width so that
-            // MessageBubbleShell's internal Align (centerRight / centerLeft)
-            // places the pill in exactly the right horizontal position.
             Positioned(
               top: widget.anchorGlobalPos.dy,
               left: 0,
@@ -331,19 +295,15 @@ class _ReactionPanelState extends State<_ReactionPanel>
                 child: widget.bubbleChild,
               ),
             ),
-
-            // ── Emoji reaction bar ─────────────────────────────────────────
             Positioned(
               top: layout.emojiTop,
               left: emojiLeft,
               child: FadeTransition(
                 opacity: _fadeAnim,
                 child: SlideTransition(
-                  // Emoji above bubble slides down into place, below slides up
                   position: layout.emojiAbove ? _slideDown : _slideUp,
                   child: ScaleTransition(
                     scale: _scaleAnim,
-                    // Scale origin at the corner closest to the bubble
                     alignment: layout.emojiAbove
                         ? (widget.isMe
                               ? Alignment.bottomRight
@@ -361,8 +321,6 @@ class _ReactionPanelState extends State<_ReactionPanel>
                 ),
               ),
             ),
-
-            // ── Context menu ───────────────────────────────────────────────
             Positioned(
               top: layout.menuTop,
               left: menuLeft,

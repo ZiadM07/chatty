@@ -31,18 +31,15 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
     _selectedPath = prefs.chatWallpaperPath;
     _brightness = prefs.chatWallpaperBrightness;
 
-    // If a custom path is saved, check if it's a file that still exists
     if (_selectedPath.isNotEmpty && !_presets.contains(_selectedPath)) {
       final file = File(_selectedPath);
       if (file.existsSync()) {
         _userPickedImage = file;
       } else {
-        // File was deleted — reset to default
         _selectedPath = _presets[0];
       }
     }
 
-    // Default to first preset if empty
     if (_selectedPath.isEmpty) {
       _selectedPath = _presets[0];
     }
@@ -61,7 +58,7 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
   void _selectPreset(String path) {
     setState(() {
       _selectedPath = path;
-      _userPickedImage = null; // Clear custom image when choosing preset
+      _userPickedImage = null;
     });
     _save();
   }
@@ -70,7 +67,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
     final prefs = getIt<AppPreferences>();
     prefs.chatWallpaperPath = _selectedPath;
     prefs.chatWallpaperBrightness = _brightness;
-    // Trigger AppCubit rebuild so ChatBackGround picks up the change
     context.read<AppCubit>().refreshAuth();
   }
 
@@ -82,8 +78,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
       body: Column(
         children: [
           const SizedBox(height: 20),
-
-          // Title
           AppText(
             context.locale.chooseWallpaper,
             style: context.textTheme.titleMedium?.copyWith(
@@ -91,8 +85,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
             ),
           ),
           const SizedBox(height: 20),
-
-          // Grid
           Expanded(
             child: GridView.count(
               crossAxisCount: 2,
@@ -100,7 +92,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
               crossAxisSpacing: 12,
               childAspectRatio: 0.75,
               children: [
-                // Preset 1
                 _WallpaperOption(
                   title: context.locale.wallpaperClassic,
                   isSelected: _selectedPath == _presets[0],
@@ -111,8 +102,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                     width: 150,
                   ),
                 ),
-
-                // Preset 2
                 _WallpaperOption(
                   title: context.locale.wallpaperAbstractBlue,
                   isSelected: _selectedPath == _presets[1],
@@ -123,8 +112,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                     width: 150,
                   ),
                 ),
-
-                // Preset 3
                 _WallpaperOption(
                   title: context.locale.wallpaperGreenTexture,
                   isSelected: _selectedPath == _presets[2],
@@ -135,8 +122,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                     width: 150,
                   ),
                 ),
-
-                // Custom photo
                 _WallpaperOption(
                   title: context.locale.wallpaperYourPhoto,
                   isSelected:
@@ -160,7 +145,7 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                               ),
                               const SizedBox(height: 8),
                               AppText(
-                                'Tap to select',
+                                context.locale.tapToAddPhoto,
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: context.colorScheme.textSecondary,
@@ -181,8 +166,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
           ),
 
           const SizedBox(height: 20),
-
-          // Brightness slider
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -201,7 +184,7 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                     ),
                     const SizedBox(width: 8),
                     AppText(
-                      'Dim wallpaper',
+                      context.locale.brightness,
                       style: context.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -235,8 +218,8 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'Adjust overlay darkness to improve text readability',
+                AppText(
+                  context.locale.brightnessDescription,
                   style: TextStyle(
                     fontSize: 11,
                     color: context.colorScheme.textSecondary,
@@ -252,10 +235,6 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Wallpaper option tile
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _WallpaperOption extends StatelessWidget {
   final String title;

@@ -1,10 +1,10 @@
 import 'package:Chatty/core/utils/enums.dart';
-import 'package:Chatty/features/chats/ui/widgets/media_viewer_dialog.dart';
+import 'package:Chatty/features/chats/ui/media/widgets/media_viewer_dialog.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-import '../../../../core/constants/exports.dart';
-import '../../data/models/message_model.dart';
+import '../../../../../core/constants/exports.dart';
+import '../../../data/models/message_model.dart';
 
 final Map<String, Uint8List?> _thumbnailCache = {};
 

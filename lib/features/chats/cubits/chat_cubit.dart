@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Chatty/core/framework/audio_service.dart';
 import 'package:Chatty/core/framework/failure.dart';
 import 'package:Chatty/core/framework/in_app_sound_service.dart';
 import 'package:Chatty/core/utils/enums.dart';
@@ -376,6 +377,81 @@ class ChatCubit extends Cubit<ChatState> {
           sendState: const AppState(
             status: StateStatus.error,
             message: 'Failed to send media.',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> sendVoiceMessage({
+    required String senderId,
+    required RecordingResult result,
+  }) async {
+    final chat = state.chat;
+    if (chat == null || result.file == null) return;
+
+    final reply = state.replyingTo;
+    emit(
+      state.copyWith(
+        sendState: const AppState(status: StateStatus.loadingOverlay),
+        clearReplyingTo: true,
+      ),
+    );
+
+    try {
+      await _repository.sendMediaMessage(
+        chatId: chat.id,
+        senderId: senderId,
+        memberIds: chat.memberIds,
+        file: result.file!,
+        type: MessageType.audio,
+        metadata: {
+          'duration': result.duration.inMilliseconds,
+          'waveform': result.waveform,
+        },
+        replyToId: reply?.id,
+        replyToContent: reply?.content,
+        replyToSenderId: reply?.senderId,
+        replyToType: reply?.type,
+      );
+
+      final senderName = chat.nameFor(senderId);
+      final recipientUids = chat.memberIds
+          .where((id) => id != senderId)
+          .toList();
+
+      if (chat.isGroup) {
+        await _notificationService.sendGroupNotification(
+          senderUsername: senderName,
+          recipientUids: recipientUids,
+          message: '🎤 Voice message',
+          chatId: chat.id,
+          groupName: chat.groupName ?? 'Group',
+          groupPhoto: chat.groupPhotoUrl,
+        );
+      } else {
+        await _notificationService.sendMessageNotification(
+          senderUid: senderId,
+          senderUsername: senderName,
+          receiverUid: recipientUids.first,
+          message: '🎤 Voice message',
+          chatId: chat.id,
+        );
+      }
+
+      emit(state.copyWith(sendState: const AppState()));
+    } on Failure catch (e) {
+      emit(
+        state.copyWith(
+          sendState: AppState(status: StateStatus.error, message: e.message),
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          sendState: const AppState(
+            status: StateStatus.error,
+            message: 'Failed to send voice message.',
           ),
         ),
       );

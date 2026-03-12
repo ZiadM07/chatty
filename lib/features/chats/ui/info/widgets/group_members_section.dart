@@ -2,7 +2,7 @@ import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/di/injectable.dart';
 import 'package:Chatty/features/auth/data/models/user_model.dart';
 import 'package:Chatty/features/chats/cubits/chat_info_cubit.dart';
-import 'package:Chatty/features/chats/ui/widgets/add_members_sheet.dart';
+import 'package:Chatty/features/chats/ui/info/widgets/add_members_sheet.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:Chatty/features/users/data/repositories/users_repository.dart';
 

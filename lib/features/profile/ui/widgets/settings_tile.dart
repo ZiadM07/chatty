@@ -68,8 +68,6 @@ class SettingsTile extends StatelessWidget {
               ],
             ),
           ),
-
-          // TRAILING (custom)
           trailing ??
               Icon(
                 Icons.arrow_forward_ios_rounded,

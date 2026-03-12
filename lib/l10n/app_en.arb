@@ -115,7 +115,6 @@
   "groupCreated": "Group created",
   "addParticipants": "Add Participants",
   "removeFromGroup": "Remove from Group",
-
   "groupInfo": "Group Info",
   "editProfile": "Edit Profile",
   "username": "Username",
@@ -621,5 +620,9 @@
   "createAGroupWithThisUser": "Create a group with this user",
   "commonGroups": "Common Groups",
   "emailOrPasswordIncorrect": "Email or password incorrect",
-  "thisOperationFailed": "This operation failed."
+  "thisOperationFailed": "This operation failed.",
+  "emailCannotBeChanged": "Email cannot be changed",
+  "usernameCannotBeChanged": "Username cannot be changed",
+  "couldNotLoadFile": "Could Not Load File",
+  "brightnessDescription": "Adjust overlay darkness to improve text readability"
 }

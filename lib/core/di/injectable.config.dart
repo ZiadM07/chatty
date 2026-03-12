@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
+import 'package:dio/dio.dart' as _i361;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:image_picker/image_picker.dart' as _i183;
@@ -87,6 +88,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i59.FirebaseAuth>(() => injectionModule.firebaseAuth);
     gh.lazySingleton<_i974.FirebaseFirestore>(() => injectionModule.firestore);
     gh.lazySingleton<_i454.SupabaseClient>(() => injectionModule.client);
+    gh.lazySingleton<_i361.Dio>(() => injectionModule.dio);
     gh.lazySingleton<_i946.AudioService>(() => _i946.AudioService());
     gh.singleton<_i942.StorageService>(
       () => injectionModule.storageService(gh<_i600.SharedPreferences>()),

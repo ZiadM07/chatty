@@ -1,8 +1,8 @@
 import 'package:Chatty/core/constants/exports.dart';
-import 'package:Chatty/features/conversations/ui/widgets/conversations_app_bar.dart';
-import 'package:Chatty/features/conversations/ui/widgets/conversations_stories_lists.dart';
-import 'package:Chatty/features/conversations/ui/widgets/conversations_tab_bar.dart';
-import 'package:Chatty/features/conversations/ui/widgets/conversations_tab_lists.dart';
+import 'package:Chatty/features/chats/ui/conversations/widgets/conversations_app_bar.dart';
+import 'package:Chatty/features/chats/ui/conversations/widgets/conversations_stories_lists.dart';
+import 'package:Chatty/features/chats/ui/conversations/widgets/conversations_tab_bar.dart';
+import 'package:Chatty/features/chats/ui/conversations/widgets/conversations_tab_lists.dart';
 
 @RoutePage()
 class ConversationsScreen extends StatefulWidget {

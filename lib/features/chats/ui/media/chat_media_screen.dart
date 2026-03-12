@@ -2,9 +2,9 @@ import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/di/injectable.dart';
 import 'package:Chatty/core/utils/enums.dart';
 import 'package:Chatty/features/chats/cubits/chat_media_cubit.dart';
-import 'package:Chatty/features/chats/ui/widgets/chat_media_app_bar.dart';
-import 'package:Chatty/features/chats/ui/widgets/chat_media_empty_state.dart';
-import 'package:Chatty/features/chats/ui/widgets/chat_media_grid.dart';
+import 'package:Chatty/features/chats/ui/media/widgets/chat_media_app_bar.dart';
+import 'package:Chatty/features/chats/ui/media/widgets/chat_media_empty_state.dart';
+import 'package:Chatty/features/chats/ui/media/widgets/chat_media_grid.dart';
 import 'package:Chatty/features/shared/widgets/app_loading.dart';
 import 'package:Chatty/features/shared/widgets/app_toast.dart';
 

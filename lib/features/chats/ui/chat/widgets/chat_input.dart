@@ -5,10 +5,11 @@ import 'package:Chatty/core/di/injectable.dart';
 import 'package:Chatty/core/framework/pick_file.dart';
 import 'package:Chatty/core/utils/enums.dart';
 import 'package:Chatty/features/chats/data/models/message_model.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/show_file_preview_sheet.dart';
 import 'package:Chatty/features/shared/cubits/app_cubit.dart';
 import 'package:Chatty/features/shared/widgets/app_toast.dart';
-import '../../../../core/framework/audio_service.dart';
-import '../../../users/data/repositories/users_repository.dart';
+import '../../../../../core/framework/audio_service.dart';
+import '../../../../users/data/repositories/users_repository.dart';
 
 class ChatInput extends StatefulWidget {
   final ValueChanged<String>? onSendPressed;
@@ -17,6 +18,7 @@ class ChatInput extends StatefulWidget {
   final String? hintText;
   final FocusNode? focusNode;
   final void Function(File file)? onSendAttachment;
+  final void Function(RecordingResult result)? onSendVoice;
   final bool isSendingMedia;
   final MessageModel? replyingTo;
   final String? currentUid;
@@ -31,6 +33,7 @@ class ChatInput extends StatefulWidget {
     required this.hintText,
     required this.focusNode,
     required this.onSendAttachment,
+    this.onSendVoice,
     this.isSendingMedia = false,
     this.replyingTo,
     this.currentUid,
@@ -98,7 +101,15 @@ class _ChatInputState extends State<ChatInput> {
   Future<void> _pickFile() async {
     setState(() => _showQuickActions = false);
     final file = await PickFile.media();
-    if (file != null && mounted) widget.onSendAttachment?.call(file);
+    if (file == null || !mounted) return;
+
+    ShowFilePreviewSheet.show(
+      context,
+      file,
+      onSend: (confirmedFile, _) {
+        widget.onSendAttachment?.call(confirmedFile);
+      },
+    );
   }
 
   void _onMicPointerDown(PointerDownEvent event) {
@@ -176,7 +187,11 @@ class _ChatInputState extends State<ChatInput> {
       _pointerDownPosition = null;
     });
 
-    if (!cancelled && result.file != null) {
+    if (cancelled || result.file == null) return;
+
+    if (widget.onSendVoice != null) {
+      widget.onSendVoice!(result);
+    } else {
       widget.onSendAttachment?.call(result.file!);
     }
   }
@@ -187,9 +202,7 @@ class _ChatInputState extends State<ChatInput> {
     _longPressTimer?.cancel();
     widget.focusNode?.removeListener(_onFocusChanged);
     _controller.removeListener(_onTextChanged);
-    if (_ownsController) {
-      _controller.dispose();
-    }
+    if (_ownsController) _controller.dispose();
     super.dispose();
   }
 
@@ -219,7 +232,6 @@ class _ChatInputState extends State<ChatInput> {
               : const SizedBox.shrink(),
         ),
 
-        // Reply preview — shown when replying to a message
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
           switchInCurve: Curves.easeOut,
@@ -240,11 +252,9 @@ class _ChatInputState extends State<ChatInput> {
               : const SizedBox.shrink(),
         ),
 
-        // Main input row
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Text field
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -395,7 +405,6 @@ class _RecordingBar extends StatelessWidget {
         children: [
           _PulsingIcon(color: accentColor),
           const SizedBox(width: 10),
-
           AppText(
             _format(duration),
             style: context.textTheme.bodyMedium?.copyWith(
@@ -405,11 +414,8 @@ class _RecordingBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-
           const _MiniWaveform(),
-
           const Spacer(),
-
           AnimatedOpacity(
             opacity: 1.0 - cancelProgress,
             duration: const Duration(milliseconds: 100),
@@ -430,7 +436,6 @@ class _RecordingBar extends StatelessWidget {
               ],
             ),
           ),
-
           AnimatedOpacity(
             opacity: cancelProgress,
             duration: const Duration(milliseconds: 100),
@@ -580,9 +585,7 @@ class _ReplyPreviewState extends State<_ReplyPreview> {
 
   Future<void> _resolveName() async {
     final senderId = widget.message.senderId;
-
     if (senderId == widget.currentUid) return;
-
     final cached = widget.memberNames[senderId];
     if (cached != null) {
       if (mounted) setState(() => _senderName = cached);
@@ -609,9 +612,7 @@ class _ReplyPreviewState extends State<_ReplyPreview> {
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.5,
-        ),
+        color: context.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border(
           left: BorderSide(color: context.colorScheme.primary, width: 3),

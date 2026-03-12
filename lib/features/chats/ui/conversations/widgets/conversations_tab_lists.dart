@@ -2,7 +2,7 @@ import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
 import 'package:Chatty/features/chats/cubits/conversations_cubit.dart';
 import 'package:Chatty/features/chats/data/models/chat_model.dart';
-import 'package:Chatty/features/conversations/ui/widgets/messages_item.dart';
+import 'messages_item.dart';
 
 class ConversationsTabLists extends StatelessWidget {
   const ConversationsTabLists({super.key, required TabController tabController})

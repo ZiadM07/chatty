@@ -1,7 +1,7 @@
 import 'package:Chatty/features/users/cubits/users_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/exports.dart';
-import '../data/data_sources/users_data_source.dart';
+import '../../../../core/framework/failure.dart';
 import '../data/repositories/users_repository.dart';
 
 @injectable
@@ -41,7 +41,7 @@ class UsersCubit extends Cubit<UsersState> {
           hasMore: users.length == _pageSize,
         ),
       );
-    } on UsersException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           usersState: AppState(status: StateStatus.error, message: e.message),
@@ -88,7 +88,7 @@ class UsersCubit extends Cubit<UsersState> {
           hasMore: more.length == _pageSize,
         ),
       );
-    } on UsersException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           usersState: AppState(status: StateStatus.error, message: e.message),
@@ -139,7 +139,7 @@ class UsersCubit extends Cubit<UsersState> {
           hasMore: false,
         ),
       );
-    } on UsersException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           usersState: AppState(status: StateStatus.error, message: e.message),

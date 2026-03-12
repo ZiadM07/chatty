@@ -2,6 +2,7 @@ import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/utils/enums.dart';
 import 'package:Chatty/features/stories/data/models/story_item_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/framework/failure.dart';
 
 abstract class StoryDataSource {
   Stream<List<StoryItemModel>> watchMyStory({required String uid});
@@ -104,7 +105,7 @@ class StoryDataSourceImpl implements StoryDataSource {
           .where((item) => !item.isExpired)
           .toList();
     } on FirebaseException catch (e) {
-      throw StoryException(e.message ?? 'Failed to fetch story items.');
+      throw Failure(500, e.message ?? 'Failed to fetch story items.');
     }
   }
 
@@ -138,7 +139,7 @@ class StoryDataSourceImpl implements StoryDataSource {
       await ref.set(item.toFirestore());
       return item;
     } on FirebaseException catch (e) {
-      throw StoryException(e.message ?? 'Failed to add story item.');
+      throw Failure(500, e.message ?? 'Failed to add story item.');
     }
   }
 
@@ -153,7 +154,7 @@ class StoryDataSourceImpl implements StoryDataSource {
         'viewerIds': FieldValue.arrayUnion([viewerUid]),
       });
     } on FirebaseException catch (e) {
-      throw StoryException(e.message ?? 'Failed to mark story as viewed.');
+      throw Failure(500, e.message ?? 'Failed to mark story as viewed.');
     }
   }
 
@@ -171,7 +172,7 @@ class StoryDataSourceImpl implements StoryDataSource {
             : FieldValue.arrayUnion([viewerUid]),
       });
     } on FirebaseException catch (e) {
-      throw StoryException(e.message ?? 'Failed to toggle like.');
+      throw Failure(500, e.message ?? 'Failed to toggle like.');
     }
   }
 
@@ -183,7 +184,7 @@ class StoryDataSourceImpl implements StoryDataSource {
     try {
       await _items(uid).doc(itemId).delete();
     } on FirebaseException catch (e) {
-      throw StoryException(e.message ?? 'Failed to delete story item.');
+      throw Failure(500, e.message ?? 'Failed to delete story item.');
     }
   }
 
@@ -201,7 +202,7 @@ class StoryDataSourceImpl implements StoryDataSource {
         await batch.commit();
       }
     } on FirebaseException catch (e) {
-      throw StoryException(e.message ?? 'Failed to clear story.');
+      throw Failure(500, e.message ?? 'Failed to clear story.');
     }
   }
 
@@ -223,15 +224,8 @@ class StoryDataSourceImpl implements StoryDataSource {
         await batch.commit();
       }
     } on FirebaseException catch (e) {
-      throw StoryException(e.message ?? 'Failed to delete expired items.');
+      throw Failure(500, e.message ?? 'Failed to delete expired items.');
     }
   }
 }
 
-class StoryException implements Exception {
-  final String message;
-  const StoryException(this.message);
-
-  @override
-  String toString() => 'StoryException: $message';
-}

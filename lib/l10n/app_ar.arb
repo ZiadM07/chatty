@@ -619,5 +619,10 @@
   "createAGroupWithThisUser": "أنشئ مجموعة مع هذا المستخدم",
   "commonGroups": "المجموعات المشتركة",
   "emailOrPasswordIncorrect": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-  "thisOperationFailed":"فشلت هذه العملية."
+  "thisOperationFailed": "فشلت هذه العملية.",
+  "emailCannotBeChanged": "لا يمكن تغيير البريد الإلكتروني",
+  "usernameCannotBeChanged": "لا يمكن تغيير اسم المستخدم",
+  "couldNotLoadFile": "تعذر تحميل الملف",
+  "brightnessDescription": "اضبط مستوى الظلام لتحسين إمكانية قراءة النص"
+
 }

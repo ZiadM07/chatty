@@ -36,7 +36,6 @@ class NotificationSettingsScreen extends StatelessWidget
               children: [
                 const SizedBox(height: 30),
 
-                // ── Header Icon ─────────────────────────────────────────────
                 Center(
                   child: Container(
                     padding: const EdgeInsets.all(24),
@@ -68,11 +67,10 @@ class NotificationSettingsScreen extends StatelessWidget
 
                 const SizedBox(height: 30),
 
-                // ── Message Notifications ───────────────────────────────────
                 SettingsTile(
                   title: context.locale.messageNotifications,
                   subtitle: context.locale.messageNotificationsDesc,
-                  icon: Icons.chat_bubble_outline,
+                  icon: SolarIconsBold.chatRoundLine,
                   trailing: Switch(
                     value: settings.messageNotifications,
                     onChanged: cubit.toggleMessageNotifications,
@@ -82,7 +80,6 @@ class NotificationSettingsScreen extends StatelessWidget
 
                 const SizedBox(height: 15),
 
-                // ── Group Notifications ─────────────────────────────────────
                 SettingsTile(
                   title: context.locale.groupNotifications,
                   subtitle: context.locale.groupNotificationsDesc,
@@ -96,11 +93,10 @@ class NotificationSettingsScreen extends StatelessWidget
 
                 const SizedBox(height: 15),
 
-                // ── Story Reply Notifications ───────────────────────────────
                 SettingsTile(
                   title: context.locale.storyReplyNotifications,
                   subtitle: context.locale.storyReplyNotificationsDesc,
-                  icon: Icons.reply_outlined,
+                  icon: SolarIconsBold.reply,
                   trailing: Switch(
                     value: settings.storyReplyNotifications,
                     onChanged: cubit.toggleStoryReplyNotifications,
@@ -110,11 +106,10 @@ class NotificationSettingsScreen extends StatelessWidget
 
                 const SizedBox(height: 15),
 
-                // ── Notification Sound ──────────────────────────────────────
                 SettingsTile(
                   title: context.locale.notificationSound,
                   subtitle: context.locale.notificationSoundDesc,
-                  icon: Icons.volume_up_outlined,
+                  icon: SolarIconsBold.volume,
                   trailing: Switch(
                     value: settings.sound,
                     onChanged: cubit.toggleSound,
@@ -124,11 +119,10 @@ class NotificationSettingsScreen extends StatelessWidget
 
                 const SizedBox(height: 15),
 
-                // ── Vibration ───────────────────────────────────────────────
                 SettingsTile(
                   title: context.locale.vibration,
                   subtitle: context.locale.vibrationDesc,
-                  icon: Icons.vibration_outlined,
+                  icon: SolarIconsBold.smartphoneVibration,
                   trailing: Switch(
                     value: settings.vibration,
                     onChanged: cubit.toggleVibration,

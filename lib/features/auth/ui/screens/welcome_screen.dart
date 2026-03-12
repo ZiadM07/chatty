@@ -11,8 +11,7 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appbarSize: 0,
-      showBackButton: false,
+      showAppBar: false,
       body: Column(
         children: [
           const SizedBox(height: 50),

@@ -21,7 +21,6 @@ class ProfileSettingsAvatar extends StatelessWidget {
         return SliverToBoxAdapter(
           child: Stack(
             children: [
-              /* ─────────────── AVATAR ─────────────── */
               Align(
                 alignment: Alignment.center,
                 child: Stack(
@@ -35,7 +34,6 @@ class ProfileSettingsAvatar extends StatelessWidget {
                       borderRadius: 100,
                     ),
 
-                    // Dimmed overlay + spinner while uploading
                     if (isUploading) ...[
                       Container(
                         width: 120,
@@ -58,7 +56,6 @@ class ProfileSettingsAvatar extends StatelessWidget {
                 ),
               ),
 
-              /* ─────────────── CAMERA BUTTON ───────── */
               Positioned(
                 bottom: 0,
                 right: 145,
@@ -77,7 +74,6 @@ class ProfileSettingsAvatar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: IconButton(
-                    // Disable button while upload is in progress
                     onPressed: isUploading
                         ? null
                         : () => _showProfilePhotoOptions(context),
@@ -97,10 +93,7 @@ class ProfileSettingsAvatar extends StatelessWidget {
   }
 }
 
-// ─── Photo Options Dialog ─────────────────────────────────────────────────────
-
 void _showProfilePhotoOptions(BuildContext context) {
-  // Capture cubit + uid before entering dialog — dialog has its own context
   final profileCubit = context.read<ProfileCubit>();
   final uid = context.read<AuthCubit>().state.currentUser?.uid ?? '';
 
@@ -124,7 +117,6 @@ void _showProfilePhotoOptions(BuildContext context) {
           vertical: 10,
         ),
         actions: [
-          /* ── Delete ── */
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
@@ -137,7 +129,6 @@ void _showProfilePhotoOptions(BuildContext context) {
             ),
           ),
 
-          /* ── Change ── */
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: context.colorScheme.primary,
@@ -167,8 +158,6 @@ void _showProfilePhotoOptions(BuildContext context) {
     },
   );
 }
-
-// ─── Pick + Upload ────────────────────────────────────────────────────────────
 
 Future<void> _pickAndUpload({
   required BuildContext context,

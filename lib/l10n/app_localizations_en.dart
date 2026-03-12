@@ -1681,4 +1681,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get thisOperationFailed => 'This operation failed.';
+
+  @override
+  String get emailCannotBeChanged => 'Email cannot be changed';
+
+  @override
+  String get usernameCannotBeChanged => 'Username cannot be changed';
+
+  @override
+  String get couldNotLoadFile => 'Could Not Load File';
+
+  @override
+  String get brightnessDescription => 'Adjust overlay darkness to improve text readability';
 }

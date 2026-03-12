@@ -5,7 +5,6 @@ import 'package:Chatty/core/framework/failure.dart';
 import 'package:Chatty/features/auth/data/models/user_model.dart';
 import 'package:Chatty/features/chats/data/models/chat_model.dart';
 import 'package:Chatty/features/chats/data/repositories/chat_repository.dart';
-import 'package:Chatty/features/users/data/data_sources/users_data_source.dart';
 import 'package:Chatty/features/users/data/repositories/users_repository.dart';
 
 class ChatInfoState extends Equatable {
@@ -103,7 +102,7 @@ class ChatInfoCubit extends Cubit<ChatInfoState> {
         state.copyWith(
           userState: AppState(
             status: StateStatus.error,
-            message: e is UsersException ? e.message : 'Failed to load user.',
+            message: e is Failure ? e.message : 'Failed to load user.',
           ),
         ),
       ),

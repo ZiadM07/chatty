@@ -15,9 +15,7 @@ class ProfileSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProfileCubit, ProfileState>(
-      // Only rebuild the screen when profile data changes
       buildWhen: (prev, curr) => prev.profile != curr.profile,
-      // Listen for update results to show snackbars
       listenWhen: (prev, curr) => prev.updateInfoState != curr.updateInfoState,
       listener: (context, state) {
         if (state.updateInfoState.status == StateStatus.success) {
@@ -44,7 +42,6 @@ class ProfileSettingsScreen extends StatelessWidget {
           title: context.locale.profileSettings,
           body: CustomScrollView(
             slivers: [
-              /* ─────────────── AVATAR ─────────────── */
               const ProfileSettingsAvatar(),
 
               SliverToBoxAdapter(
@@ -53,14 +50,12 @@ class ProfileSettingsScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 30),
 
-                    /* ───────── ACCOUNT INFORMATION ──────── */
                     AppText(
                       context.locale.accountInformation,
                       style: context.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 10),
 
-                    // Name
                     SettingsTile(
                       icon: SolarIconsOutline.user,
                       title: context.locale.nameLabel,
@@ -85,7 +80,6 @@ class ProfileSettingsScreen extends StatelessWidget {
 
                     const SizedBox(height: 15),
 
-                    // Bio
                     SettingsTile(
                       icon: SolarIconsOutline.infoCircle,
                       title: context.locale.bioLabel,
@@ -110,20 +104,23 @@ class ProfileSettingsScreen extends StatelessWidget {
 
                     const SizedBox(height: 30),
 
-                    /* ─────────── USER DETAILS (read-only) ───── */
                     AppText(
                       context.locale.userDetails,
                       style: context.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 10),
 
-                    // Email — read only
                     SettingsTile(
                       icon: SolarIconsOutline.mailbox,
                       title: context.locale.emailLabel,
                       subtitle: profile?.email ?? '—',
                       enabled: false,
-                      onTap: () {},
+                      onTap: () {
+                        AppToast.showError(
+                          message: context.locale.emailCannotBeChanged,
+                          context: context,
+                        );
+                      },
                       trailing: Icon(
                         SolarIconsOutline.lockKeyhole,
                         size: 20,
@@ -133,13 +130,17 @@ class ProfileSettingsScreen extends StatelessWidget {
 
                     const SizedBox(height: 15),
 
-                    // Username — read only
                     SettingsTile(
                       icon: Icons.alternate_email,
                       title: context.locale.usernameLabel,
                       subtitle: profile?.username ?? '—',
                       enabled: false,
-                      onTap: () {},
+                      onTap: () {
+                        AppToast.showError(
+                          message: context.locale.usernameCannotBeChanged,
+                          context: context,
+                        );
+                      },
                       trailing: Icon(
                         SolarIconsOutline.lockKeyhole,
                         size: 20,

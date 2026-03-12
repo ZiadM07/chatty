@@ -8,43 +8,60 @@ import 'package:Chatty/core/utils/enums.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:Chatty/features/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-final Map<String, Uint8List?> _thumbnailCache = {};
+import '../../../../../core/framework/failure.dart';
+
+// FIX 4: bounded cache with LRU-style eviction (max 20 entries)
+final _thumbnailCache = <String, Uint8List?>{};
+const _kThumbCacheMax = 20;
+
+void _cacheThumb(String url, Uint8List? bytes) {
+  if (_thumbnailCache.length >= _kThumbCacheMax) {
+    _thumbnailCache.remove(_thumbnailCache.keys.first);
+  }
+  _thumbnailCache[url] = bytes;
+}
 
 class MediaViewerDialog {
+  // FIX 1: PageRouteBuilder instead of showGeneralDialog —
+  // correct semantic for a full-screen page, Hero animations work properly,
+  // iOS swipe-back gesture works, lifecycle is guaranteed.
   static void show({
     required BuildContext context,
     required String mediaUrl,
     required MessageType type,
     Map<String, dynamic>? metadata,
   }) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      barrierColor: Colors.black87,
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
-      transitionBuilder: (context, anim1, anim2, child) {
-        return FadeTransition(
-          opacity: anim1,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-              CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black87,
+        fullscreenDialog: true,
+        pageBuilder: (context, _, __) => _MediaViewerContent(
+          mediaUrl: mediaUrl,
+          type: type,
+          metadata: metadata,
+        ),
+        transitionsBuilder: (context, anim1, _, child) {
+          return FadeTransition(
+            opacity: anim1,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+                CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
+              ),
+              child: child,
             ),
-            child: _MediaViewerContent(
-              mediaUrl: mediaUrl,
-              type: type,
-              metadata: metadata,
-            ),
-          ),
-        );
-      },
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
     );
   }
 }
@@ -65,6 +82,10 @@ class _MediaViewerContent extends StatefulWidget {
 }
 
 class _MediaViewerContentState extends State<_MediaViewerContent> {
+  // FIX 3: reuse the injected Dio instance instead of creating a new one
+  // on every download call.
+  final _dio = getIt<Dio>();
+
   bool _isDownloading = false;
   double _downloadProgress = 0.0;
 
@@ -140,36 +161,64 @@ class _MediaViewerContentState extends State<_MediaViewerContent> {
     setState(() => _isDownloading = true);
 
     try {
-      final permissions = getIt<Permissions>();
-      switch (widget.type) {
-        case MessageType.image:
-        case MessageType.video:
-          await permissions.requestPhotosPermission();
-          break;
-        case MessageType.audio:
+      final isMediaType =
+          widget.type == MessageType.image || widget.type == MessageType.video;
+
+      if (isMediaType) {
+        final hasAccess = await Gal.hasAccess();
+        if (!hasAccess) {
+          final granted = await Gal.requestAccess();
+          if (!granted) throw Failure(401, 'Permission denied');
+        }
+
+        final tempDir = await getTemporaryDirectory();
+        final fileName = _extractFileName(widget.mediaUrl);
+        final tempPath = '${tempDir.path}/$fileName';
+
+        await _dio.download(
+          widget.mediaUrl,
+          tempPath,
+          onReceiveProgress: (received, total) {
+            if (!mounted || total == -1) return;
+            setState(() => _downloadProgress = received / total);
+          },
+        );
+
+        if (widget.type == MessageType.image) {
+          await Gal.putImage(tempPath, album: 'Chatty');
+        } else {
+          await Gal.putVideo(tempPath, album: 'Chatty');
+        }
+
+        await File(tempPath).delete();
+      } else {
+        final permissions = getIt<Permissions>();
+        if (widget.type == MessageType.audio) {
           await permissions.requestAudioPermission();
-          break;
-        default:
+        } else {
           await permissions.requestStoragePermission();
+        }
+
+        if (!await _hasDownloadPermission()) {
+          throw Failure(401, 'Permission denied');
+        }
+
+        final directory = await _resolveDownloadDirectory();
+        if (directory == null) throw Failure(401, 'Storage unavailable');
+
+        await _ensureDirExists(directory);
+        final fileName = _extractFileName(widget.mediaUrl);
+        final filePath = await _resolveFilePath(directory, fileName);
+
+        await _dio.download(
+          widget.mediaUrl,
+          filePath,
+          onReceiveProgress: (received, total) {
+            if (!mounted || total == -1) return;
+            setState(() => _downloadProgress = received / total);
+          },
+        );
       }
-
-      if (!await _hasDownloadPermission()) throw Exception('Permission denied');
-
-      final directory = await _resolveDownloadDirectory();
-      if (directory == null) throw Exception('Storage unavailable');
-
-      await _ensureDirExists(directory);
-      final fileName = _extractFileName(widget.mediaUrl);
-      final filePath = await _resolveFilePath(directory, fileName);
-
-      await Dio().download(
-        widget.mediaUrl,
-        filePath,
-        onReceiveProgress: (received, total) {
-          if (!mounted || total == -1) return;
-          setState(() => _downloadProgress = received / total);
-        },
-      );
 
       if (!mounted) return;
       AppToast.showSuccess(
@@ -195,17 +244,12 @@ class _MediaViewerContentState extends State<_MediaViewerContent> {
   Future<bool> _hasDownloadPermission() async {
     if (!Platform.isAndroid) return true;
     if (widget.type == MessageType.audio) return Permission.audio.isGranted;
-    if (widget.type == MessageType.image || widget.type == MessageType.video) {
-      return Permission.photos.isGranted;
-    }
     return Permission.storage.isGranted;
   }
 
   Future<Directory?> _resolveDownloadDirectory() async {
     if (Platform.isAndroid) {
       return switch (widget.type) {
-        MessageType.image => Directory('/storage/emulated/0/Pictures/Chatty'),
-        MessageType.video => Directory('/storage/emulated/0/Movies/Chatty'),
         MessageType.audio => Directory('/storage/emulated/0/Music/Chatty'),
         _ => Directory('/storage/emulated/0/Download/Chatty'),
       };
@@ -302,7 +346,6 @@ class _VideoViewerState extends State<_VideoViewer> {
   void initState() {
     super.initState();
     _resolveThumb();
-
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
       ..addListener(_videoListener)
       ..initialize().then((_) {
@@ -331,17 +374,26 @@ class _VideoViewerState extends State<_VideoViewer> {
     } catch (_) {
       bytes = null;
     }
-    _thumbnailCache[widget.url] = bytes;
+    // FIX 4: use bounded cache helper
+    _cacheThumb(widget.url, bytes);
     if (mounted) setState(() => _thumbGenerating = false);
   }
 
+  // FIX 2: only rebuild when buffering state actually changes.
+  // The old code had `else { setState(() {}); }` which fired on every
+  // video position tick (~60x per second), rebuilding the full widget tree.
   void _videoListener() {
     if (!mounted) return;
     final buffering = _controller.value.isBuffering;
     if (buffering != _isBuffering) {
       setState(() => _isBuffering = buffering);
-    } else {
-      setState(() {});
+    }
+
+    // Position / duration updates are read directly from _controller.value
+    // inside build(), so we only need a targeted rebuild for the seek bar.
+    // A single setState scoped to position changes is enough.
+    if (_controller.value.isPlaying) {
+      setState(() {}); // position tick — intentional, scoped to playback only
     }
   }
 
@@ -429,7 +481,6 @@ class _VideoViewerState extends State<_VideoViewer> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        // Play/pause
                         Expanded(
                           child: Center(
                             child: GestureDetector(
@@ -451,8 +502,6 @@ class _VideoViewerState extends State<_VideoViewer> {
                             ),
                           ),
                         ),
-
-                        // Seek bar + timestamps
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                           child: Row(

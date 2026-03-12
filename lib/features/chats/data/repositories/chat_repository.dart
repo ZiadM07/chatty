@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:Chatty/core/utils/enums.dart';
 import 'package:Chatty/features/chats/data/data_source/chat_data_source.dart';
 import 'package:Chatty/features/chats/data/models/chat_model.dart';
@@ -116,6 +115,7 @@ class ChatRepository {
     required List<String> memberIds,
     required File file,
     required MessageType type,
+    Map<String, dynamic>? metadata,
     String? replyToId,
     String? replyToContent,
     String? replyToSenderId,
@@ -125,21 +125,6 @@ class ChatRepository {
       file: file,
       path: _StoragePaths.chatMedia(chatId),
     );
-
-    Map<String, dynamic>? metadata;
-    if (type == MessageType.audio) {
-      final player = AudioPlayer();
-      try {
-        await player.setSourceDeviceFile(file.path);
-        final duration = await player.getDuration();
-        if (duration != null) {
-          metadata = {'duration': duration.inMilliseconds};
-        }
-      } catch (_) {
-      } finally {
-        await player.dispose();
-      }
-    }
 
     return _dataSource.sendMessage(
       chatId: chatId,

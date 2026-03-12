@@ -1,6 +1,6 @@
 import 'package:Chatty/core/constants/exports.dart';
 import '../../../core/framework/notification_service.dart';
-import '../data/data_sources/auth_data_source.dart';
+import '../../../core/framework/failure.dart';
 import '../data/models/user_model.dart';
 import '../data/repositories/auth_repositories.dart';
 import 'auth_state.dart';
@@ -51,7 +51,7 @@ class AuthCubit extends Cubit<AuthState> {
           signUpState: AppState(status: StateStatus.success, data: authModel),
         ),
       );
-    } on AuthException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           signUpState: AppState(status: StateStatus.error, message: e.message),
@@ -85,7 +85,7 @@ class AuthCubit extends Cubit<AuthState> {
           loginState: AppState(status: StateStatus.success, data: authModel),
         ),
       );
-    } on AuthException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           loginState: AppState(status: StateStatus.error, message: e.message),
@@ -118,7 +118,7 @@ class AuthCubit extends Cubit<AuthState> {
           fillProfileState: AppState(status: StateStatus.success, data: user),
         ),
       );
-    } on AuthException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           fillProfileState: AppState(
@@ -157,7 +157,7 @@ class AuthCubit extends Cubit<AuthState> {
           ),
         ),
       );
-    } on AuthException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           forgotPasswordState: AppState(
@@ -193,7 +193,7 @@ class AuthCubit extends Cubit<AuthState> {
           signOutState: const AppState(status: StateStatus.success),
         ),
       );
-    } on AuthException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           signOutState: AppState(status: StateStatus.error, message: e.message),
@@ -225,7 +225,7 @@ class AuthCubit extends Cubit<AuthState> {
       await _notificationService.logout();
       await _repository.deleteAccount(uid: uid);
       emit(AuthState.initial().copyWith(authReady: true));
-    } on AuthException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           signOutState: AppState(status: StateStatus.error, message: e.message),
@@ -247,14 +247,12 @@ class AuthCubit extends Cubit<AuthState> {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
     await _repository.updateUserPresence(uid: uid, isOnline: true);
-    kPrint('user is online');
   }
 
   Future<void> setOffline() async {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
     await _repository.updateUserPresence(uid: uid, isOnline: false);
-    kPrint('user is offline');
   }
 
   void resetLoginState() => emit(state.copyWith(loginState: const AppState()));

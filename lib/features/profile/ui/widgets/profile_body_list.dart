@@ -65,8 +65,6 @@ class ProfileBodyList extends StatelessWidget {
   }
 }
 
-// ─── Logout Bottom Sheet ──────────────────────────────────────────────────────
-
 void _confirmLogout(BuildContext context) {
   final authCubit = context.read<AuthCubit>();
 
@@ -104,8 +102,6 @@ void _confirmLogout(BuildContext context) {
     },
   );
 }
-
-// ─── Sheet Content ────────────────────────────────────────────────────────────
 
 class _LogoutSheetContent extends StatelessWidget {
   final AuthCubit authCubit;
@@ -209,8 +205,6 @@ class _LogoutSheetContent extends StatelessWidget {
     );
   }
 }
-
-// ─── Profile Tile ─────────────────────────────────────────────────────────────
 
 class _ProfileTile extends StatelessWidget {
   final Widget icon;

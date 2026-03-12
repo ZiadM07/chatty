@@ -66,9 +66,7 @@ class _UsersScreenState extends State<UsersScreen> {
                     ),
                     const SizedBox(height: 20),
                     AppText(
-                      state.isSearching
-                          ? context.locale.searchLabel(state.searchQuery)
-                          : context.locale.myUsers,
+                      context.locale.myUsers,
                       style: context.textTheme.titleLarge,
                     ),
                     const SizedBox(height: 10),

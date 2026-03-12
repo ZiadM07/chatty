@@ -1,4 +1,4 @@
-import '../../../../core/constants/exports.dart';
+import '../../../../../core/constants/exports.dart';
 
 class ChatMediaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final TabController tabController;
@@ -37,7 +37,7 @@ class ChatMediaAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-          icon: Icon(isSearching ? Icons.close : Icons.search),
+          icon: Icon(isSearching ? Icons.close : SolarIconsOutline.magnifier),
           onPressed: onToggleSearch,
         ),
       ],

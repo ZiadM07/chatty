@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:Chatty/features/stories/data/data_sources/story_data_source.dart';
 import 'package:Chatty/features/stories/data/models/story_item_model.dart';
 import 'package:Chatty/features/stories/data/models/story_model.dart';
 import 'package:Chatty/features/stories/data/repositories/story_repository.dart';
@@ -8,6 +7,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/state/app_state.dart';
+import '../../../../core/framework/failure.dart';
 
 class StoriesState extends Equatable {
   final AppState<List<StoryModel>> feedState;
@@ -139,7 +139,7 @@ class StoriesCubit extends Cubit<StoriesState> {
           uploadState: AppState(status: StateStatus.success, data: item),
         ),
       );
-    } on StoryException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           uploadState: AppState(status: StateStatus.error, message: e.message),
@@ -180,7 +180,7 @@ class StoriesCubit extends Cubit<StoriesState> {
           uploadState: AppState(status: StateStatus.success, data: item),
         ),
       );
-    } on StoryException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           uploadState: AppState(status: StateStatus.error, message: e.message),
@@ -219,7 +219,7 @@ class StoriesCubit extends Cubit<StoriesState> {
           uploadState: AppState(status: StateStatus.success, data: item),
         ),
       );
-    } on StoryException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           uploadState: AppState(status: StateStatus.error, message: e.message),
@@ -243,7 +243,7 @@ class StoriesCubit extends Cubit<StoriesState> {
   }) async {
     try {
       await _repository.deleteStoryItem(uid: uid, item: item);
-    } on StoryException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           uploadState: AppState(status: StateStatus.error, message: e.message),
@@ -256,7 +256,7 @@ class StoriesCubit extends Cubit<StoriesState> {
     final items = state.myStoryState.data ?? [];
     try {
       await _repository.clearMyStory(uid: uid, items: items);
-    } on StoryException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           uploadState: AppState(status: StateStatus.error, message: e.message),

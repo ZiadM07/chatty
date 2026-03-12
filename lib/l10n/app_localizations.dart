@@ -3358,6 +3358,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This operation failed.'**
   String get thisOperationFailed;
+
+  /// No description provided for @emailCannotBeChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Email cannot be changed'**
+  String get emailCannotBeChanged;
+
+  /// No description provided for @usernameCannotBeChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Username cannot be changed'**
+  String get usernameCannotBeChanged;
+
+  /// No description provided for @couldNotLoadFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Could Not Load File'**
+  String get couldNotLoadFile;
+
+  /// No description provided for @brightnessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust overlay darkness to improve text readability'**
+  String get brightnessDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

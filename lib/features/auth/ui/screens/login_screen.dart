@@ -74,15 +74,13 @@ class _LoginScreenState extends State<LoginScreen> {
         return StateHandler(
           state: state.loginState,
           builder: (context, state) => AppScaffold(
-            appbarSize: 0,
-            showBackButton: false,
+            showAppBar: false,
             body: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: 50),
+                    const SizedBox(height: 60),
 
                     Align(
                       alignment: Alignment.center,
@@ -106,6 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderWidth: 1,
                       borderRadius: 12,
                       textInputType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
                       validator: Validator.validateEmail,
                       focusNode: _emailFocusNode,
                       onFieldSubmitted: (_) =>
@@ -125,6 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: 12,
                       validator: Validator.validatePassword,
                       isPasswordField: true,
+                      textInputAction: TextInputAction.done,
                       focusNode: _passwordFocusNode,
                       onFieldSubmitted: (_) => _submit(),
                     ),

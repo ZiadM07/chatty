@@ -1,11 +1,10 @@
+import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/utils/enums.dart';
-import 'package:Chatty/core/utils/extensions.dart';
 import 'package:Chatty/features/chats/data/models/message_model.dart';
-import 'package:Chatty/features/chats/ui/widgets/message_bubble_shell.dart';
-import 'package:Chatty/features/chats/ui/widgets/message_reaction_overlay.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/message_bubble_shell.dart';
 import 'package:Chatty/features/shared/widgets/app_message_text.dart';
-import 'package:Chatty/features/shared/widgets/app_text.dart';
-import 'package:flutter/material.dart';
+
+import 'message_reaction_overlay.dart';
 
 class TextMessageBubble extends StatelessWidget {
   final MessageModel message;
@@ -77,8 +76,6 @@ class TextMessageBubble extends StatelessWidget {
             ),
     );
 
-    // BubbleWithReactions handles: long-press overlay + chip overlapping
-    // the bubble corner via Stack — no Column needed, no RenderFlex risk.
     return BubbleWithReactions(
       message: message,
       isMe: isMe,

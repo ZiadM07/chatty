@@ -4,6 +4,8 @@ import '../../../auth/data/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/framework/failure.dart';
+
 abstract class UsersDataSource {
   Future<List<UserModel>> getUsers({
     required String currentUid,
@@ -62,7 +64,7 @@ class UsersDataSourceImpl implements UsersDataSource {
           .map((d) => UserModel.fromFirestore(d.data(), d.id))
           .toList();
     } on FirebaseException catch (e) {
-      throw UsersException(e.message ?? 'Failed to fetch users.');
+      throw Failure(500, e.message ?? 'Failed to fetch users.');
     }
   }
 
@@ -103,7 +105,7 @@ class UsersDataSourceImpl implements UsersDataSource {
 
       return results;
     } on FirebaseException catch (e) {
-      throw UsersException(e.message ?? 'Failed to search users.');
+      throw Failure(500, e.message ?? 'Failed to search users.');
     }
   }
 
@@ -114,7 +116,7 @@ class UsersDataSourceImpl implements UsersDataSource {
       if (!doc.exists || doc.data() == null) return null;
       return UserModel.fromFirestore(doc.data()!, doc.id);
     } on FirebaseException catch (e) {
-      throw UsersException(e.message ?? 'Failed to fetch user.');
+      throw Failure(500, e.message ?? 'Failed to fetch user.');
     }
   }
 
@@ -152,14 +154,9 @@ class UsersDataSourceImpl implements UsersDataSource {
 
       return commonGroups;
     } on FirebaseException catch (e) {
-      throw UsersException(e.message ?? 'Failed to fetch common groups.');
+      throw Failure(500, e.message ?? 'Failed to fetch common groups.');
     }
   }
 }
 
-class UsersException implements Exception {
-  final String message;
-  const UsersException(this.message);
-  @override
-  String toString() => 'UsersException: $message';
-}
+

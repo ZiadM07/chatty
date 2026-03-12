@@ -3,6 +3,7 @@ import 'package:Chatty/features/chats/data/models/chat_model.dart';
 import 'package:Chatty/features/chats/data/models/message_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/framework/failure.dart';
 
 abstract class ChatDataSource {
   Stream<List<ChatModel>> watchChats({required String uid});
@@ -140,7 +141,7 @@ class ChatDataSourceImpl implements ChatDataSource {
       if (!doc.exists || doc.data() == null) return null;
       return ChatModel.fromFirestore(doc.data()!, doc.id);
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to get chat.');
+      throw Failure(500, e.message ?? 'Failed to get chat.');
     }
   }
 
@@ -160,7 +161,7 @@ class ChatDataSourceImpl implements ChatDataSource {
           .toList();
       return match.isEmpty ? null : match.first;
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to find chat.');
+      throw Failure(500, e.message ?? 'Failed to find chat.');
     }
   }
 
@@ -184,7 +185,7 @@ class ChatDataSourceImpl implements ChatDataSource {
       await doc.set(chat.toFirestore());
       return chat;
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to create chat.');
+      throw Failure(500, e.message ?? 'Failed to create chat.');
     }
   }
 
@@ -215,7 +216,7 @@ class ChatDataSourceImpl implements ChatDataSource {
       await doc.set(chat.toFirestore());
       return chat;
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to create group.');
+      throw Failure(500, e.message ?? 'Failed to create group.');
     }
   }
 
@@ -225,7 +226,7 @@ class ChatDataSourceImpl implements ChatDataSource {
       await _deleteSubCollection(_messages(chatId));
       await _chats.doc(chatId).delete();
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to delete chat.');
+      throw Failure(500, e.message ?? 'Failed to delete chat.');
     }
   }
 
@@ -287,7 +288,7 @@ class ChatDataSourceImpl implements ChatDataSource {
       await batch.commit();
       return message;
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to send message.');
+      throw Failure(500, e.message ?? 'Failed to send message.');
     }
   }
 
@@ -306,7 +307,7 @@ class ChatDataSourceImpl implements ChatDataSource {
           'reactions.$uid': FieldValue.delete(),
       });
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to react.');
+      throw Failure(500, e.message ?? 'Failed to react.');
     }
   }
 
@@ -341,7 +342,7 @@ class ChatDataSourceImpl implements ChatDataSource {
         await _chats.doc(chatId).update({'unreadCounts.$uid': 0});
       }
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to mark as read.');
+      throw Failure(500, e.message ?? 'Failed to mark as read.');
     }
   }
 
@@ -378,7 +379,7 @@ class ChatDataSourceImpl implements ChatDataSource {
         await batch.commit();
       }
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to mark messages as seen.');
+      throw Failure(500, e.message ?? 'Failed to mark messages as seen.');
     }
   }
 
@@ -406,7 +407,7 @@ class ChatDataSourceImpl implements ChatDataSource {
         await batch.commit();
       }
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to mark delivered.');
+      throw Failure(500, e.message ?? 'Failed to mark delivered.');
     }
   }
 
@@ -420,7 +421,7 @@ class ChatDataSourceImpl implements ChatDataSource {
         chatId,
       ).doc(messageId).update({'isDeleted': true, 'content': ''});
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to delete message.');
+      throw Failure(500, e.message ?? 'Failed to delete message.');
     }
   }
 
@@ -460,7 +461,7 @@ class ChatDataSourceImpl implements ChatDataSource {
           .map((d) => MessageModel.fromFirestore(d.data(), d.id, chatId))
           .toList();
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to load media.');
+      throw Failure(500, e.message ?? 'Failed to load media.');
     }
   }
 
@@ -478,7 +479,7 @@ class ChatDataSourceImpl implements ChatDataSource {
           'memberNames.${entry.key}': entry.value,
       });
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to add members.');
+      throw Failure(500, e.message ?? 'Failed to add members.');
     }
   }
 
@@ -493,7 +494,7 @@ class ChatDataSourceImpl implements ChatDataSource {
         'unreadCounts.$memberId': FieldValue.delete(),
       });
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to remove member.');
+      throw Failure(500, e.message ?? 'Failed to remove member.');
     }
   }
 
@@ -505,7 +506,7 @@ class ChatDataSourceImpl implements ChatDataSource {
         'unreadCounts.$uid': FieldValue.delete(),
       });
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to leave group.');
+      throw Failure(500, e.message ?? 'Failed to leave group.');
     }
   }
 
@@ -522,7 +523,7 @@ class ChatDataSourceImpl implements ChatDataSource {
         'unreadCounts.$currentOwnerUid': FieldValue.delete(),
       });
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to transfer ownership.');
+      throw Failure(500, e.message ?? 'Failed to transfer ownership.');
     }
   }
 
@@ -542,7 +543,7 @@ class ChatDataSourceImpl implements ChatDataSource {
       if (data.isEmpty) return;
       await _chats.doc(chatId).update(data);
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to update group.');
+      throw Failure(500, e.message ?? 'Failed to update group.');
     }
   }
 
@@ -554,7 +555,7 @@ class ChatDataSourceImpl implements ChatDataSource {
     try {
       await _chats.doc(chatId).update({'memberNames': memberNames});
     } on FirebaseException catch (e) {
-      throw ChatException(e.message ?? 'Failed to patch member names.');
+      throw Failure(500, e.message ?? 'Failed to patch member names.');
     }
   }
 
@@ -582,9 +583,4 @@ class ChatDataSourceImpl implements ChatDataSource {
   }
 }
 
-class ChatException implements Exception {
-  final String message;
-  const ChatException(this.message);
-  @override
-  String toString() => 'ChatException: $message';
-}
+

@@ -1,5 +1,6 @@
 import 'package:Chatty/core/framework/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -61,4 +62,7 @@ abstract class InjectionModule {
 
   @injectable
   Location get location => Location();
+
+  @lazySingleton
+  Dio get dio => Dio();
 }

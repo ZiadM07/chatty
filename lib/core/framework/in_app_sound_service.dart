@@ -1,5 +1,4 @@
-// in_app_sound_service.dart
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/di/injectable.dart';
 import 'package:Chatty/features/profile/cubits/notifications_cubit.dart';
@@ -23,7 +22,8 @@ class InAppSoundService {
   Future<void> _play(String asset) async {
     try {
       await _player.stop();
-      await _player.play(AssetSource(asset));
+      await _player.setAsset('assets/$asset');
+      await _player.play();
     } catch (e) {
       debugPrint('🔇 InAppSoundService: $e');
     }

@@ -1,17 +1,15 @@
 import 'dart:async';
 
+import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/di/injectable.dart';
 import 'package:Chatty/core/framework/audio_service.dart';
 import 'package:Chatty/core/utils/enums.dart';
-import 'package:Chatty/core/utils/extensions.dart';
 import 'package:Chatty/features/chats/data/models/message_model.dart';
-import 'package:Chatty/features/chats/ui/widgets/message_bubble_shell.dart';
-import 'package:Chatty/features/chats/ui/widgets/message_reaction_overlay.dart';
-import 'package:Chatty/features/shared/widgets/app_text.dart';
-import 'package:flutter/material.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/message_bubble_shell.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/message_reaction_overlay.dart';
 
 class VoiceMessageBubble extends StatefulWidget {
-  final MessageModel message; // ← now takes full model
+  final MessageModel message;
   final String time;
   final MessageStatus? status;
   final bool isMe;
@@ -21,8 +19,6 @@ class VoiceMessageBubble extends StatefulWidget {
   final MessageType? replyToType;
   final VoidCallback? onReplyTap;
   final Map<String, String> memberNames;
-
-  // Reaction / menu callbacks
   final ValueChanged<String?> onReact;
   final VoidCallback onReply;
   final VoidCallback? onDelete;
@@ -52,13 +48,23 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
   final _audioService = getIt<AudioService>();
   StreamSubscription<AudioPlaybackState>? _sub;
   bool _isPlaying = false;
+  bool _isBuffering = false;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
 
   String get _audioUrl => widget.message.content;
   bool get _isDeleted => widget.message.isDeleted;
+
   Duration get _sourceDuration =>
       Duration(milliseconds: widget.message.metadata?['duration'] as int? ?? 0);
+
+  List<double> get _waveformBars {
+    final raw = widget.message.metadata?['waveform'];
+    if (raw is List && raw.isNotEmpty) {
+      return raw.map((e) => (e as num).toDouble().clamp(0.0, 1.0)).toList();
+    }
+    return List.generate(30, (i) => 0.22 + ((i * 12 + 7) % 17) / 13 * 0.70);
+  }
 
   @override
   void initState() {
@@ -68,6 +74,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
     final snap = _audioService.currentState;
     if (snap.activeUrl == _audioUrl) {
       _isPlaying = snap.isPlaying;
+      _isBuffering = snap.isBuffering;
       _position = snap.position;
       if (snap.duration > Duration.zero) _duration = snap.duration;
     }
@@ -78,10 +85,12 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
     setState(() {
       if (state.activeUrl == _audioUrl) {
         _isPlaying = state.isPlaying;
+        _isBuffering = state.isBuffering;
         _position = state.position;
         if (state.duration > Duration.zero) _duration = state.duration;
       } else {
         _isPlaying = false;
+        _isBuffering = false;
         _position = Duration.zero;
       }
     });
@@ -94,7 +103,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
   }
 
   Future<void> _togglePlayback() async {
-    if (_isDeleted) return;
+    if (_isDeleted || _isBuffering) return;
     if (_isPlaying) {
       await _audioService.pause();
     } else {
@@ -119,11 +128,19 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
         ? (_position.inMilliseconds / _duration.inMilliseconds).clamp(0.0, 1.0)
         : 0.0;
 
+    final iconColor = widget.isMe
+        ? context.colorScheme.onPrimary
+        : context.colorScheme.primary;
+
     final subtleColor =
         (widget.isMe
                 ? context.colorScheme.onPrimary
                 : context.colorScheme.onSurface)
             .withValues(alpha: 0.6);
+
+    final displayDuration = _isPlaying
+        ? _duration - _position
+        : (_position > Duration.zero ? _duration - _position : _duration);
 
     final bubble = MessageBubbleShell(
       isMe: widget.isMe,
@@ -152,18 +169,27 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
                         : context.colorScheme.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    color: widget.isMe
-                        ? context.colorScheme.onPrimary
-                        : context.colorScheme.primary,
-                    size: 22,
-                  ),
+                  child: _isBuffering
+                      ? Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: iconColor,
+                          ),
+                        )
+                      : Icon(
+                          _isPlaying
+                              ? SolarIconsBold.pause
+                              : SolarIconsBold.play,
+                          color: iconColor,
+                          size: 14,
+                        ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: _Waveform(
+                  bars: _waveformBars,
                   progress: progress,
                   isMe: widget.isMe,
                   onSeek: _onSeek,
@@ -171,7 +197,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
               ),
               const SizedBox(width: 10),
               AppText(
-                _isPlaying ? _fmt(_position) : _fmt(_duration),
+                _fmt(displayDuration),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -201,7 +227,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     color: widget.status == MessageStatus.read
-                        ? Colors.lightBlueAccent.withValues(alpha: 0.9)
+                        ? subtleColor
                         : subtleColor,
                   ),
                 ),
@@ -225,39 +251,37 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
 }
 
 class _Waveform extends StatelessWidget {
+  final List<double> bars;
   final double progress;
   final bool isMe;
   final ValueChanged<double> onSeek;
 
   const _Waveform({
+    required this.bars,
     required this.progress,
     required this.isMe,
     required this.onSeek,
   });
 
-  static final _heights = List.generate(
-    30,
-    (i) => 0.22 + ((i * 12 + 7) % 17) / 13 * 0.70,
-  );
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (d) {
+      onHorizontalDragUpdate: (d) {
         final box = context.findRenderObject() as RenderBox;
         onSeek((d.localPosition.dx / box.size.width).clamp(0.0, 1.0));
       },
+      onHorizontalDragEnd: (_) {},
       child: SizedBox(
-        height: 20,
+        height: 28,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: List.generate(_heights.length, (i) {
-            final isPast = (i / _heights.length) <= progress;
+          children: List.generate(bars.length, (i) {
+            final isPast = (i / bars.length) <= progress;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 80),
               width: 2.5,
-              height: _heights[i] * 20,
+              height: (bars[i] * 28).clamp(4.0, 28.0),
               decoration: BoxDecoration(
                 color: isPast
                     ? (isMe

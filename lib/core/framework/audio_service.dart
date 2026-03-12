@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:injectable/injectable.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
@@ -10,18 +10,26 @@ import 'package:record/record.dart';
 class RecordingResult {
   final File? file;
   final Duration duration;
-  const RecordingResult({this.file, this.duration = Duration.zero});
+  final List<double> waveform;
+
+  const RecordingResult({
+    this.file,
+    this.duration = Duration.zero,
+    this.waveform = const [],
+  });
 }
 
 class AudioPlaybackState {
   final String? activeUrl;
   final bool isPlaying;
+  final bool isBuffering;
   final Duration position;
   final Duration duration;
 
   const AudioPlaybackState({
     this.activeUrl,
     this.isPlaying = false,
+    this.isBuffering = false,
     this.position = Duration.zero,
     this.duration = Duration.zero,
   });
@@ -31,11 +39,13 @@ class AudioPlaybackState {
   AudioPlaybackState copyWith({
     String? activeUrl,
     bool? isPlaying,
+    bool? isBuffering,
     Duration? position,
     Duration? duration,
   }) => AudioPlaybackState(
     activeUrl: activeUrl ?? this.activeUrl,
     isPlaying: isPlaying ?? this.isPlaying,
+    isBuffering: isBuffering ?? this.isBuffering,
     position: position ?? this.position,
     duration: duration ?? this.duration,
   );
@@ -49,24 +59,27 @@ class AudioService {
   String? _activeUrl;
 
   final _stateController = StreamController<AudioPlaybackState>.broadcast();
-  StreamSubscription<void>? _completeSub;
-  StreamSubscription<PlayerState>? _stateSub;
+  StreamSubscription<PlayerState>? _playerStateSub;
   StreamSubscription<Duration>? _positionSub;
-  StreamSubscription<Duration>? _durationSub;
+  StreamSubscription<Duration?>? _durationSub;
 
   AudioPlaybackState _current = const AudioPlaybackState();
 
   final _recorder = AudioRecorder();
   DateTime? _recordingStart;
 
+  Timer? _amplitudeTimer;
+  final List<double> _amplitudeSamples = [];
+
   Stream<AudioPlaybackState> get playbackState => _stateController.stream;
   AudioPlaybackState get currentState => _current;
 
   Future<void> play(String url) async {
     if (_activeUrl == url &&
-        _current.isPlaying == false &&
-        _current.position > Duration.zero) {
-      await _player.resume();
+        !_current.isPlaying &&
+        _current.position > Duration.zero &&
+        _player.processingState != ProcessingState.completed) {
+      await _player.play();
       return;
     }
 
@@ -77,13 +90,16 @@ class AudioService {
       _current.copyWith(
         activeUrl: url,
         isPlaying: true,
+        isBuffering: true,
         position: Duration.zero,
         duration: Duration.zero,
       ),
     );
 
     _subscribeToPlayer();
-    await _player.play(UrlSource(url));
+
+    await _player.setUrl(url);
+    await _player.play();
   }
 
   Future<void> pause() async {
@@ -91,7 +107,7 @@ class AudioService {
   }
 
   Future<void> resume() async {
-    if (_activeUrl != null) await _player.resume();
+    if (_activeUrl != null) await _player.play();
   }
 
   Future<void> stop() async {
@@ -118,15 +134,31 @@ class AudioService {
     final ts = DateTime.now().millisecondsSinceEpoch;
     final path = '${dir.path}/voice_$ts.m4a';
     _recordingStart = DateTime.now();
+    _amplitudeSamples.clear();
 
     await _recorder.start(
       const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000),
       path: path,
     );
+
+    _amplitudeTimer = Timer.periodic(const Duration(milliseconds: 100), (
+      _,
+    ) async {
+      try {
+        final amp = await _recorder.getAmplitude();
+        const noiseFloor = -50.0;
+        final db = amp.current.clamp(noiseFloor, 0.0);
+        final normalized = ((db - noiseFloor) / (-noiseFloor)).clamp(0.0, 1.0);
+        _amplitudeSamples.add(normalized);
+      } catch (_) {}
+    });
   }
 
   Future<RecordingResult> stopRecording() async {
     if (!await _recorder.isRecording()) return const RecordingResult();
+
+    _amplitudeTimer?.cancel();
+    _amplitudeTimer = null;
 
     final path = await _recorder.stop();
     final duration = _recordingStart != null
@@ -138,32 +170,69 @@ class AudioService {
     final file = File(path);
     if (!await file.exists()) return const RecordingResult();
 
-    return RecordingResult(file: file, duration: duration);
+    final waveform = _buildWaveform(_amplitudeSamples);
+    _amplitudeSamples.clear();
+
+    return RecordingResult(file: file, duration: duration, waveform: waveform);
   }
 
   Future<void> cancelRecording() async {
+    _amplitudeTimer?.cancel();
+    _amplitudeTimer = null;
+    _amplitudeSamples.clear();
     if (await _recorder.isRecording()) await _recorder.cancel();
     _recordingStart = null;
   }
 
+  List<double> _buildWaveform(List<double> raw, {int barCount = 30}) {
+    if (raw.isEmpty) return List.filled(barCount, 0.3);
+
+    final result = <double>[];
+    for (int i = 0; i < barCount; i++) {
+      final start = (i / barCount * raw.length).floor();
+      final end = ((i + 1) / barCount * raw.length).ceil().clamp(0, raw.length);
+      if (start >= end) {
+        result.add(0.15);
+        continue;
+      }
+      final window = raw.sublist(start, end);
+      final avg = window.reduce((a, b) => a + b) / window.length;
+      result.add(avg.clamp(0.08, 1.0));
+    }
+    return result;
+  }
+
   void _subscribeToPlayer() {
     _cancelSubscriptions();
+    _playerStateSub = _player.playerStateStream.listen((state) {
+      final isBuffering =
+          state.processingState == ProcessingState.loading ||
+          state.processingState == ProcessingState.buffering;
 
-    _stateSub = _player.onPlayerStateChanged.listen((state) {
-      final playing = state == PlayerState.playing;
-      _emit(_current.copyWith(isPlaying: playing));
+      if (state.processingState == ProcessingState.completed) {
+        _emit(
+          _current.copyWith(
+            isPlaying: false,
+            isBuffering: false,
+            position: Duration.zero,
+          ),
+        );
+        return;
+      }
+
+      _emit(
+        _current.copyWith(isPlaying: state.playing, isBuffering: isBuffering),
+      );
     });
 
-    _positionSub = _player.onPositionChanged.listen((pos) {
+    _positionSub = _player.positionStream.listen((pos) {
       _emit(_current.copyWith(position: pos));
     });
 
-    _durationSub = _player.onDurationChanged.listen((dur) {
-      if (dur > Duration.zero) _emit(_current.copyWith(duration: dur));
-    });
-
-    _completeSub = _player.onPlayerComplete.listen((_) {
-      _emit(_current.copyWith(isPlaying: false, position: _current.duration));
+    _durationSub = _player.durationStream.listen((dur) {
+      if (dur != null && dur > Duration.zero) {
+        _emit(_current.copyWith(duration: dur));
+      }
     });
   }
 
@@ -173,14 +242,12 @@ class AudioService {
   }
 
   void _cancelSubscriptions() {
-    _stateSub?.cancel();
+    _playerStateSub?.cancel();
     _positionSub?.cancel();
     _durationSub?.cancel();
-    _completeSub?.cancel();
-    _stateSub = null;
+    _playerStateSub = null;
     _positionSub = null;
     _durationSub = null;
-    _completeSub = null;
   }
 
   void _emit(AudioPlaybackState state) {
@@ -189,6 +256,7 @@ class AudioService {
   }
 
   Future<void> dispose() async {
+    _amplitudeTimer?.cancel();
     _cancelSubscriptions();
     await _player.dispose();
     await _recorder.dispose();

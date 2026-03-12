@@ -1,4 +1,3 @@
-import 'package:Chatty/features/stories/data/data_sources/story_data_source.dart';
 import 'package:Chatty/features/stories/data/models/story_item_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/state/app_state.dart';
 import '../data/models/story_model.dart';
 import '../data/repositories/story_repository.dart';
+import '../../../../core/framework/failure.dart';
 
 class StoryViewerState extends Equatable {
   final StoryModel? story;
@@ -104,7 +104,7 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
       );
 
       _markCurrentViewed(currentUid);
-    } on StoryException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           storyState: AppState(status: StateStatus.error, message: e.message),
@@ -220,7 +220,7 @@ class StoryViewerCubit extends Cubit<StoryViewerState> {
           replyState: AppState(status: StateStatus.success, data: chatId),
         ),
       );
-    } on StoryException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           replyState: AppState(status: StateStatus.error, message: e.message),

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/state/app_state.dart';
-import '../data/data_source/profile_data_source.dart';
+import '../../../../core/framework/failure.dart';
 import '../data/repositories/profile_repositories.dart';
 import 'profile_state.dart';
 
@@ -40,7 +40,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           fetchState: AppState(status: StateStatus.success, data: profile),
         ),
       );
-    } on ProfileException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           fetchState: AppState(status: StateStatus.error, message: e.message),
@@ -83,7 +83,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           ),
         ),
       );
-    } on ProfileException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           updateInfoState: AppState(
@@ -126,7 +126,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           ),
         ),
       );
-    } on ProfileException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           updateInfoState: AppState(
@@ -175,7 +175,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           ),
         ),
       );
-    } on ProfileException catch (e) {
+    } on Failure catch (e) {
       emit(
         state.copyWith(
           updatePhotoState: AppState(

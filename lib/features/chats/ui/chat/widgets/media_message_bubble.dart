@@ -1,9 +1,9 @@
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/utils/enums.dart';
 import 'package:Chatty/features/chats/data/models/message_model.dart';
-import 'package:Chatty/features/chats/ui/widgets/media_viewer_dialog.dart';
-import 'package:Chatty/features/chats/ui/widgets/message_bubble_shell.dart';
-import 'package:Chatty/features/chats/ui/widgets/message_reaction_overlay.dart';
+import 'package:Chatty/features/chats/ui/media/widgets/media_viewer_dialog.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/message_bubble_shell.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/message_reaction_overlay.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 

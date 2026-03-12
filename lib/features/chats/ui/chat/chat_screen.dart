@@ -1,19 +1,15 @@
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
 import 'package:Chatty/features/chats/cubits/chat_cubit.dart';
-import 'package:Chatty/features/chats/data/models/message_model.dart';
-import 'package:Chatty/features/chats/ui/widgets/chat_app_bar.dart';
-import 'package:Chatty/features/chats/ui/widgets/chat_back_ground.dart';
-import 'package:Chatty/features/chats/ui/widgets/chat_input.dart';
-import 'package:Chatty/features/chats/ui/widgets/confirm_delete_message.dart';
-import 'package:Chatty/features/chats/ui/widgets/swipe_to_reply.dart';
-import 'package:Chatty/features/chats/ui/widgets/text_message_bubble.dart';
-import 'package:Chatty/features/chats/ui/widgets/media_message_bubble.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/chat_appbar.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/chat_background.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/chat_input.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/confirm_delete_message.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/message_bubble.dart';
+import 'package:Chatty/features/chats/ui/chat/widgets/swipe_to_reply.dart';
 import '../../../../core/di/injectable.dart';
 import '../../../../core/utils/enums.dart';
-import '../../../shared/widgets/app_loading.dart';
 import '../../../shared/widgets/app_toast.dart';
-import '../widgets/voice_message_bubble.dart';
 
 @RoutePage()
 class ChatScreen extends StatefulWidget implements AutoRouteWrapper {
@@ -174,13 +170,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     ],
                   ),
                 ),
-                child: IconButton(
-                  onPressed: _scrollToBottom,
-                  icon: Icon(
-                    Icons.arrow_downward_outlined,
+                child: Center(
+                  child: Icon(
+                    SolarIconsOutline.arrowDown,
                     color: context.colorScheme.onPrimary,
                     size: 18,
-                  ),
+                  ).addAction(onBounce: _scrollToBottom),
                 ),
               ).addPadding(bottom: 80);
             },
@@ -194,19 +189,20 @@ class _ChatScreenState extends State<ChatScreen> {
                     ChatAppBar(chat: state.chat),
                     const SizedBox(height: 5),
 
-                    // ✅ Reversed message list takes remaining space
                     Expanded(
                       child: CustomScrollView(
                         controller: _scrollController,
                         reverse: true,
                         slivers: [
-                          const SliverPadding(
-                            padding: EdgeInsets.only(top: 85),
-                          ),
+                          SliverPadding(padding: AppPadding.set(top: 85)),
 
                           if (state.chatState.isLoading)
                             SliverFillRemaining(
-                              child: Center(child: Loading.loader(context)),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: context.colorScheme.secondary,
+                                ),
+                              ),
                             )
                           else if (state.chatState.isError)
                             SliverFillRemaining(
@@ -245,37 +241,55 @@ class _ChatScreenState extends State<ChatScreen> {
                                       () => GlobalKey(),
                                     );
 
-                                    return Padding(
-                                      padding: const EdgeInsets.only(bottom: 6),
-                                      child: AnimatedContainer(
-                                        key: itemKey,
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isHighlighted
-                                              ? context.colorScheme.primary
-                                                    .withValues(alpha: 0.12)
-                                              : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: SwipeToReply(
+                                    return AnimatedContainer(
+                                      key: itemKey,
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isHighlighted
+                                            ? context.colorScheme.primary
+                                                  .withValues(alpha: 0.12)
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: SwipeToReply(
+                                        isMe: isMe,
+                                        onSwipe: message.isDeleted
+                                            ? null
+                                            : () => context
+                                                  .read<ChatCubit>()
+                                                  .setReplyingTo(message),
+                                        child: MessageBubble(
+                                          message: message,
                                           isMe: isMe,
-                                          onSwipe: message.isDeleted
-                                              ? null
-                                              : () => context
-                                                    .read<ChatCubit>()
-                                                    .setReplyingTo(message),
-                                          child: _buildMessageBubble(
-                                            message,
-                                            isMe,
-                                            isLastMyMessage,
-                                          ),
+                                          isLastMyMessage: isLastMyMessage,
+                                          currentUid: _currentUid,
+                                          memberNames:
+                                              state.chat?.memberNames ?? {},
+                                          onReplyTap: message.replyToId != null
+                                              ? () => _scrollToMessage(
+                                                  message.replyToId!,
+                                                )
+                                              : null,
+                                          onReact: (emoji) => context
+                                              .read<ChatCubit>()
+                                              .reactToMessage(
+                                                messageId: message.id,
+                                                reaction: emoji,
+                                              ),
+                                          onReply: () => context
+                                              .read<ChatCubit>()
+                                              .setReplyingTo(message),
+                                          onDelete: isMe && !message.isDeleted
+                                              ? () => confirmDeleteMessage(
+                                                  context: context,
+                                                  messageId: message.id,
+                                                )
+                                              : null,
                                         ),
                                       ),
-                                    );
+                                    ).addPadding(bottom: 6);
                                   }, childCount: messages.length),
                                 );
                               },
@@ -310,6 +324,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                     onTextChanged: (_) {},
                     onSendAttachment: _onSendAttachment,
+                    onSendVoice: (result) {
+                      context.read<ChatCubit>().sendVoiceMessage(
+                        senderId: _currentUid,
+                        result: result,
+                      );
+                      _scrollToBottom();
+                    },
                   ),
                 ),
               ],
@@ -318,101 +339,5 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       },
     );
-  }
-
-  Widget _buildMessageBubble(
-    MessageModel message,
-    bool isMe,
-    bool isLastMyMessage,
-  ) {
-    final onReplyTap = message.replyToId != null
-        ? () => _scrollToMessage(message.replyToId!)
-        : null;
-
-    final memberNames = context.read<ChatCubit>().state.chat?.memberNames ?? {};
-
-    void handleReact(String? emoji) => context.read<ChatCubit>().reactToMessage(
-      messageId: message.id,
-      reaction: emoji,
-    );
-
-    void handleReply() => context.read<ChatCubit>().setReplyingTo(message);
-
-    void handleDelete() =>
-        confirmDeleteMessage(context: context, messageId: message.id);
-
-    switch (message.type) {
-      case MessageType.audio:
-        return VoiceMessageBubble(
-          key: ValueKey(message.id),
-          message: message, // ← full model
-          time: _formatTime(message.createdAt),
-          status: isMe && isLastMyMessage ? message.status : null,
-          isMe: isMe,
-          currentUid: _currentUid,
-          replyToContent: message.replyToContent,
-          replyToSenderId: message.replyToSenderId,
-          replyToType: message.replyToType,
-          onReplyTap: onReplyTap,
-          memberNames: memberNames,
-          onReact: handleReact,
-          onReply: handleReply,
-          onDelete: isMe && !message.isDeleted ? handleDelete : null,
-        );
-
-      case MessageType.image:
-      case MessageType.video:
-      case MessageType.file:
-        return MediaMessageBubble(
-          key: ValueKey(message.id),
-          message: message, // ← full model
-          type: message.type,
-          time: _formatTime(message.createdAt),
-          status: isMe && isLastMyMessage ? message.status : null,
-          isMe: isMe,
-          currentUid: _currentUid,
-          metadata: message.metadata,
-          replyToContent: message.replyToContent,
-          replyToSenderId: message.replyToSenderId,
-          replyToType: message.replyToType,
-          onReplyTap: onReplyTap,
-          memberNames: memberNames,
-          onReact: handleReact,
-          onReply: handleReply,
-          onDelete: isMe && !message.isDeleted ? handleDelete : null,
-        );
-
-      case MessageType.text:
-      default:
-        return TextMessageBubble(
-          key: ValueKey(message.id),
-          message: message, // ← full model
-          time: _formatTime(message.createdAt),
-          status: isMe && isLastMyMessage ? message.status : null,
-          isMe: isMe,
-          isDeleted: message.isDeleted,
-          messageType: message.type,
-          replyToContent: message.replyToContent,
-          replyToSenderId: message.replyToSenderId,
-          replyToType: message.replyToType,
-          currentUid: _currentUid,
-          onReplyTap: onReplyTap,
-          memberNames: memberNames,
-          onReact: handleReact,
-          onReply: handleReply,
-          onDelete: handleDelete,
-        );
-    }
-  }
-
-  String _formatTime(DateTime dt) {
-    final hour = dt.hour > 12
-        ? dt.hour - 12
-        : dt.hour == 0
-        ? 12
-        : dt.hour;
-    final minute = dt.minute.toString().padLeft(2, '0');
-    final period = dt.hour >= 12 ? context.locale.pm : context.locale.am;
-    return '$hour:$minute $period';
   }
 }

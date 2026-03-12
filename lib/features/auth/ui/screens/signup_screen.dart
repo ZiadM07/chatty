@@ -69,20 +69,17 @@ class _SignupScreenState extends State<SignupScreen> {
         return StateHandler(
           state: state.signUpState,
           loadingWidget: const AppScaffold(
-            appbarSize: 0,
-            showBackButton: false,
+            showAppBar: false,
             body: Center(child: CircularProgressIndicator()),
           ),
           builder: (context, _) => AppScaffold(
-            appbarSize: 0,
-            showBackButton: false,
+            showAppBar: false,
             body: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 60),
 
                     Align(
                       alignment: Alignment.center,
@@ -104,6 +101,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       label: context.locale.email,
                       hintText: context.locale.email,
                       textInputType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
                       validator: Validator.validateEmail,
                       focusNode: _emailFocusNode,
                       onFieldSubmitted: (_) =>
@@ -118,6 +116,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       hintText: context.locale.password,
                       validator: Validator.validatePassword,
                       isPasswordField: true,
+                      textInputAction: TextInputAction.next,
                       focusNode: _passwordFocusNode,
                       onFieldSubmitted: (_) =>
                           _confirmPasswordFocusNode.requestFocus(),
@@ -134,6 +133,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         v?.trim(),
                       ),
                       isPasswordField: true,
+                      textInputAction: TextInputAction.done,
                       focusNode: _confirmPasswordFocusNode,
                       onFieldSubmitted: (_) => _submit(),
                     ),
@@ -177,7 +177,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           style: context.textTheme.bodyMedium,
                         ),
                         TextButton(
-                          onPressed: () => context.router.pop(),
+                          onPressed: () => context.router.maybePop(),
                           child: AppText(
                             context.locale.login,
                             style: context.textTheme.bodyMedium?.copyWith(

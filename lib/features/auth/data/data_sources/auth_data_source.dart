@@ -3,6 +3,7 @@ import '../models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/framework/failure.dart';
 
 abstract class AuthDataSource {
   Future<AuthModel?> getCurrentUser();
@@ -155,7 +156,7 @@ class AuthDataSourceImpl implements AuthDataSource {
   Future<void> sendEmailVerification() async {
     try {
       final user = _firebaseAuth.currentUser;
-      if (user == null) throw const AuthException('No user is signed in.');
+      if (user == null) throw Failure(401, 'No user is signed in.');
       await user.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       throw _mapFirebaseAuthException(e);
@@ -178,7 +179,7 @@ class AuthDataSourceImpl implements AuthDataSource {
         }
       }
     } on FirebaseException catch (e) {
-      throw FirestoreException(e.message ?? 'Failed to save user profile.');
+      throw Failure(500, e.message ?? 'Failed to save user profile.');
     }
   }
 
@@ -194,7 +195,7 @@ class AuthDataSourceImpl implements AuthDataSource {
 
       return UserModel.fromFirestore(doc.data()!, uid);
     } on FirebaseException catch (e) {
-      throw FirestoreException(e.message ?? 'Failed to fetch user profile.');
+      throw Failure(500, e.message ?? 'Failed to fetch user profile.');
     }
   }
 
@@ -205,7 +206,7 @@ class AuthDataSourceImpl implements AuthDataSource {
         _UserFields.isProfileComplete: true,
       });
     } on FirebaseException catch (e) {
-      throw FirestoreException(e.message ?? 'Failed to mark profile complete.');
+      throw Failure(500, e.message ?? 'Failed to mark profile complete.');
     }
   }
 
@@ -220,7 +221,7 @@ class AuthDataSourceImpl implements AuthDataSource {
         _UserFields.lastSeen: DateTime.now().millisecondsSinceEpoch,
       });
     } on FirebaseException catch (e) {
-      throw FirestoreException(e.message ?? 'Failed to update presence.');
+      throw Failure(500, e.message ?? 'Failed to update presence.');
     }
   }
 
@@ -234,7 +235,7 @@ class AuthDataSourceImpl implements AuthDataSource {
     } on FirebaseAuthException catch (e) {
       throw _mapFirebaseAuthException(e);
     } on FirebaseException catch (e) {
-      throw FirestoreException(e.message ?? 'Failed to delete account.');
+      throw Failure(500, e.message ?? 'Failed to delete account.');
     }
   }
 
@@ -247,49 +248,33 @@ class AuthDataSourceImpl implements AuthDataSource {
     });
   }
 
-  AuthException _mapFirebaseAuthException(FirebaseAuthException e) {
+  Failure _mapFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':
-        return const AuthException('This email is already registered.');
+        return Failure(401, 'This email is already registered.');
       case 'invalid-email':
-        return const AuthException('The email address is not valid.');
+        return Failure(401, 'The email address is not valid.');
       case 'weak-password':
-        return const AuthException('The password is too weak.');
+        return Failure(401, 'The password is too weak.');
       case 'user-not-found':
-        return const AuthException('No account found with this email.');
+        return Failure(401, 'No account found with this email.');
       case 'wrong-password':
-        return const AuthException('Incorrect password. Please try again.');
+        return Failure(401, 'Incorrect password. Please try again.');
       case 'user-disabled':
-        return const AuthException('This account has been disabled.');
+        return Failure(401, 'This account has been disabled.');
       case 'too-many-requests':
-        return const AuthException(
-          'Too many attempts. Please try again later.',
-        );
+        return Failure(401, 'Too many attempts. Please try again later.');
       case 'network-request-failed':
-        return const AuthException('Network error. Check your connection.');
+        return Failure(401, 'Network error. Check your connection.');
       case 'requires-recent-login':
-        return const AuthException('Please sign in again to continue.');
+        return Failure(401, 'Please sign in again to continue.');
       default:
-        return AuthException(e.message ?? 'An unexpected error occurred.');
+        return Failure(401, e.message ?? 'An unexpected error occurred.');
     }
   }
 }
 
-class AuthException implements Exception {
-  final String message;
-  const AuthException(this.message);
 
-  @override
-  String toString() => 'AuthException: $message';
-}
-
-class FirestoreException implements Exception {
-  final String message;
-  const FirestoreException(this.message);
-
-  @override
-  String toString() => 'FirestoreException: $message';
-}
 
 class _Collections {
   static const String users = 'users';
