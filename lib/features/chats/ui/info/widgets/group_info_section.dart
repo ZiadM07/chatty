@@ -3,6 +3,7 @@ import 'package:Chatty/core/framework/pick_file.dart';
 import 'package:Chatty/features/chats/data/models/chat_model.dart';
 import 'package:Chatty/features/chats/cubits/chat_info_cubit.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/features/shared/widgets/profile_placeholder.dart';
 import 'package:intl/intl.dart';
 
 class GroupInfoSection extends StatefulWidget {
@@ -179,13 +180,14 @@ class _GroupInfoSectionState extends State<GroupInfoSection> {
                       ],
                     ),
                   ),
-                  child: AppImage(
-                    imageUrl:
-                        _chat!.groupPhotoUrl ?? AppConstants.fakeUserImage,
-                    width: 100,
-                    height: 100,
-                    borderRadius: 50,
-                  ),
+                  child: _chat!.groupPhotoUrl != null
+                      ? AppImage(
+                          imageUrl: _chat!.groupPhotoUrl!,
+                          width: 100,
+                          height: 100,
+                          borderRadius: 50,
+                        )
+                      : ProfilePlaceholder(name: _chat!.groupName!, size: 100),
                 ),
                 if (_isOwner)
                   Container(

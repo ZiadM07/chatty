@@ -4,6 +4,7 @@ import 'package:Chatty/features/auth/data/models/user_model.dart';
 import 'package:Chatty/features/chats/cubits/chat_info_cubit.dart';
 import 'package:Chatty/features/chats/ui/info/widgets/add_members_sheet.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/features/shared/widgets/profile_placeholder.dart';
 import 'package:Chatty/features/users/data/repositories/users_repository.dart';
 
 class GroupMembersSection extends StatelessWidget {
@@ -240,12 +241,17 @@ class _MemberTileState extends State<_MemberTile> {
           Stack(
             alignment: Alignment.bottomRight,
             children: [
-              AppImage(
-                imageUrl: _user?.photoUrl ?? AppConstants.fakeUserImage,
-                width: 48,
-                height: 48,
-                borderRadius: 100,
-              ),
+              _user?.photoUrl != null
+                  ? AppImage(
+                      imageUrl: _user!.photoUrl!,
+                      width: 48,
+                      height: 48,
+                      borderRadius: 100,
+                    )
+                  : ProfilePlaceholder(
+                      name: _user?.displayName ?? 'user',
+                      size: 48,
+                    ),
               Container(
                 width: 12,
                 height: 12,
@@ -305,7 +311,7 @@ class _MemberTileState extends State<_MemberTile> {
                           color: widget.isSelf
                               ? context.colorScheme.primary
                               : (_user?.isOnline ?? false
-                                    ? Colors.greenAccent
+                                    ? context.colorScheme.success
                                     : context.colorScheme.textSecondary),
                           fontWeight: FontWeight.w500,
                         ),

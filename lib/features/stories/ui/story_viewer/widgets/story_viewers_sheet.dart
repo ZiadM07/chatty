@@ -1,6 +1,7 @@
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/di/injectable.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/features/shared/widgets/profile_placeholder.dart';
 import 'package:Chatty/features/users/data/repositories/users_repository.dart';
 
 class StoryViewersSheet extends StatelessWidget {
@@ -195,12 +196,14 @@ class _StoryViewerTileState extends State<StoryViewerTile> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          AppImage(
-            imageUrl: _photo ?? AppConstants.fakeUserImage,
-            width: 44,
-            height: 44,
-            borderRadius: 100,
-          ),
+          _photo != null
+              ? AppImage(
+                  imageUrl: _photo!,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 100,
+                )
+              : ProfilePlaceholder(name: _name ?? '...', size: 44),
           const SizedBox(width: 12),
           Expanded(
             child: AppText(

@@ -2,17 +2,15 @@ import 'package:Chatty/config/router/app_router.gr.dart';
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/core/di/injectable.dart';
 import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
-import 'package:Chatty/features/auth/data/models/user_model.dart';
 import 'package:Chatty/features/chats/cubits/chat_info_cubit.dart';
 import 'package:Chatty/features/chats/ui/info/widgets/account_info_section.dart';
 import 'package:Chatty/features/chats/ui/info/widgets/actions_section.dart';
-import 'package:Chatty/features/chats/ui/info/widgets/common_groups_section.dart';
+import 'package:Chatty/features/chats/ui/info/widgets/groups_section.dart';
 import 'package:Chatty/features/chats/ui/info/widgets/group_info_section.dart';
 import 'package:Chatty/features/chats/ui/info/widgets/group_members_section.dart';
 import 'package:Chatty/features/chats/ui/info/widgets/media_section.dart';
 import 'package:Chatty/features/chats/ui/info/widgets/notifications_section.dart';
 import 'package:Chatty/features/shared/widgets/app_toast.dart';
-import 'package:Chatty/features/users/ui/widgets/create_group_bottom_sheet.dart';
 
 @RoutePage()
 class ChatInfoScreen extends StatefulWidget implements AutoRouteWrapper {
@@ -182,84 +180,18 @@ class _UserInfoContent extends StatelessWidget {
             MediaSection(chatId: chatId),
             const SizedBox(height: 30),
 
-            _CommonGroupsWrapper(
-              commonGroupsState: state.commonGroupsState,
-              currentUid: currentUid,
-              otherUser: user,
-            ),
+            if (state.commonGroupsState.isSuccess &&
+                state.commonGroupsState.data != null)
+              GroupsSection(
+                groups: state.commonGroupsState.data!,
+                currentUid: currentUid,
+                otherUser: user,
+              ),
             const SizedBox(height: 32),
           ],
         );
       },
     );
-  }
-}
-
-class _CommonGroupsWrapper extends StatelessWidget {
-  final AppState commonGroupsState;
-  final String currentUid;
-  final UserModel? otherUser;
-
-  const _CommonGroupsWrapper({
-    required this.commonGroupsState,
-    required this.currentUid,
-    this.otherUser,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (commonGroupsState.isLoading) {
-      return const SizedBox.shrink();
-    }
-
-    if (commonGroupsState.isError || commonGroupsState.data == null) {
-      return const SizedBox.shrink();
-    }
-
-    final groups = commonGroupsState.data as List;
-
-    if (groups.isEmpty) {
-      return Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  context.colorScheme.primary,
-                  context.colorScheme.secondary,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              SolarIconsOutline.usersGroupRounded,
-              size: 18,
-              color: context.colorScheme.onPrimary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          AppText(
-            context.locale.createAGroupWithThisUser,
-            weight: FontWeight.w700,
-            size: 14,
-          ),
-          const Spacer(),
-          Icon(
-            Icons.chevron_right,
-            color: context.colorScheme.onSurface,
-          ).addAction(
-            onTap: () {
-              CreateGroupBottomSheet.show(context, preSelectedUser: otherUser);
-            },
-          ),
-        ],
-      ).addPadding(horizontal: 20);
-    }
-
-    return CommonGroupsSection(groups: groups, currentUid: currentUid);
   }
 }
 

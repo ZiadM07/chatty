@@ -4,6 +4,8 @@ import 'package:Chatty/features/auth/data/models/user_model.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:Chatty/features/users/data/repositories/users_repository.dart';
 
+import '../../../../shared/widgets/profile_placeholder.dart';
+
 class AddMembersSheet extends StatefulWidget {
   final String chatId;
   final String currentUid;
@@ -290,12 +292,14 @@ class _SelectedChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AppImage(
-            imageUrl: user.photoUrl ?? AppConstants.fakeUserImage,
-            width: 22,
-            height: 22,
-            borderRadius: 100,
-          ),
+          user.photoUrl != null
+              ? AppImage(
+                  imageUrl: user.photoUrl!,
+                  width: 22,
+                  height: 22,
+                  borderRadius: 100,
+                )
+              : ProfilePlaceholder(name: user.displayName, size: 22),
           const SizedBox(width: 6),
           AppText(
             user.displayName,
@@ -339,12 +343,14 @@ class _UserSelectTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
         child: Row(
           children: [
-            AppImage(
-              imageUrl: user.photoUrl ?? AppConstants.fakeUserImage,
-              width: 46,
-              height: 46,
-              borderRadius: 100,
-            ),
+            user.photoUrl != null
+                ? AppImage(
+                    imageUrl: user.photoUrl!,
+                    width: 46,
+                    height: 46,
+                    borderRadius: 100,
+                  )
+                : ProfilePlaceholder(name: user.displayName, size: 46),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

@@ -5,6 +5,8 @@ import 'package:Chatty/features/shared/widgets/app_asset_image.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:Chatty/features/shared/widgets/profile_image_dialog.dart';
 
+import '../../../shared/widgets/profile_placeholder.dart';
+
 class ProfileAppBar extends StatelessWidget {
   const ProfileAppBar({super.key});
 
@@ -52,6 +54,7 @@ class ProfileAppBar extends StatelessWidget {
                     _ProfileAvatar(
                       photoUrl: photoUrl,
                       heroTag: heroTag,
+                      name: name,
                       isUploading:
                           state.updatePhotoState.status ==
                           StateStatus.loadingOverlay,
@@ -120,12 +123,14 @@ class _ProfileAvatar extends StatelessWidget {
   final bool isUploading;
   final String heroTag;
   final VoidCallback onLongPress;
+  final String name;
 
   const _ProfileAvatar({
     required this.photoUrl,
     required this.isUploading,
     required this.heroTag,
     required this.onLongPress,
+    required this.name,
   });
 
   @override
@@ -137,12 +142,14 @@ class _ProfileAvatar extends StatelessWidget {
         children: [
           Hero(
             tag: heroTag,
-            child: AppImage(
-              imageUrl: photoUrl ?? AppConstants.fakeUserImage,
-              width: 56,
-              height: 56,
-              borderRadius: 100,
-            ),
+            child: photoUrl != null
+                ? ProfilePlaceholder(name: name, size: 56)
+                : AppImage(
+                    imageUrl: photoUrl!,
+                    width: 56,
+                    height: 56,
+                    borderRadius: 100,
+                  ),
           ),
 
           if (isUploading) ...[

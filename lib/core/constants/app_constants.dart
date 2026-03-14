@@ -14,6 +14,6 @@ class AppConstants {
   static const playFairDisplayFont = "PlayfairDisplaySC";
   static const emojiFont = "NotoColorEmoji";
   static const otpLength = 6;
-  static const fakeUserImage =
-      'https://static.vecteezy.com/system/resources/previews/019/776/467/non_2x/user-icon-fake-photo-sign-profile-button-simple-style-social-media-poster-background-symbol-user-brand-logo-design-element-user-t-shirt-printing-for-sticker-free-vector.jpg';
+  static const appDownloadLink =
+      'https://www.dropbox.com/scl/fi/zoadtjhn452mn6tz2qnon/Chatty-App.apk?rlkey=lokaafiogw1opesjad1mw7o05&st=kvgmh4hp&dl=0';
 }

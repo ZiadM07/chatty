@@ -35,8 +35,7 @@ class UsersActionsRow extends StatelessWidget {
             onTap: () {
               SharePlus.instance.share(
                 ShareParams(
-                  text:
-                      'https://www.dropbox.com/scl/fi/tue8u0u8nl4nd2qah14dd/chatty.apk?rlkey=squoaeec99c2nrcsrb7u7qj9y&st=7n8diymz&dl=0',
+                  text: AppConstants.appDownloadLink,
                   title: 'Chatty',
                   downloadFallbackEnabled: true,
                 ),

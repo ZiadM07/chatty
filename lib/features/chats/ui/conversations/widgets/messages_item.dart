@@ -11,6 +11,8 @@ import 'package:Chatty/features/stories/cubits/stories_cubit.dart';
 import 'package:Chatty/features/stories/data/models/story_model.dart';
 import 'package:Chatty/features/users/data/repositories/users_repository.dart';
 
+import '../../../../shared/widgets/profile_placeholder.dart';
+
 class MessagesItem extends StatefulWidget {
   final ChatModel chat;
   final String currentUid;
@@ -95,8 +97,8 @@ class _MessagesItemState extends State<MessagesItem> {
         : widget.chat.nameFor(otherUid);
 
     final photoUrl = _isGroup
-        ? (widget.chat.groupPhotoUrl ?? AppConstants.fakeUserImage)
-        : (_otherUser?.photoUrl ?? AppConstants.fakeUserImage);
+        ? (widget.chat.groupPhotoUrl)
+        : (_otherUser?.photoUrl);
 
     final heroTag = 'chat_avatar_${widget.chat.id}';
 
@@ -125,9 +127,7 @@ class _MessagesItemState extends State<MessagesItem> {
                     : null,
                 onLongPress: () => ProfileImageDialog.show(
                   context: context,
-                  imageUrl: photoUrl == AppConstants.fakeUserImage
-                      ? null
-                      : photoUrl,
+                  imageUrl: photoUrl,
                   name: displayName,
                   heroTag: heroTag,
                 ),
@@ -166,12 +166,14 @@ class _MessagesItemState extends State<MessagesItem> {
                                     : null,
                               )
                             : null,
-                        child: AppImage(
-                          imageUrl: photoUrl,
-                          width: 55,
-                          height: 55,
-                          borderRadius: 100,
-                        ),
+                        child: photoUrl != null
+                            ? AppImage(
+                                imageUrl: photoUrl,
+                                width: 55,
+                                height: 55,
+                                borderRadius: 100,
+                              )
+                            : ProfilePlaceholder(name: displayName, size: 55),
                       ),
 
                       if (!_isGroup)

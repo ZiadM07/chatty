@@ -11,6 +11,8 @@ import 'package:Chatty/features/shared/widgets/app_text_form_field.dart';
 import 'package:Chatty/features/shared/widgets/app_toast.dart';
 import 'package:Chatty/features/users/cubits/users_cubit.dart';
 
+import '../../../shared/widgets/profile_placeholder.dart';
+
 class CreateGroupBottomSheet extends StatefulWidget {
   final UserModel? preSelectedUser;
 
@@ -301,12 +303,7 @@ class _GroupInfoStep extends StatelessWidget {
                         fit: BoxFit.cover,
                         borderRadius: 100,
                       )
-                    : AppImage(
-                        imageUrl: AppConstants.fakeUserImage,
-                        width: 110,
-                        height: 110,
-                        borderRadius: 100,
-                      ),
+                    : ProfilePlaceholder(name: context.locale.group, size: 110),
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -580,12 +577,15 @@ class _SelectedChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AppImage(
-            imageUrl: user.photoUrl ?? AppConstants.fakeUserImage,
-            width: 22,
-            height: 22,
-            borderRadius: 100,
-          ),
+          if (user.photoUrl != null)
+            AppImage(
+              imageUrl: user.photoUrl!,
+              width: 22,
+              height: 22,
+              borderRadius: 100,
+            )
+          else
+            ProfilePlaceholder(name: user.displayName, size: 22),
           const SizedBox(width: 6),
           AppText(
             user.displayName,
@@ -629,12 +629,15 @@ class _UserSelectTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
         child: Row(
           children: [
-            AppImage(
-              imageUrl: user.photoUrl ?? AppConstants.fakeUserImage,
-              width: 46,
-              height: 46,
-              borderRadius: 100,
-            ),
+            if (user.photoUrl != null)
+              AppImage(
+                imageUrl: user.photoUrl!,
+                width: 46,
+                height: 46,
+                borderRadius: 100,
+              )
+            else
+              ProfilePlaceholder(name: user.displayName, size: 46),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

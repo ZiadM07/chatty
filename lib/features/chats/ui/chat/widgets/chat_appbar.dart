@@ -11,6 +11,8 @@ import 'package:Chatty/features/shared/widgets/profile_image_dialog.dart';
 import 'package:Chatty/features/users/data/repositories/users_repository.dart';
 import 'package:Chatty/config/router/app_router.gr.dart';
 
+import '../../../../shared/widgets/profile_placeholder.dart';
+
 class ChatAppBar extends StatefulWidget {
   final ChatModel? chat;
   const ChatAppBar({super.key, required this.chat});
@@ -62,16 +64,16 @@ class _ChatAppBarState extends State<ChatAppBar> {
     final currentUid = context.read<AuthCubit>().state.currentUser?.uid ?? '';
     final isGroup = chat?.isGroup ?? false;
 
-    final String photoUrl;
+    final String? photoUrl;
     final String displayName;
     final String? navigateUid;
 
     if (isGroup) {
-      photoUrl = chat?.groupPhotoUrl ?? AppConstants.fakeUserImage;
-      displayName = chat?.groupName ?? context.locale.groupName;
+      photoUrl = chat!.groupPhotoUrl;
+      displayName = chat.groupName!;
       navigateUid = null;
     } else {
-      photoUrl = _otherUser?.photoUrl ?? AppConstants.fakeUserImage;
+      photoUrl = _otherUser!.photoUrl;
       final otherUid = chat?.otherMemberId(currentUid) ?? '';
       displayName = chat?.nameFor(otherUid) ?? _otherUser?.displayName ?? '...';
       navigateUid = otherUid.isEmpty ? null : otherUid;
@@ -92,7 +94,6 @@ class _ChatAppBarState extends State<ChatAppBar> {
           height: 60,
           child: Row(
             children: [
-              // ... all your existing Row children stay 100% identical ...
               AppWidgetDirection(
                 child: IconButton(
                   onPressed: () => AutoRouterX(context).maybePop(),
@@ -103,9 +104,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
               GestureDetector(
                 onLongPress: () => ProfileImageDialog.show(
                   context: context,
-                  imageUrl: photoUrl == AppConstants.fakeUserImage
-                      ? null
-                      : photoUrl,
+                  imageUrl: photoUrl,
                   name: displayName,
                   heroTag: heroTag,
                 ),
@@ -114,12 +113,14 @@ class _ChatAppBarState extends State<ChatAppBar> {
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      AppImage(
-                        imageUrl: photoUrl,
-                        width: 40,
-                        height: 40,
-                        borderRadius: 100,
-                      ),
+                      photoUrl != null
+                          ? AppImage(
+                              imageUrl: photoUrl,
+                              width: 40,
+                              height: 40,
+                              borderRadius: 100,
+                            )
+                          : ProfilePlaceholder(name: displayName, size: 40),
                       if (!isGroup)
                         Positioned(
                           right: 0,

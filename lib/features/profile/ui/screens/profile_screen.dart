@@ -8,7 +8,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      showAppBar: false,
       body: CustomScrollView(
         slivers: [const ProfileAppBar(), const ProfileBodyList()],
       ),

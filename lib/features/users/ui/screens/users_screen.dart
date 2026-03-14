@@ -6,6 +6,8 @@ import 'package:Chatty/features/users/ui/widgets/user_item.dart';
 import 'package:Chatty/features/users/ui/widgets/users_actions_row.dart';
 import 'package:Chatty/features/users/ui/widgets/users_app_bar.dart';
 
+import '../../../shared/widgets/app_gradient_button.dart';
+
 @RoutePage()
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -46,8 +48,7 @@ class _UsersScreenState extends State<UsersScreen> {
     return BlocBuilder<UsersCubit, UsersState>(
       builder: (context, state) {
         return AppScaffold(
-          appbarSize: 0,
-          showBackButton: false,
+          showAppBar: false,
           body: CustomScrollView(
             controller: _scrollController,
             slivers: [
@@ -92,11 +93,11 @@ class _UsersScreenState extends State<UsersScreen> {
                           style: context.textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 12),
-                        TextButton(
-                          onPressed: () => context.read<UsersCubit>().loadUsers(
+                        AppButton(
+                          onTap: () => context.read<UsersCubit>().loadUsers(
                             currentUid: _currentUid,
                           ),
-                          child: Text(context.locale.retry),
+                          text: context.locale.retry,
                         ),
                       ],
                     ),

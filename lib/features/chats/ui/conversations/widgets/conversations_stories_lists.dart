@@ -7,6 +7,7 @@ import 'package:Chatty/features/stories/cubits/stories_cubit.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:Chatty/features/stories/data/models/story_item_model.dart';
 import 'package:Chatty/features/stories/data/models/story_model.dart';
+import '../../../../shared/widgets/profile_placeholder.dart';
 
 class ConversationsStoriesLists extends StatefulWidget {
   const ConversationsStoriesLists({super.key});
@@ -193,13 +194,15 @@ class _StoryRing extends StatelessWidget {
                           ],
                         ),
                       ),
-                child: AppImage(
-                  fit: BoxFit.cover,
-                  imageUrl: photoUrl ?? AppConstants.fakeUserImage,
-                  width: 60,
-                  height: 60,
-                  borderRadius: 100,
-                ),
+                child: photoUrl != null
+                    ? AppImage(
+                        fit: BoxFit.cover,
+                        imageUrl: photoUrl!,
+                        width: 60,
+                        height: 60,
+                        borderRadius: 100,
+                      )
+                    : ProfilePlaceholder(name: label, size: 60),
               ),
 
               if (showAddButton)

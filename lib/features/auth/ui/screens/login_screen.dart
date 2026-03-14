@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 80),
 
                     Align(
                       alignment: Alignment.center,

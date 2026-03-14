@@ -79,7 +79,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 80),
 
                     Align(
                       alignment: Alignment.center,

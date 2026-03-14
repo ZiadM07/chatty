@@ -14,7 +14,7 @@ class WelcomeScreen extends StatelessWidget {
       showAppBar: false,
       body: Column(
         children: [
-          const SizedBox(height: 50),
+          const SizedBox(height: 80),
 
           Align(
             alignment: Alignment.center,

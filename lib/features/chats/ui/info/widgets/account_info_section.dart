@@ -3,6 +3,8 @@ import 'package:Chatty/features/auth/data/models/user_model.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../shared/widgets/profile_placeholder.dart';
+
 class AccountInfoSection extends StatelessWidget {
   final UserModel user;
   const AccountInfoSection({super.key, required this.user});
@@ -17,12 +19,14 @@ class AccountInfoSection extends StatelessWidget {
             shape: BoxShape.circle,
             color: context.colorScheme.surfaceContainerHighest,
           ),
-          child: AppImage(
-            imageUrl: user.photoUrl ?? AppConstants.fakeUserImage,
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-          ),
+          child: user.photoUrl != null
+              ? AppImage(
+                  imageUrl: user.photoUrl!,
+                  width: 100,
+                  height: 100,
+                  borderRadius: 50,
+                )
+              : ProfilePlaceholder(name: user.displayName, size: 100),
         ),
 
         const SizedBox(height: 20),

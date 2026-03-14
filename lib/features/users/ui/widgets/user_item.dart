@@ -2,6 +2,7 @@ import 'package:Chatty/config/router/app_router.gr.dart';
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/features/auth/data/models/user_model.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
+import '../../../shared/widgets/profile_placeholder.dart';
 
 class UserItem extends StatelessWidget {
   final UserModel user;
@@ -20,30 +21,14 @@ class UserItem extends StatelessWidget {
         children: [
           Stack(
             children: [
-              AppImage(
-                imageUrl: user.photoUrl ?? AppConstants.fakeUserImage,
-                width: 55,
-                height: 55,
-                borderRadius: 100,
-              ),
-              Positioned(
-                right: 2,
-                bottom: 0,
-                child: Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: (user.isOnline)
-                        ? context.colorScheme.success
-                        : context.colorScheme.onSurfaceDisabled,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: context.colorScheme.surfaceContainerHigh,
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
+              user.photoUrl != null
+                  ? AppImage(
+                      imageUrl: user.photoUrl!,
+                      width: 55,
+                      height: 55,
+                      borderRadius: 100,
+                    )
+                  : ProfilePlaceholder(name: user.displayName, size: 55),
             ],
           ),
 

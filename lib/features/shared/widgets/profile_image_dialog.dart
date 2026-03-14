@@ -1,5 +1,6 @@
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
+import 'package:Chatty/features/shared/widgets/profile_placeholder.dart';
 
 class ProfileImageDialog extends StatefulWidget {
   final String? imageUrl;
@@ -170,7 +171,7 @@ class _ProfileImageDialogState extends State<ProfileImageDialog>
                                               height: imageSize,
                                               fit: BoxFit.cover,
                                             )
-                                          : _Placeholder(
+                                          : ProfilePlaceholder(
                                               name: widget.name,
                                               size: imageSize,
                                             ),
@@ -254,39 +255,6 @@ class _CircleButton extends StatelessWidget {
           border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
         ),
         child: Icon(icon, color: Colors.white, size: 20),
-      ),
-    );
-  }
-}
-
-class _Placeholder extends StatelessWidget {
-  final String name;
-  final double size;
-
-  const _Placeholder({required this.name, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [context.colorScheme.primary, context.colorScheme.secondary],
-        ),
-      ),
-      child: Center(
-        child: Text(
-          initial,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: size * 0.38,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
     );
   }

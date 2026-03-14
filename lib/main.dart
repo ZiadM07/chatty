@@ -1,7 +1,6 @@
 import 'package:Chatty/core/constants/app_endpoints.dart';
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/di/injectable.dart';
@@ -15,7 +14,6 @@ Future<void> main() async {
     url: AppEndpoints.supabaseUrl,
     anonKey: AppEndpoints.supabaseAnonKey,
   );
-  if (kDebugMode) OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
   OneSignal.initialize(AppEndpoints.oneSignalAppId);
   await configureDependencies();
   await getIt<NotificationService>().initialize();

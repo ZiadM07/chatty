@@ -2,6 +2,8 @@ import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:Chatty/features/stories/data/models/story_model.dart';
 
+import '../../../../shared/widgets/profile_placeholder.dart';
+
 class StoryHeader extends StatelessWidget {
   final StoryModel story;
   final String timeAgo;
@@ -20,7 +22,7 @@ class StoryHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _Avatar(photoUrl: story.photoUrl),
+        _Avatar(photoUrl: story.photoUrl, displayName: story.displayName),
         const SizedBox(width: 10),
         Expanded(
           child: _UserInfo(displayName: story.displayName, timeAgo: timeAgo),
@@ -35,8 +37,9 @@ class StoryHeader extends StatelessWidget {
 
 class _Avatar extends StatelessWidget {
   final String? photoUrl;
+  final String displayName;
 
-  const _Avatar({this.photoUrl});
+  const _Avatar({this.photoUrl, required this.displayName});
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +57,14 @@ class _Avatar extends StatelessWidget {
           color: Colors.black,
           shape: BoxShape.circle,
         ),
-        child: AppImage(
-          imageUrl: photoUrl ?? AppConstants.fakeUserImage,
-          width: 38,
-          height: 38,
-          borderRadius: 100,
-        ),
+        child: photoUrl != null
+            ? AppImage(
+                imageUrl: photoUrl!,
+                width: 38,
+                height: 38,
+                borderRadius: 100,
+              )
+            : ProfilePlaceholder(name: displayName, size: 38),
       ),
     );
   }

@@ -6,9 +6,9 @@ import 'package:Chatty/features/auth/data/models/user_model.dart';
 import 'package:Chatty/features/shared/widgets/app_asset_image.dart';
 import 'package:Chatty/features/shared/widgets/app_file_image.dart';
 import 'package:Chatty/features/shared/widgets/app_gradient_button.dart';
-import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:Chatty/features/shared/widgets/app_text_form_field.dart';
 import 'package:Chatty/config/router/app_router.gr.dart';
+import 'package:Chatty/features/shared/widgets/profile_placeholder.dart';
 
 import '../../../../core/constants/exports.dart';
 import '../../../shared/widgets/app_toast.dart';
@@ -97,16 +97,14 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
         return StateHandler(
           state: state.fillProfileState,
           builder: (context, _) => AppScaffold(
-            appbarSize: 0,
-            showBackButton: false,
+            showAppBar: false,
             body: SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: 40),
-
+                    const SizedBox(height: 80),
                     Align(
                       alignment: Alignment.center,
                       child: AppAssetImage(
@@ -116,16 +114,12 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
                         height: 100,
                       ),
                     ),
-
                     const SizedBox(height: 10),
-
                     AppText(
                       context.locale.completeProfileMessage,
                       style: context.textTheme.bodyLarge,
                     ),
-
                     const SizedBox(height: 30),
-
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
@@ -137,11 +131,9 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
                                 fit: BoxFit.cover,
                                 borderRadius: 100,
                               )
-                            : AppImage(
-                                imageUrl: AppConstants.fakeUserImage,
-                                width: 120,
-                                height: 120,
-                                borderRadius: 100,
+                            : ProfilePlaceholder(
+                                name: _nameController.text.trim(),
+                                size: 120,
                               ),
                         Positioned(
                           bottom: 0,

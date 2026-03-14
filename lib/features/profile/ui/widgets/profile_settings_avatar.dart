@@ -5,6 +5,8 @@ import 'package:Chatty/features/profile/cubits/profile_cubit.dart';
 import 'package:Chatty/features/profile/cubits/profile_state.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 
+import '../../../shared/widgets/profile_placeholder.dart';
+
 class ProfileSettingsAvatar extends StatelessWidget {
   const ProfileSettingsAvatar({super.key});
 
@@ -17,6 +19,8 @@ class ProfileSettingsAvatar extends StatelessWidget {
       builder: (context, state) {
         final isUploading =
             state.updatePhotoState.status == StateStatus.loadingOverlay;
+        final imageUrl = state.profile?.photoUrl;
+        final profile = state.profile;
 
         return SliverToBoxAdapter(
           child: Stack(
@@ -26,13 +30,17 @@ class ProfileSettingsAvatar extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    AppImage(
-                      imageUrl:
-                          state.profile?.photoUrl ?? AppConstants.fakeUserImage,
-                      width: 120,
-                      height: 120,
-                      borderRadius: 100,
-                    ),
+                    imageUrl != null
+                        ? AppImage(
+                            imageUrl: imageUrl,
+                            width: 120,
+                            height: 120,
+                            borderRadius: 100,
+                          )
+                        : ProfilePlaceholder(
+                            name: profile!.fullName,
+                            size: 120,
+                          ),
 
                     if (isUploading) ...[
                       Container(
