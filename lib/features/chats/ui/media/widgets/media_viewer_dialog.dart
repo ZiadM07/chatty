@@ -44,7 +44,7 @@ class MediaViewerDialog {
         opaque: false,
         barrierColor: Colors.black87,
         fullscreenDialog: true,
-        pageBuilder: (context, _, __) => _MediaViewerContent(
+        pageBuilder: (context, _, i) => _MediaViewerContent(
           mediaUrl: mediaUrl,
           type: type,
           metadata: metadata,

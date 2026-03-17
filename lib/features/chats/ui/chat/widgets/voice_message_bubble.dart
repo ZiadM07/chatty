@@ -22,6 +22,8 @@ class VoiceMessageBubble extends StatefulWidget {
   final ValueChanged<String?> onReact;
   final VoidCallback onReply;
   final VoidCallback? onDelete;
+  final bool showSenderName;
+  final String? senderId;
 
   const VoiceMessageBubble({
     super.key,
@@ -38,6 +40,8 @@ class VoiceMessageBubble extends StatefulWidget {
     required this.onReact,
     required this.onReply,
     this.onDelete,
+    this.showSenderName = false,
+    this.senderId,
   });
 
   @override
@@ -153,6 +157,8 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
       replyToType: widget.replyToType,
       onReplyTap: widget.onReplyTap,
       memberNames: widget.memberNames,
+      showSenderName: widget.showSenderName,
+      senderId: widget.senderId,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

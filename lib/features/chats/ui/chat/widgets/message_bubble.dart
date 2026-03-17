@@ -18,6 +18,7 @@ class MessageBubble extends StatelessWidget {
     required this.onReact,
     required this.onReply,
     required this.onDelete,
+    this.isGroup = false,
   });
 
   final MessageModel message;
@@ -29,6 +30,7 @@ class MessageBubble extends StatelessWidget {
   final void Function(String? emoji) onReact;
   final VoidCallback onReply;
   final VoidCallback? onDelete;
+  final bool isGroup;
 
   String _formatTime(DateTime dt, BuildContext context) {
     final hour = dt.hour > 12
@@ -46,68 +48,71 @@ class MessageBubble extends StatelessWidget {
     final time = _formatTime(message.createdAt, context);
     final status = isMe && isLastMyMessage ? message.status : null;
     final replyTap = message.replyToId != null ? onReplyTap : null;
+    final bool showSenderName = isGroup && !isMe && !message.isDeleted;
 
-    switch (message.type) {
-      case MessageType.audio:
-        return VoiceMessageBubble(
-          key: ValueKey(message.id),
-          message: message,
-          time: time,
-          status: status,
-          isMe: isMe,
-          currentUid: currentUid,
-          replyToContent: message.replyToContent,
-          replyToSenderId: message.replyToSenderId,
-          replyToType: message.replyToType,
-          onReplyTap: replyTap,
-          memberNames: memberNames,
-          onReact: onReact,
-          onReply: onReply,
-          onDelete: isMe && !message.isDeleted ? onDelete : null,
-        );
+    return switch (message.type) {
+      MessageType.audio => VoiceMessageBubble(
+        key: ValueKey(message.id),
+        message: message,
+        time: time,
+        status: status,
+        isMe: isMe,
+        currentUid: currentUid,
+        replyToContent: message.replyToContent,
+        replyToSenderId: message.replyToSenderId,
+        replyToType: message.replyToType,
+        onReplyTap: replyTap,
+        memberNames: memberNames,
+        onReact: onReact,
+        onReply: onReply,
+        onDelete: isMe && !message.isDeleted ? onDelete : null,
+        showSenderName: showSenderName,
+        senderId: message.senderId,
+      ),
 
-      case MessageType.image:
-      case MessageType.video:
-      case MessageType.file:
-        return MediaMessageBubble(
-          key: ValueKey(message.id),
-          message: message,
-          type: message.type,
-          time: time,
-          status: status,
-          isMe: isMe,
-          currentUid: currentUid,
-          metadata: message.metadata,
-          replyToContent: message.replyToContent,
-          replyToSenderId: message.replyToSenderId,
-          replyToType: message.replyToType,
-          onReplyTap: replyTap,
-          memberNames: memberNames,
-          onReact: onReact,
-          onReply: onReply,
-          onDelete: isMe && !message.isDeleted ? onDelete : null,
-        );
+      MessageType.image ||
+      MessageType.video ||
+      MessageType.file => MediaMessageBubble(
+        key: ValueKey(message.id),
+        message: message,
+        type: message.type,
+        time: time,
+        status: status,
+        isMe: isMe,
+        currentUid: currentUid,
+        metadata: message.metadata,
+        replyToContent: message.replyToContent,
+        replyToSenderId: message.replyToSenderId,
+        replyToType: message.replyToType,
+        onReplyTap: replyTap,
+        memberNames: memberNames,
+        onReact: onReact,
+        onReply: onReply,
+        onDelete: isMe && !message.isDeleted ? onDelete : null,
+        showSenderName: showSenderName,
+        senderId: message.senderId,
+      ),
 
-      case MessageType.text:
-      default:
-        return TextMessageBubble(
-          key: ValueKey(message.id),
-          message: message,
-          time: time,
-          status: status,
-          isMe: isMe,
-          isDeleted: message.isDeleted,
-          messageType: message.type,
-          replyToContent: message.replyToContent,
-          replyToSenderId: message.replyToSenderId,
-          replyToType: message.replyToType,
-          currentUid: currentUid,
-          onReplyTap: replyTap,
-          memberNames: memberNames,
-          onReact: onReact,
-          onReply: onReply,
-          onDelete: onDelete,
-        );
-    }
+      _ => TextMessageBubble(
+        key: ValueKey(message.id),
+        message: message,
+        time: time,
+        status: status,
+        isMe: isMe,
+        isDeleted: message.isDeleted,
+        messageType: message.type,
+        replyToContent: message.replyToContent,
+        replyToSenderId: message.replyToSenderId,
+        replyToType: message.replyToType,
+        currentUid: currentUid,
+        onReplyTap: replyTap,
+        memberNames: memberNames,
+        onReact: onReact,
+        onReply: onReply,
+        onDelete: onDelete,
+        showSenderName: showSenderName,
+        senderId: message.senderId,
+      ),
+    };
   }
 }

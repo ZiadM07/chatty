@@ -15,6 +15,7 @@ abstract class ProfileDataSource {
     required String uid,
     required String photoUrl,
   });
+  Future<void> deleteProfilePhoto({required String uid});
   Stream<UserModel?> watchProfile({required String uid});
 }
 
@@ -74,6 +75,15 @@ class ProfileDataSourceImpl implements ProfileDataSource {
   }
 
   @override
+  Future<void> deleteProfilePhoto({required String uid}) async {
+    try {
+      await _userDoc(uid).update({'photoUrl': FieldValue.delete()});
+    } on FirebaseException catch (e) {
+      throw Failure(500, e.message ?? 'Failed to delete photo.');
+    }
+  }
+
+  @override
   Stream<UserModel?> watchProfile({required String uid}) {
     return _userDoc(uid).snapshots().map((doc) {
       if (!doc.exists || doc.data() == null) return null;
@@ -81,5 +91,3 @@ class ProfileDataSourceImpl implements ProfileDataSource {
     });
   }
 }
-
-

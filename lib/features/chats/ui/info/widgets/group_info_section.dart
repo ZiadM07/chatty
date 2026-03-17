@@ -152,6 +152,29 @@ class _GroupInfoSectionState extends State<GroupInfoSection> {
     );
   }
 
+  void _showGroupPhoto(BuildContext context) {
+    if (_chat?.groupPhotoUrl == null) return;
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withValues(alpha: 0.92),
+      transitionDuration: const Duration(milliseconds: 220),
+      transitionBuilder: (context, animation, _, child) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween(
+            begin: 0.92,
+            end: 1.0,
+          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+          child: child,
+        ),
+      ),
+      pageBuilder: (context, _, i) =>
+          _GroupImageViewer(photoUrl: _chat!.groupPhotoUrl!),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_chat == null) {
@@ -163,7 +186,7 @@ class _GroupInfoSectionState extends State<GroupInfoSection> {
       child: Column(
         children: [
           GestureDetector(
-            onTap: _isOwner ? _editPhoto : null,
+            onTap: () => _showGroupPhoto(context),
             child: Stack(
               alignment: Alignment.bottomRight,
               children: [
@@ -218,7 +241,7 @@ class _GroupInfoSectionState extends State<GroupInfoSection> {
                       SolarIconsOutline.cameraAdd,
                       size: 16,
                       color: context.colorScheme.onPrimary,
-                    ),
+                    ).addAction(onTap: _isOwner ? _editPhoto : null),
                   ),
               ],
             ),
@@ -423,6 +446,46 @@ class _GroupInfoSectionState extends State<GroupInfoSection> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GroupImageViewer extends StatelessWidget {
+  final String photoUrl;
+  const _GroupImageViewer({required this.photoUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Stack(
+        children: [
+          Center(
+            child: AppImage(
+              imageUrl: photoUrl,
+              width: context.width,
+              height: context.width,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 12,
+            left: 5,
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.45),
+                borderRadius: AppBorderRadius.set(all: 12),
+              ),
+              child: Icon(
+                SolarIconsOutline.altArrowLeft,
+                color: Colors.white,
+                size: 25,
+              ),
+            ).addAction(onBounce: () => context.router.maybePop()),
           ),
         ],
       ),

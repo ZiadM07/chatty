@@ -3,6 +3,7 @@ import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
 import 'package:Chatty/features/chats/cubits/conversations_cubit.dart';
 import 'package:Chatty/features/profile/cubits/profile_cubit.dart';
+import 'package:Chatty/features/profile/cubits/profile_state.dart';
 import 'package:Chatty/features/stories/cubits/stories_cubit.dart';
 import 'package:Chatty/features/shared/widgets/app_image.dart';
 import 'package:Chatty/features/stories/data/models/story_item_model.dart';
@@ -105,16 +106,25 @@ class _MyStoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasStory = myItems.isNotEmpty;
 
-    return _StoryRing(
-      photoUrl: context.read<ProfileCubit>().state.profile?.photoUrl,
-      label: context.locale.you,
-      hasStory: hasStory,
-      isSeen: false,
-      showAddButton: true,
-      onAddTap: () => context.router.push(const AddStoryRoute()),
-      onTap: hasStory
-          ? () => context.router.push(StoryViewerRoute(ownerUid: uid))
-          : () => context.router.push(const AddStoryRoute()),
+    return BlocBuilder<ProfileCubit, ProfileState>(
+      buildWhen: (prev, curr) =>
+          prev.profile?.photoUrl != curr.profile?.photoUrl ||
+          prev.updatePhotoState != curr.updatePhotoState,
+      builder: (context, profileState) {
+        final photoUrl = profileState.profile?.photoUrl;
+
+        return _StoryRing(
+          photoUrl: photoUrl,
+          label: context.locale.you,
+          hasStory: hasStory,
+          isSeen: false,
+          showAddButton: true,
+          onAddTap: () => context.router.push(const AddStoryRoute()),
+          onTap: hasStory
+              ? () => context.router.push(StoryViewerRoute(ownerUid: uid))
+              : () => context.router.push(const AddStoryRoute()),
+        );
+      },
     );
   }
 }
@@ -201,6 +211,10 @@ class _StoryRing extends StatelessWidget {
                         width: 60,
                         height: 60,
                         borderRadius: 100,
+                        customErrorWidget: ProfilePlaceholder(
+                          name: label,
+                          size: 60,
+                        ),
                       )
                     : ProfilePlaceholder(name: label, size: 60),
               ),

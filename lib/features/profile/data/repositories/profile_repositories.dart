@@ -53,4 +53,17 @@ class ProfileRepository {
     );
     return newPhotoUrl;
   }
+
+  Future<void> deleteProfilePhoto({
+    required String uid,
+    required String photoUrl,
+  }) async {
+    if (photoUrl.isNotEmpty) {
+      try {
+        await _storageDataSource.deleteFile(path: photoUrl);
+      } catch (_) {}
+    }
+
+    await _profileDataSource.deleteProfilePhoto(uid: uid);
+  }
 }

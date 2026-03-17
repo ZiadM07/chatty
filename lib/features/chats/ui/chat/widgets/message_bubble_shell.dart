@@ -23,6 +23,8 @@ class MessageBubbleShell extends StatefulWidget {
   final String? currentUid;
   final MessageType? replyToType;
   final VoidCallback? onReplyTap;
+  final bool showSenderName;
+  final String? senderId;
 
   const MessageBubbleShell({
     super.key,
@@ -41,6 +43,8 @@ class MessageBubbleShell extends StatefulWidget {
     this.replyToType,
     this.onReplyTap,
     required this.memberNames,
+    this.showSenderName = false,
+    this.senderId,
   });
 
   @override
@@ -83,6 +87,8 @@ class _MessageBubbleShellState extends State<MessageBubbleShell> {
   @override
   Widget build(BuildContext context) {
     final hasReply = widget.replyToContent != null && !widget.isDeleted;
+    final showName =
+        widget.showSenderName && widget.senderId != null && !widget.isDeleted;
 
     return Align(
       alignment: widget.isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -124,6 +130,15 @@ class _MessageBubbleShellState extends State<MessageBubbleShell> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Sender name — only for group chats, other people's messages
+              if (showName) ...[
+                BubbleSenderNameLabel(
+                  senderId: widget.senderId!,
+                  memberNames: widget.memberNames,
+                ),
+                const SizedBox(height: 4),
+              ],
+
               if (hasReply)
                 BubbleReplyHeader(
                   content: widget.replyToContent!,
@@ -178,9 +193,47 @@ class _MessageBubbleShellState extends State<MessageBubbleShell> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared helpers
-// ─────────────────────────────────────────────────────────────────────────────
+class BubbleSenderNameLabel extends StatelessWidget {
+  final String senderId;
+  final Map<String, String> memberNames;
+  final Color? overrideColor;
+
+  const BubbleSenderNameLabel({
+    super.key,
+    required this.senderId,
+    required this.memberNames,
+    this.overrideColor,
+  });
+
+  Color _color(BuildContext context) {
+    if (overrideColor != null) return overrideColor!;
+
+    const palette = [
+      Color(0xFF4F3EEE),
+      Color(0xFF88FF00),
+      Color(0xFF49C3E9),
+      Color(0xFFF14461),
+      Color(0xFFE449E9),
+    ];
+
+    final hash = senderId.codeUnits.fold(0, (sum, c) => sum + c);
+    return palette[hash % palette.length];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = memberNames[senderId];
+    if (name == null || name.isEmpty) return const SizedBox.shrink();
+    return AppText(
+      name,
+      style: context.textTheme.labelSmall?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: _color(context),
+      ),
+      maxLines: 1,
+    );
+  }
+}
 
 String bubbleStatusText(MessageStatus status, BuildContext context) =>
     switch (status) {
@@ -191,17 +244,11 @@ String bubbleStatusText(MessageStatus status, BuildContext context) =>
       MessageStatus.failed => context.locale.failed,
     };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BubbleReplyHeader
-// ─────────────────────────────────────────────────────────────────────────────
-
 class BubbleReplyHeader extends StatelessWidget {
   final String content;
   final MessageType replyToType;
   final String senderLabel;
   final bool isMe;
-
-  /// Tapping the header scrolls to the original message.
   final VoidCallback? onTap;
 
   const BubbleReplyHeader({
@@ -354,10 +401,6 @@ class _ReplyThumbnail extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// BubbleDeletedMessage
-// ─────────────────────────────────────────────────────────────────────────────
 
 class BubbleDeletedMessage extends StatelessWidget {
   final bool isMe;

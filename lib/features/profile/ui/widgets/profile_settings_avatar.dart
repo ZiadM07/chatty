@@ -104,6 +104,7 @@ class ProfileSettingsAvatar extends StatelessWidget {
 void _showProfilePhotoOptions(BuildContext context) {
   final profileCubit = context.read<ProfileCubit>();
   final uid = context.read<AuthCubit>().state.currentUser?.uid ?? '';
+  final hasPhoto = profileCubit.state.profile?.photoUrl?.isNotEmpty ?? false;
 
   showDialog(
     context: context,
@@ -125,17 +126,24 @@ void _showProfilePhotoOptions(BuildContext context) {
           vertical: 10,
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-            },
-            child: Text(
-              context.locale.cancel,
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: context.colorScheme.primary,
+          if (hasPhoto)
+            TextButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx);
+                profileCubit.deleteProfilePhoto(uid: uid);
+              },
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: context.colorScheme.error,
+                size: 20,
+              ),
+              label: Text(
+                context.locale.delete,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.error,
+                ),
               ),
             ),
-          ),
 
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(

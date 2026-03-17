@@ -612,7 +612,7 @@ class _ReplyPreviewState extends State<_ReplyPreview> {
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerHighest,
+        color: context.colorScheme.surfaceContainerHigh.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(16),
         border: Border(
           left: BorderSide(color: context.colorScheme.primary, width: 3),

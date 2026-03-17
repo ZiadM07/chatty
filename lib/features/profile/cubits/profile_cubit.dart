@@ -203,4 +203,47 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   void resetUpdatePhotoState() =>
       emit(state.copyWith(updatePhotoState: const AppState()));
+
+  Future<void> deleteProfilePhoto({required String uid}) async {
+    final currentPhotoUrl = state.profile?.photoUrl;
+
+    emit(
+      state.copyWith(
+        updatePhotoState: const AppState(status: StateStatus.loadingOverlay),
+      ),
+    );
+
+    try {
+      await _repository.deleteProfilePhoto(
+        uid: uid,
+        photoUrl: currentPhotoUrl ?? '',
+      );
+
+      await loadProfile(uid: uid);
+
+      emit(
+        state.copyWith(
+          updatePhotoState: const AppState(status: StateStatus.success),
+        ),
+      );
+    } on Failure catch (e) {
+      emit(
+        state.copyWith(
+          updatePhotoState: AppState(
+            status: StateStatus.error,
+            message: e.message,
+          ),
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          updatePhotoState: const AppState(
+            status: StateStatus.error,
+            message: 'Failed to delete photo.',
+          ),
+        ),
+      );
+    }
+  }
 }

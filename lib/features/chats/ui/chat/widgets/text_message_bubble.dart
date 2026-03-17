@@ -19,11 +19,11 @@ class TextMessageBubble extends StatelessWidget {
   final MessageType? replyToType;
   final VoidCallback? onReplyTap;
   final Map<String, String> memberNames;
-
-  // Reaction / menu callbacks
   final ValueChanged<String?> onReact;
   final VoidCallback onReply;
   final VoidCallback? onDelete;
+  final bool showSenderName;
+  final String? senderId;
 
   const TextMessageBubble({
     super.key,
@@ -42,6 +42,8 @@ class TextMessageBubble extends StatelessWidget {
     required this.onReact,
     required this.onReply,
     this.onDelete,
+    this.showSenderName = false,
+    this.senderId,
   });
 
   @override
@@ -57,6 +59,8 @@ class TextMessageBubble extends StatelessWidget {
       replyToType: replyToType,
       onReplyTap: onReplyTap,
       memberNames: memberNames,
+      showSenderName: showSenderName,
+      senderId: senderId,
       child: messageType != MessageType.text
           ? _MediaMessage(type: messageType, isMe: isMe)
           : AppMessageText(

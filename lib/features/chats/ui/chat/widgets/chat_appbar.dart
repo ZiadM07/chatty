@@ -69,11 +69,11 @@ class _ChatAppBarState extends State<ChatAppBar> {
     final String? navigateUid;
 
     if (isGroup) {
-      photoUrl = chat!.groupPhotoUrl;
-      displayName = chat.groupName!;
+      photoUrl = chat?.groupPhotoUrl;
+      displayName = chat!.groupName!;
       navigateUid = null;
     } else {
-      photoUrl = _otherUser!.photoUrl;
+      photoUrl = _otherUser?.photoUrl;
       final otherUid = chat?.otherMemberId(currentUid) ?? '';
       displayName = chat?.nameFor(otherUid) ?? _otherUser?.displayName ?? '...';
       navigateUid = otherUid.isEmpty ? null : otherUid;
@@ -82,7 +82,6 @@ class _ChatAppBarState extends State<ChatAppBar> {
     final heroTag = 'chat_appbar_avatar_${chat?.id ?? 'unknown'}';
 
     return Material(
-      // ← was SliverAppBar
       color: context.colorScheme.surface,
       borderRadius: const BorderRadius.only(
         bottomLeft: Radius.circular(24),

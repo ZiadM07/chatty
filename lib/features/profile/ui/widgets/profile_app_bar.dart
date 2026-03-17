@@ -143,13 +143,14 @@ class _ProfileAvatar extends StatelessWidget {
           Hero(
             tag: heroTag,
             child: photoUrl != null
-                ? ProfilePlaceholder(name: name, size: 56)
-                : AppImage(
+                ? AppImage(
                     imageUrl: photoUrl!,
                     width: 56,
                     height: 56,
                     borderRadius: 100,
-                  ),
+                    customErrorWidget: ProfilePlaceholder(name: name, size: 56),
+                  )
+                : ProfilePlaceholder(name: name, size: 56),
           ),
 
           if (isUploading) ...[

@@ -22,10 +22,11 @@ class MediaMessageBubble extends StatelessWidget {
   final MessageType? replyToType;
   final VoidCallback? onReplyTap;
   final Map<String, String> memberNames;
-
   final ValueChanged<String?> onReact;
   final VoidCallback onReply;
   final VoidCallback? onDelete;
+  final bool showSenderName;
+  final String? senderId;
 
   const MediaMessageBubble({
     super.key,
@@ -44,6 +45,8 @@ class MediaMessageBubble extends StatelessWidget {
     required this.onReact,
     required this.onReply,
     this.onDelete,
+    this.showSenderName = false,
+    this.senderId,
   });
 
   String get _mediaUrl => message.content;
@@ -52,7 +55,6 @@ class MediaMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget bubble;
-
     if (_isDeleted) {
       bubble = MessageBubbleShell(
         isMe: isMe,
@@ -74,6 +76,8 @@ class MediaMessageBubble extends StatelessWidget {
         replyToType: replyToType,
         onReplyTap: onReplyTap,
         memberNames: memberNames,
+        showSenderName: showSenderName,
+        senderId: senderId,
         child: _FileBody(
           url: _mediaUrl,
           isMe: isMe,
@@ -107,6 +111,31 @@ class MediaMessageBubble extends StatelessWidget {
                   _ImagePreview(url: _mediaUrl)
                 else if (type == MessageType.video)
                   _VideoPreview(url: _mediaUrl),
+
+                if (showSenderName && senderId != null)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.55),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: BubbleSenderNameLabel(
+                        senderId: senderId!,
+                        memberNames: memberNames,
+                        overrideColor: Colors.white,
+                      ).addPadding(horizontal: 10, top: 8, bottom: 14),
+                    ),
+                  ),
+
                 Positioned(
                   right: 8,
                   bottom: 8,

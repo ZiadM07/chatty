@@ -11,6 +11,7 @@ class AppImage extends StatefulWidget {
   final double borderRadius;
   final int? memCacheWidth;
   final Function()? onLoaded;
+  final Widget? customErrorWidget;
 
   const AppImage({
     super.key,
@@ -21,6 +22,7 @@ class AppImage extends StatefulWidget {
     this.borderRadius = 0,
     this.memCacheWidth,
     this.onLoaded,
+    this.customErrorWidget,
   });
 
   @override
@@ -32,7 +34,6 @@ class _AppImageState extends State<AppImage> {
 
   @override
   void didUpdateWidget(AppImage oldWidget) {
-    
     super.didUpdateWidget(oldWidget);
     // Reset the flag if the image URL changes
     if (oldWidget.imageUrl != widget.imageUrl) {
@@ -87,6 +88,9 @@ class _AppImageState extends State<AppImage> {
               );
             },
             errorWidget: (context, url, error) {
+              if (widget.customErrorWidget != null) {
+                return widget.customErrorWidget!;
+              }
               return AspectRatio(
                 aspectRatio: 1,
                 child: Image.asset(Pngs.empty, fit: BoxFit.cover),

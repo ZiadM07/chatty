@@ -261,6 +261,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   .read<ChatCubit>()
                                                   .setReplyingTo(message),
                                         child: MessageBubble(
+                                          isGroup: state.chat?.isGroup ?? false,
                                           message: message,
                                           isMe: isMe,
                                           isLastMyMessage: isLastMyMessage,
