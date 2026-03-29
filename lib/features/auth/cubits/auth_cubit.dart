@@ -37,7 +37,9 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> signUp({required String email, required String password}) async {
     emit(
-      state.copyWith(signUpState: const AppState(status: StateStatus.loading)),
+      state.copyWith(
+        signUpState: const AppState(status: StateStatus.loadingOverlay),
+      ),
     );
     try {
       final authModel = await _repository.signUp(
@@ -71,13 +73,31 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> login({required String email, required String password}) async {
     emit(
-      state.copyWith(loginState: const AppState(status: StateStatus.loading)),
+      state.copyWith(
+        loginState: const AppState(status: StateStatus.loadingOverlay),
+      ),
     );
     try {
       final authModel = await _repository.login(
         email: email,
         password: password,
       );
+
+      // ── Block unverified users ──────────────────────────────────────────
+      if (!authModel.emailVerified) {
+        // Sign them out so authStateChanges doesn't auto-navigate.
+        await _repository.signOut();
+        emit(
+          state.copyWith(
+            loginState: const AppState(
+              status: StateStatus.error,
+              message: 'EMAIL_NOT_VERIFIED',
+            ),
+          ),
+        );
+        return;
+      }
+
       emit(
         state.copyWith(
           currentUser: authModel,
@@ -102,6 +122,68 @@ class AuthCubit extends Cubit<AuthState> {
       );
     }
   }
+
+  // ─── Email Verification ──────────────────────────────────────────────────
+
+  /// Resend the verification email to the current Firebase user.
+  Future<void> sendEmailVerification() async {
+    emit(
+      state.copyWith(
+        emailVerificationState: const AppState(
+          status: StateStatus.loading,
+        ),
+      ),
+    );
+    try {
+      await _repository.sendEmailVerification();
+      emit(
+        state.copyWith(
+          emailVerificationState: const AppState(
+            status: StateStatus.success,
+            message: 'Verification email sent! Check your inbox.',
+          ),
+        ),
+      );
+    } on Failure catch (e) {
+      emit(
+        state.copyWith(
+          emailVerificationState: AppState(
+            status: StateStatus.error,
+            message: e.message,
+          ),
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          emailVerificationState: const AppState(
+            status: StateStatus.error,
+            message: 'Failed to send verification email.',
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Polls Firebase to check if the user has verified their email.
+  /// Returns `true` when verified.
+  Future<bool> checkEmailVerified() async {
+    try {
+      final refreshed = await _repository.reloadUser();
+      if (refreshed != null && refreshed.emailVerified) {
+        emit(state.copyWith(currentUser: refreshed));
+        return true;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void resetEmailVerificationState() =>
+      emit(state.copyWith(emailVerificationState: const AppState()));
+
+  // ─── Profile ─────────────────────────────────────────────────────────────
 
   Future<void> saveProfile({required UserModel user, File? imageFile}) async {
     emit(
@@ -141,10 +223,12 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  // ─── Password Reset ──────────────────────────────────────────────────────
+
   Future<void> sendPasswordResetEmail({required String email}) async {
     emit(
       state.copyWith(
-        forgotPasswordState: const AppState(status: StateStatus.loading),
+        forgotPasswordState: const AppState(status: StateStatus.loadingOverlay),
       ),
     );
     try {
@@ -177,6 +261,8 @@ class AuthCubit extends Cubit<AuthState> {
       );
     }
   }
+
+  // ─── Sign Out & Delete ───────────────────────────────────────────────────
 
   Future<void> signOut() async {
     emit(
@@ -243,6 +329,8 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  // ─── Presence ─────────────────────────────────────────────────────────────
+
   Future<void> setOnline() async {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
@@ -254,6 +342,8 @@ class AuthCubit extends Cubit<AuthState> {
     if (uid == null) return;
     await _repository.updateUserPresence(uid: uid, isOnline: false);
   }
+
+  // ─── Resets ───────────────────────────────────────────────────────────────
 
   void resetLoginState() => emit(state.copyWith(loginState: const AppState()));
 

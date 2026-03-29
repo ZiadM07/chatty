@@ -54,7 +54,17 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onFailure(AuthState state) {
+    final message = state.loginState.message;
     context.read<AuthCubit>().resetLoginState();
+
+    if (message == 'EMAIL_NOT_VERIFIED') {
+      AppToast.showError(
+        message: context.locale.emailNotVerified,
+        context: context,
+      );
+      return;
+    }
+
     AppToast.showError(
       message: context.locale.emailOrPasswordIncorrect,
       context: context,
@@ -128,8 +138,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       focusNode: _passwordFocusNode,
                       onFieldSubmitted: (_) => _submit(),
                     ),
+                    const SizedBox(height: 15),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child:
+                          AppText(
+                            context.locale.forgotPassword,
+                            size: 14,
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: context.colorScheme.primary,
+                            ),
+                          ).addAction(
+                            onTap: () => context.router.push(
+                              const ForgotPasswordRoute(),
+                            ),
+                          ),
+                    ),
 
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 20),
 
                     AppButton(text: context.locale.login, onTap: _submit),
 
@@ -149,28 +175,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           TextSpan(
                             text: "${context.locale.byLoggingInYouAgree} ",
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              color: context.colorScheme.textPrimary,
-                            ),
+                            style: context.textTheme.bodyMedium,
                           ),
                           TextSpan(
                             text: "${context.locale.termsAndConditions} ",
                             style: context.textTheme.bodyMedium?.copyWith(
                               color: context.colorScheme.primary,
-                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           TextSpan(
                             text: "${context.locale.and} ",
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              color: context.colorScheme.textPrimary,
-                            ),
+                            style: context.textTheme.bodyMedium,
                           ),
                           TextSpan(
                             text: context.locale.privacyPolicy,
                             style: context.textTheme.bodyMedium?.copyWith(
                               color: context.colorScheme.primary,
-                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -187,15 +207,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           context.locale.dontHaveAccount,
                           style: context.textTheme.bodyMedium,
                         ),
-                        TextButton(
-                          onPressed: () =>
-                              context.router.push(const SignupRoute()),
-                          child: AppText(
-                            context.locale.signup,
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              color: context.colorScheme.primary,
-                            ),
+                        AppText(
+                          " ${context.locale.signup}",
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.primary,
                           ),
+                        ).addAction(
+                          onTap: () => context.router.push(const SignupRoute()),
                         ),
                       ],
                     ),

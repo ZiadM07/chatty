@@ -45,7 +45,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   void _onSuccess() {
     context.read<AuthCubit>().resetSignUpState();
-    context.router.push(const FillProfileRoute());
+    context.router.push(const EmailVerificationRoute());
   }
 
   void _onFailure(AuthState state) {

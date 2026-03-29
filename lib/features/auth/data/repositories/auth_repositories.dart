@@ -76,4 +76,11 @@ class AuthRepository {
 
     await _authDataSource.deleteAccount(uid: uid);
   }
+
+  Future<void> sendEmailVerification() =>
+      _authDataSource.sendEmailVerification();
+
+  /// Reloads the Firebase user to get the latest server state
+  /// (e.g. emailVerified after the user clicked the link).
+  Future<AuthModel?> reloadUser() => _authDataSource.reloadUser();
 }

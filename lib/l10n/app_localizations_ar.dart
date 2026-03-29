@@ -1693,4 +1693,63 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get brightnessDescription => 'اضبط مستوى الظلام لتحسين إمكانية قراءة النص';
+
+  @override
+  String get forgotPassword => 'نسيت كلمة المرور؟';
+
+  @override
+  String get forgotPasswordSubtitle => 'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.';
+
+  @override
+  String get sendResetLink => 'إرسال رابط إعادة التعيين';
+
+  @override
+  String get resetLinkSent => 'تم إرسال رابط إعادة التعيين! تحقق من صندوق الوارد أو مجلد الرسائل غير المرغوب فيها.';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get passwordChangedSuccess => 'تم تغيير كلمة المرور بنجاح!';
+
+  @override
+  String get backTo => 'العودة إلى';
+
+  @override
+  String get emailNotVerified => 'يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول. تحقق من صندوق الوارد أو مجلد الرسائل غير المرغوب فيها.';
+
+  @override
+  String get verifyEmailTitle => 'تأكيد البريد الإلكتروني';
+
+  @override
+  String get verifyEmailDescription => 'لقد أرسلنا رابط تأكيد إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد (وأيضًا البريد العشوائي) والضغط على الرابط لتأكيد الحساب.';
+
+  @override
+  String get resendVerification => 'إعادة إرسال رسالة التأكيد';
+
+  @override
+  String resendIn(Object seconds) {
+    return 'إعادة الإرسال خلال $seconds ثانية';
+  }
+
+  @override
+  String get waitingForVerification => 'في انتظار تأكيد البريد...';
+
+  @override
+  String get backToLogin => 'العودة إلى تسجيل الدخول';
+
+  @override
+  String get emailVerificationSent => 'تم إرسال رسالة التأكيد!';
+
+  @override
+  String get emailVerificationFailed => 'فشل إرسال رسالة التأكيد.';
 }

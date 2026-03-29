@@ -1693,4 +1693,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get brightnessDescription => 'Adjust overlay darkness to improve text readability';
+
+  @override
+  String get forgotPassword => 'Forgot Password?';
+
+  @override
+  String get forgotPasswordSubtitle => 'Enter your email and we\'ll send you a link to reset your password.';
+
+  @override
+  String get sendResetLink => 'Send Reset Link';
+
+  @override
+  String get resetLinkSent => 'Reset link sent! Check your inbox or spam folder.';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get passwordChangedSuccess => 'Password changed successfully!';
+
+  @override
+  String get backTo => 'Back to';
+
+  @override
+  String get emailNotVerified => 'Please verify your email address before logging in. Check your inbox or spam folder.';
+
+  @override
+  String get verifyEmailTitle => 'Verify Your Email';
+
+  @override
+  String get verifyEmailDescription => 'We sent a verification link to your email address. Please check your inbox (and spam folder) and tap the link to verify.';
+
+  @override
+  String get resendVerification => 'Resend Verification Email';
+
+  @override
+  String resendIn(Object seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get waitingForVerification => 'Waiting for verification...';
+
+  @override
+  String get backToLogin => 'Back to Login';
+
+  @override
+  String get emailVerificationSent => 'Verification email sent!';
+
+  @override
+  String get emailVerificationFailed => 'Failed to send verification email.';
 }

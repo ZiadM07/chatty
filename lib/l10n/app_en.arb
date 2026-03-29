@@ -624,5 +624,29 @@
   "emailCannotBeChanged": "Email cannot be changed",
   "usernameCannotBeChanged": "Username cannot be changed",
   "couldNotLoadFile": "Could Not Load File",
-  "brightnessDescription": "Adjust overlay darkness to improve text readability"
+  "brightnessDescription": "Adjust overlay darkness to improve text readability",
+  "forgotPassword": "Forgot Password?",
+  "forgotPasswordSubtitle": "Enter your email and we'll send you a link to reset your password.",
+  "sendResetLink": "Send Reset Link",
+  "resetLinkSent": "Reset link sent! Check your inbox or spam folder.",
+  "changePassword": "Change Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password",
+  "passwordChangedSuccess": "Password changed successfully!",
+  "backTo": "Back to",
+  "emailNotVerified": "Please verify your email address before logging in. Check your inbox or spam folder.",
+  "verifyEmailTitle": "Verify Your Email",
+  "verifyEmailDescription": "We sent a verification link to your email address. Please check your inbox (and spam folder) and tap the link to verify.",
+  "resendVerification": "Resend Verification Email",
+  "resendIn": "Resend in {seconds}s",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "waitingForVerification": "Waiting for verification...",
+  "backToLogin": "Back to Login",
+  "emailVerificationSent": "Verification email sent!",
+  "emailVerificationFailed": "Failed to send verification email."
 }

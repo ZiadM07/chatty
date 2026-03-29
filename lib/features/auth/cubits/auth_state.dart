@@ -18,6 +18,9 @@ class AuthState extends Equatable {
 
   final AppState<void> signOutState;
 
+  /// Tracks email-verification flow: resend, polling, etc.
+  final AppState<void> emailVerificationState;
+
   final bool authReady;
 
   const AuthState({
@@ -27,6 +30,7 @@ class AuthState extends Equatable {
     this.fillProfileState = const AppState(),
     this.forgotPasswordState = const AppState(),
     this.signOutState = const AppState(),
+    this.emailVerificationState = const AppState(),
     this.authReady = false,
   });
 
@@ -41,6 +45,7 @@ class AuthState extends Equatable {
     AppState<UserModel>? fillProfileState,
     AppState<void>? forgotPasswordState,
     AppState<void>? signOutState,
+    AppState<void>? emailVerificationState,
   }) {
     return AuthState(
       currentUser: clearCurrentUser ? null : currentUser ?? this.currentUser,
@@ -50,6 +55,8 @@ class AuthState extends Equatable {
       fillProfileState: fillProfileState ?? this.fillProfileState,
       forgotPasswordState: forgotPasswordState ?? this.forgotPasswordState,
       signOutState: signOutState ?? this.signOutState,
+      emailVerificationState:
+          emailVerificationState ?? this.emailVerificationState,
     );
   }
 
@@ -62,5 +69,6 @@ class AuthState extends Equatable {
     fillProfileState,
     forgotPasswordState,
     signOutState,
+    emailVerificationState,
   ];
 }

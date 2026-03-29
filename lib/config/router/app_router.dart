@@ -40,7 +40,18 @@ class AppRouter extends RootStackRouter {
           duration: const Duration(milliseconds: 220),
         ),
         CustomRoute(
+          page: ForgotPasswordRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 220),
+        ),
+
+        CustomRoute(
           page: SignupRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 220),
+        ),
+        CustomRoute(
+          page: EmailVerificationRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 220),
         ),

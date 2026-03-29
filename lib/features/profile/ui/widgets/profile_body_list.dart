@@ -92,7 +92,6 @@ void _confirmLogout(BuildContext context) {
           builder: (context, state) {
             return StateHandler(
               state: state.signOutState,
-              loadingOverlayWidget: const CircularProgressIndicator(),
               builder: (context, state) =>
                   _LogoutSheetContent(authCubit: authCubit),
             );

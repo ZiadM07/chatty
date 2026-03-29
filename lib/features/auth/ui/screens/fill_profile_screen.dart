@@ -25,7 +25,7 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _nameController = TextEditingController();
-  final _bioController = TextEditingController()..text = 'i am new user';
+  final _bioController = TextEditingController();
   final _usernameFocusNode = FocusNode();
   final _nameFocusNode = FocusNode();
   final _bioFocusNode = FocusNode();
@@ -33,7 +33,16 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
   File? _selectedImage;
 
   @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() => setState(() {});
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _usernameController.dispose();
     _nameController.dispose();
     _bioController.dispose();
@@ -51,6 +60,7 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
+    if (!mounted) return;
     final currentUser = context.read<AuthCubit>().state.currentUser;
     if (currentUser == null) return;
 

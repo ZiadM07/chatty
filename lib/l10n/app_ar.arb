@@ -623,6 +623,29 @@
   "emailCannotBeChanged": "لا يمكن تغيير البريد الإلكتروني",
   "usernameCannotBeChanged": "لا يمكن تغيير اسم المستخدم",
   "couldNotLoadFile": "تعذر تحميل الملف",
-  "brightnessDescription": "اضبط مستوى الظلام لتحسين إمكانية قراءة النص"
-
+  "brightnessDescription": "اضبط مستوى الظلام لتحسين إمكانية قراءة النص",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "forgotPasswordSubtitle": "أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.",
+  "sendResetLink": "إرسال رابط إعادة التعيين",
+  "resetLinkSent": "تم إرسال رابط إعادة التعيين! تحقق من صندوق الوارد أو مجلد الرسائل غير المرغوب فيها.",
+  "changePassword": "تغيير كلمة المرور",
+  "currentPassword": "كلمة المرور الحالية",
+  "newPassword": "كلمة المرور الجديدة",
+  "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+  "passwordChangedSuccess": "تم تغيير كلمة المرور بنجاح!",
+  "backTo": "العودة إلى",
+  "emailNotVerified": "يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول. تحقق من صندوق الوارد أو مجلد الرسائل غير المرغوب فيها.",
+  "verifyEmailTitle": "تأكيد البريد الإلكتروني",
+  "verifyEmailDescription": "لقد أرسلنا رابط تأكيد إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد (وأيضًا البريد العشوائي) والضغط على الرابط لتأكيد الحساب.",
+  "resendVerification": "إعادة إرسال رسالة التأكيد",
+  "resendIn": "إعادة الإرسال خلال {seconds} ثانية",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "waitingForVerification": "في انتظار تأكيد البريد...",
+  "backToLogin": "العودة إلى تسجيل الدخول",
+  "emailVerificationSent": "تم إرسال رسالة التأكيد!",
+  "emailVerificationFailed": "فشل إرسال رسالة التأكيد."
 }

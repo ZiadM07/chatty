@@ -37,6 +37,11 @@ abstract class AuthDataSource {
 
   Future<void> deleteAccount({required String uid});
 
+  /// Calls [User.reload()] on the current Firebase user, then returns
+  /// a fresh [AuthModel] with the latest server-side state
+  /// (notably [emailVerified]).
+  Future<AuthModel?> reloadUser();
+
   Stream<AuthModel?> get authStateChanges;
 }
 
@@ -236,6 +241,22 @@ class AuthDataSourceImpl implements AuthDataSource {
       throw _mapFirebaseAuthException(e);
     } on FirebaseException catch (e) {
       throw Failure(500, e.message ?? 'Failed to delete account.');
+    }
+  }
+
+  @override
+  Future<AuthModel?> reloadUser() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) return null;
+      await user.reload();
+      // After reload, currentUser holds the refreshed data.
+      final refreshed = _firebaseAuth.currentUser;
+      if (refreshed == null) return null;
+      final isProfileComplete = await _fetchIsProfileComplete(refreshed.uid);
+      return _mapFirebaseUser(refreshed, isProfileComplete: isProfileComplete);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseAuthException(e);
     }
   }
 

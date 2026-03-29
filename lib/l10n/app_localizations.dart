@@ -3382,6 +3382,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Adjust overlay darkness to improve text readability'**
   String get brightnessDescription;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get forgotPassword;
+
+  /// No description provided for @forgotPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we\'ll send you a link to reset your password.'**
+  String get forgotPasswordSubtitle;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Reset Link'**
+  String get sendResetLink;
+
+  /// No description provided for @resetLinkSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset link sent! Check your inbox or spam folder.'**
+  String get resetLinkSent;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePassword;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @passwordChangedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully!'**
+  String get passwordChangedSuccess;
+
+  /// No description provided for @backTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to'**
+  String get backTo;
+
+  /// No description provided for @emailNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify your email address before logging in. Check your inbox or spam folder.'**
+  String get emailNotVerified;
+
+  /// No description provided for @verifyEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Your Email'**
+  String get verifyEmailTitle;
+
+  /// No description provided for @verifyEmailDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification link to your email address. Please check your inbox (and spam folder) and tap the link to verify.'**
+  String get verifyEmailDescription;
+
+  /// No description provided for @resendVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Verification Email'**
+  String get resendVerification;
+
+  /// No description provided for @resendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String resendIn(Object seconds);
+
+  /// No description provided for @waitingForVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for verification...'**
+  String get waitingForVerification;
+
+  /// No description provided for @backToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Login'**
+  String get backToLogin;
+
+  /// No description provided for @emailVerificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email sent!'**
+  String get emailVerificationSent;
+
+  /// No description provided for @emailVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send verification email.'**
+  String get emailVerificationFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
