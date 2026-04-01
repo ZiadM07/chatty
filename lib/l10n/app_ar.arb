@@ -647,5 +647,16 @@
   "waitingForVerification": "في انتظار تأكيد البريد...",
   "backToLogin": "العودة إلى تسجيل الدخول",
   "emailVerificationSent": "تم إرسال رسالة التأكيد!",
-  "emailVerificationFailed": "فشل إرسال رسالة التأكيد."
+  "emailVerificationFailed": "فشل إرسال رسالة التأكيد.",
+  "changePasswordSubtitle": "أدخل كلمة المرور الحالية واختر كلمة مرور جديدة.",
+  "enterCurrentPassword": "أدخل كلمة المرور الحالية",
+  "currentPasswordRequired": "يرجى إدخال كلمة المرور الحالية",
+  "enterNewPassword": "أدخل كلمة المرور الجديدة",
+  "newPasswordMustBeDifferent": "يجب أن تختلف كلمة المرور الجديدة عن الحالية",
+  "confirmNewPasswordHint": "تأكيد كلمة المرور الجديدة",
+  "deleteAccount": "حذف الحساب",
+  "deleteAccountSubtitle": "حذف حسابك بشكل دائم",
+  "deleteAccountConfirm": "هل أنت متأكد من رغبتك في حذف حسابك؟",
+  "deleteAccountSuccess": "تم حذف الحساب بنجاح",
+  "deleteAccountFailed": "فشل حذف الحساب"
 }

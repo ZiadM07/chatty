@@ -5,14 +5,17 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/state/app_state.dart';
 import '../../../../core/framework/failure.dart';
+import '../../auth/data/repositories/auth_repositories.dart';
 import '../data/repositories/profile_repositories.dart';
 import 'profile_state.dart';
 
 @injectable
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileRepository _repository;
+  final AuthRepository _authRepository;
 
-  ProfileCubit(this._repository) : super(ProfileState.initial());
+  ProfileCubit(this._repository, this._authRepository)
+    : super(ProfileState.initial());
 
   Future<void> loadProfile({required String uid}) async {
     emit(
@@ -198,11 +201,59 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    emit(
+      state.copyWith(
+        changePasswordState: const AppState(status: StateStatus.loadingOverlay),
+      ),
+    );
+
+    try {
+      await _authRepository.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+
+      emit(
+        state.copyWith(
+          changePasswordState: const AppState(
+            status: StateStatus.success,
+            message: 'Password changed successfully.',
+          ),
+        ),
+      );
+    } on Failure catch (e) {
+      emit(
+        state.copyWith(
+          changePasswordState: AppState(
+            status: StateStatus.error,
+            message: e.message,
+          ),
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          changePasswordState: const AppState(
+            status: StateStatus.error,
+            message: 'Failed to change password. Please try again.',
+          ),
+        ),
+      );
+    }
+  }
+
   void resetUpdateInfoState() =>
       emit(state.copyWith(updateInfoState: const AppState()));
 
   void resetUpdatePhotoState() =>
       emit(state.copyWith(updatePhotoState: const AppState()));
+
+  void resetChangePasswordState() =>
+      emit(state.copyWith(changePasswordState: const AppState()));
 
   Future<void> deleteProfilePhoto({required String uid}) async {
     final currentPhotoUrl = state.profile?.photoUrl;

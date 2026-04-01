@@ -1,9 +1,11 @@
+import 'package:Chatty/config/router/app_router.gr.dart';
 import 'package:Chatty/core/constants/exports.dart';
 import 'package:Chatty/features/auth/cubits/auth_cubit.dart';
 import 'package:Chatty/features/profile/cubits/profile_cubit.dart';
 import 'package:Chatty/features/profile/cubits/profile_state.dart';
 import 'package:Chatty/features/profile/ui/widgets/profile_settings_avatar.dart';
 import 'package:Chatty/features/profile/ui/widgets/settings_tile.dart';
+import 'package:Chatty/features/profile/ui/widgets/show_delete_account_sheet.dart';
 import 'package:Chatty/features/shared/widgets/app_gradient_button.dart';
 import 'package:Chatty/features/shared/widgets/app_text_form_field.dart';
 import 'package:Chatty/features/shared/widgets/app_toast.dart';
@@ -102,6 +104,23 @@ class ProfileSettingsScreen extends StatelessWidget {
                       ),
                     ),
 
+                    const SizedBox(height: 15),
+
+                    SettingsTile(
+                      icon: SolarIconsOutline.password,
+                      title: context.locale.changePassword,
+                      enabled: true,
+                      onTap: () =>
+                          context.router.push(const ChangePasswordRoute()),
+                      trailing: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 18,
+                        color: context.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
+                    ),
+
                     const SizedBox(height: 30),
 
                     AppText(
@@ -147,6 +166,39 @@ class ProfileSettingsScreen extends StatelessWidget {
                         color: context.colorScheme.onSurfaceVariant,
                       ),
                     ),
+                    const SizedBox(height: 30),
+
+                    AppText(
+                      context.locale.dangerZone,
+                      style: context.textTheme.titleMedium?.copyWith(
+                        color: context.colorScheme.error,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    SettingsTile(
+                      icon: SolarIconsOutline.dangerTriangle,
+                      title: context.locale.deleteAccount,
+                      subtitle: context.locale.deleteAccountSubtitle,
+                      enabled: false,
+                      iconColor: context.colorScheme.error.withValues(
+                        alpha: 0.8,
+                      ),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          isScrollControlled: true,
+                          builder: (ctx) => const DeleteAccountSheet(),
+                        );
+                      },
+                      trailing: Icon(
+                        SolarIconsOutline.trashBin2,
+                        size: 20,
+                        color: context.colorScheme.error,
+                      ),
+                    ),
+                    SizedBox(height: 30),
                   ],
                 ).addPadding(horizontal: 20),
               ),
@@ -157,8 +209,6 @@ class ProfileSettingsScreen extends StatelessWidget {
     );
   }
 }
-
-// ─── Inline Edit Sheet ────────────────────────────────────────────────────────
 
 void _showEditSheet({
   required BuildContext context,
@@ -171,7 +221,6 @@ void _showEditSheet({
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
-    // Pushes the sheet up when the keyboard appears
     isScrollControlled: true,
     builder: (ctx) => BlocProvider.value(
       value: profileCubit,

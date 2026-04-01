@@ -1752,4 +1752,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get emailVerificationFailed => 'فشل إرسال رسالة التأكيد.';
+
+  @override
+  String get changePasswordSubtitle => 'أدخل كلمة المرور الحالية واختر كلمة مرور جديدة.';
+
+  @override
+  String get enterCurrentPassword => 'أدخل كلمة المرور الحالية';
+
+  @override
+  String get currentPasswordRequired => 'يرجى إدخال كلمة المرور الحالية';
+
+  @override
+  String get enterNewPassword => 'أدخل كلمة المرور الجديدة';
+
+  @override
+  String get newPasswordMustBeDifferent => 'يجب أن تختلف كلمة المرور الجديدة عن الحالية';
+
+  @override
+  String get confirmNewPasswordHint => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountSubtitle => 'حذف حسابك بشكل دائم';
+
+  @override
+  String get deleteAccountConfirm => 'هل أنت متأكد من رغبتك في حذف حسابك؟';
+
+  @override
+  String get deleteAccountSuccess => 'تم حذف الحساب بنجاح';
+
+  @override
+  String get deleteAccountFailed => 'فشل حذف الحساب';
 }

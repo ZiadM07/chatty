@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:Chatty/features/chats/data/data_source/chat_data_source.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../data/data_sources/auth_data_source.dart';
@@ -14,9 +15,14 @@ class _StoragePaths {
 @lazySingleton
 class AuthRepository {
   final AuthDataSource _authDataSource;
+  final ChatDataSource _chatDataSource;
   final StorageDataSource _storageDataSource;
 
-  const AuthRepository(this._authDataSource, this._storageDataSource);
+  const AuthRepository(
+    this._authDataSource,
+    this._storageDataSource,
+    this._chatDataSource,
+  );
 
   Stream<AuthModel?> get authStateChanges => _authDataSource.authStateChanges;
 
@@ -74,13 +80,24 @@ class AuthRepository {
       await _storageDataSource.deleteFile(path: userProfile.photoUrl!);
     }
 
+    await _chatDataSource.deleteAllUserChats(uid: uid);
+
     await _authDataSource.deleteAccount(uid: uid);
   }
+
+  Future<void> reauthenticate({required String password}) =>
+      _authDataSource.reauthenticate(password: password);
 
   Future<void> sendEmailVerification() =>
       _authDataSource.sendEmailVerification();
 
-  /// Reloads the Firebase user to get the latest server state
-  /// (e.g. emailVerified after the user clicked the link).
   Future<AuthModel?> reloadUser() => _authDataSource.reloadUser();
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) => _authDataSource.changePassword(
+    currentPassword: currentPassword,
+    newPassword: newPassword,
+  );
 }

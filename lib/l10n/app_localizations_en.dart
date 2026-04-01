@@ -1752,4 +1752,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emailVerificationFailed => 'Failed to send verification email.';
+
+  @override
+  String get changePasswordSubtitle => 'Enter your current password and choose a new one.';
+
+  @override
+  String get enterCurrentPassword => 'Enter current password';
+
+  @override
+  String get currentPasswordRequired => 'Please enter your current password';
+
+  @override
+  String get enterNewPassword => 'Enter new password';
+
+  @override
+  String get newPasswordMustBeDifferent => 'New password must be different from current';
+
+  @override
+  String get confirmNewPasswordHint => 'Confirm new password';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountSubtitle => 'Delete your account permanently';
+
+  @override
+  String get deleteAccountConfirm => 'Are you sure you want to delete your account?';
+
+  @override
+  String get deleteAccountSuccess => 'Account deleted successfully';
+
+  @override
+  String get deleteAccountFailed => 'Failed to delete account';
 }

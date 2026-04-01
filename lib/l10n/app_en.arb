@@ -648,5 +648,16 @@
   "waitingForVerification": "Waiting for verification...",
   "backToLogin": "Back to Login",
   "emailVerificationSent": "Verification email sent!",
-  "emailVerificationFailed": "Failed to send verification email."
+  "emailVerificationFailed": "Failed to send verification email.",
+  "changePasswordSubtitle": "Enter your current password and choose a new one.",
+  "enterCurrentPassword": "Enter current password",
+  "currentPasswordRequired": "Please enter your current password",
+  "enterNewPassword": "Enter new password",
+  "newPasswordMustBeDifferent": "New password must be different from current",
+  "confirmNewPasswordHint": "Confirm new password",
+  "deleteAccount": "Delete Account",
+  "deleteAccountSubtitle": "Delete your account permanently",
+  "deleteAccountConfirm": "Are you sure you want to delete your account?",
+  "deleteAccountSuccess": "Account deleted successfully",
+  "deleteAccountFailed": "Failed to delete account"
 }

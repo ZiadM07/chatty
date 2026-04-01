@@ -83,9 +83,7 @@ class AuthCubit extends Cubit<AuthState> {
         password: password,
       );
 
-      // ── Block unverified users ──────────────────────────────────────────
       if (!authModel.emailVerified) {
-        // Sign them out so authStateChanges doesn't auto-navigate.
         await _repository.signOut();
         emit(
           state.copyWith(
@@ -123,15 +121,10 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Email Verification ──────────────────────────────────────────────────
-
-  /// Resend the verification email to the current Firebase user.
   Future<void> sendEmailVerification() async {
     emit(
       state.copyWith(
-        emailVerificationState: const AppState(
-          status: StateStatus.loading,
-        ),
+        emailVerificationState: const AppState(status: StateStatus.loading),
       ),
     );
     try {
@@ -165,8 +158,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Polls Firebase to check if the user has verified their email.
-  /// Returns `true` when verified.
   Future<bool> checkEmailVerified() async {
     try {
       final refreshed = await _repository.reloadUser();
@@ -182,8 +173,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   void resetEmailVerificationState() =>
       emit(state.copyWith(emailVerificationState: const AppState()));
-
-  // ─── Profile ─────────────────────────────────────────────────────────────
 
   Future<void> saveProfile({required UserModel user, File? imageFile}) async {
     emit(
@@ -223,8 +212,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Password Reset ──────────────────────────────────────────────────────
-
   Future<void> sendPasswordResetEmail({required String email}) async {
     emit(
       state.copyWith(
@@ -262,8 +249,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Sign Out & Delete ───────────────────────────────────────────────────
-
   Future<void> signOut() async {
     emit(
       state.copyWith(
@@ -297,7 +282,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> deleteAccount() async {
+  Future<void> deleteAccount({required String password}) async {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
 
@@ -309,8 +294,14 @@ class AuthCubit extends Cubit<AuthState> {
 
     try {
       await _notificationService.logout();
+      await _repository.reauthenticate(password: password);
       await _repository.deleteAccount(uid: uid);
-      emit(AuthState.initial().copyWith(authReady: true));
+      emit(
+        AuthState.initial().copyWith(
+          authReady: true,
+          signOutState: const AppState(status: StateStatus.success),
+        ),
+      );
     } on Failure catch (e) {
       emit(
         state.copyWith(
@@ -329,8 +320,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // ─── Presence ─────────────────────────────────────────────────────────────
-
   Future<void> setOnline() async {
     final uid = state.currentUser?.uid;
     if (uid == null) return;
@@ -342,8 +331,6 @@ class AuthCubit extends Cubit<AuthState> {
     if (uid == null) return;
     await _repository.updateUserPresence(uid: uid, isOnline: false);
   }
-
-  // ─── Resets ───────────────────────────────────────────────────────────────
 
   void resetLoginState() => emit(state.copyWith(loginState: const AppState()));
 

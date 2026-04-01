@@ -8,12 +8,14 @@ class ProfileState extends Equatable {
   final AppState<UserModel> fetchState;
   final AppState<UserModel> updateInfoState;
   final AppState<UserModel> updatePhotoState;
+  final AppState<void> changePasswordState;
 
   const ProfileState({
     this.profile,
     this.fetchState = const AppState(),
     this.updateInfoState = const AppState(),
     this.updatePhotoState = const AppState(),
+    this.changePasswordState = const AppState(),
   });
 
   factory ProfileState.initial() => const ProfileState();
@@ -23,12 +25,14 @@ class ProfileState extends Equatable {
     AppState<UserModel>? fetchState,
     AppState<UserModel>? updateInfoState,
     AppState<UserModel>? updatePhotoState,
+    AppState<void>? changePasswordState,
   }) {
     return ProfileState(
       profile: profile ?? this.profile,
       fetchState: fetchState ?? this.fetchState,
       updateInfoState: updateInfoState ?? this.updateInfoState,
       updatePhotoState: updatePhotoState ?? this.updatePhotoState,
+      changePasswordState: changePasswordState ?? this.changePasswordState,
     );
   }
 
@@ -38,5 +42,6 @@ class ProfileState extends Equatable {
     fetchState,
     updateInfoState,
     updatePhotoState,
+    changePasswordState,
   ];
 }

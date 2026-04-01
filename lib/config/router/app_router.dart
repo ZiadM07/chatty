@@ -141,6 +141,11 @@ class AppRouter extends RootStackRouter {
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 220),
         ),
+        CustomRoute(
+          page: ChangePasswordRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 220),
+        ),
       ],
     ),
   ];

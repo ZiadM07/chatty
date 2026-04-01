@@ -63,6 +63,8 @@ abstract class ChatDataSource {
     required String chatId,
     required String messageId,
   });
+
+  Future<void> deleteAllUserChats({required String uid});
   Future<List<MessageModel>> getMediaMessages({
     required String chatId,
     MessageType? type,
@@ -227,6 +229,30 @@ class ChatDataSourceImpl implements ChatDataSource {
       await _chats.doc(chatId).delete();
     } on FirebaseException catch (e) {
       throw Failure(500, e.message ?? 'Failed to delete chat.');
+    }
+  }
+
+  @override
+  Future<void> deleteAllUserChats({required String uid}) async {
+    try {
+      final snap = await _chats.where('memberIds', arrayContains: uid).get();
+
+      for (final doc in snap.docs) {
+        final chat = ChatModel.fromFirestore(doc.data(), doc.id);
+
+        if (chat.type == ChatType.oneToOne) {
+          await _deleteSubCollection(_messages(doc.id));
+          await _chats.doc(doc.id).delete();
+        } else {
+          await _chats.doc(doc.id).update({
+            'memberIds': FieldValue.arrayRemove([uid]),
+            'memberNames.$uid': FieldValue.delete(),
+            'unreadCounts.$uid': FieldValue.delete(),
+          });
+        }
+      }
+    } on FirebaseException catch (e) {
+      throw Failure(500, e.message ?? 'Failed to delete user chats.');
     }
   }
 
@@ -582,5 +608,3 @@ class ChatDataSourceImpl implements ChatDataSource {
     }
   }
 }
-
-

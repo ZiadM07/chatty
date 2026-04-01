@@ -12,45 +12,47 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       showAppBar: false,
-      body: Column(
-        children: [
-          const SizedBox(height: 80),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 80),
 
-          Align(
-            alignment: Alignment.center,
-            child: AppAssetImage(
-              Pngs.chatty,
-              fit: BoxFit.contain,
-              width: 200,
-              height: 100,
+            Align(
+              alignment: Alignment.center,
+              child: AppAssetImage(
+                Pngs.chatty,
+                fit: BoxFit.contain,
+                width: 200,
+                height: 100,
+              ),
             ),
-          ),
 
-          const SizedBox(height: 80),
+            const SizedBox(height: 80),
 
-          Align(
-            alignment: Alignment.center,
-            child: AppAssetImage(
-              Pngs.socialConnection,
-              fit: BoxFit.contain,
-              width: 250,
-              height: 250,
+            Align(
+              alignment: Alignment.center,
+              child: AppAssetImage(
+                Pngs.socialConnection,
+                fit: BoxFit.contain,
+                width: 250,
+                height: 250,
+              ),
             ),
-          ),
 
-          const SizedBox(height: 50),
-          AppText(
-            context.locale.welcomeHeadline,
-            style: context.textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 100),
+            const SizedBox(height: 50),
+            AppText(
+              context.locale.welcomeHeadline,
+              style: context.textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 100),
 
-          AppButton(
-            text: context.locale.getStarted,
-            onTap: () => context.router.push(const LoginRoute()),
-          ),
-        ],
-      ).addPadding(horizontal: 20),
+            AppButton(
+              text: context.locale.getStarted,
+              onTap: () => context.router.push(const LoginRoute()),
+            ),
+          ],
+        ).addPadding(horizontal: 20),
+      ),
     );
   }
 }

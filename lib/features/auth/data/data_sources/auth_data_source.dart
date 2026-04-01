@@ -24,6 +24,13 @@ abstract class AuthDataSource {
 
   Future<void> sendEmailVerification();
 
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  Future<void> reauthenticate({required String password});
+
   Future<void> saveUserProfile({required UserModel user});
 
   Future<UserModel?> getUserProfile({required String uid});
@@ -37,9 +44,6 @@ abstract class AuthDataSource {
 
   Future<void> deleteAccount({required String uid});
 
-  /// Calls [User.reload()] on the current Firebase user, then returns
-  /// a fresh [AuthModel] with the latest server-side state
-  /// (notably [emailVerified]).
   Future<AuthModel?> reloadUser();
 
   Stream<AuthModel?> get authStateChanges;
@@ -169,6 +173,43 @@ class AuthDataSourceImpl implements AuthDataSource {
   }
 
   @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) throw Failure(401, 'No user is signed in.');
+
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseAuthException(e);
+    }
+  }
+
+  @override
+  Future<void> reauthenticate({required String password}) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) throw Failure(401, 'No user is signed in.');
+
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseAuthException(e);
+    }
+  }
+
+  @override
   Future<void> saveUserProfile({required UserModel user}) async {
     try {
       await _firestore
@@ -250,7 +291,6 @@ class AuthDataSourceImpl implements AuthDataSource {
       final user = _firebaseAuth.currentUser;
       if (user == null) return null;
       await user.reload();
-      // After reload, currentUser holds the refreshed data.
       final refreshed = _firebaseAuth.currentUser;
       if (refreshed == null) return null;
       final isProfileComplete = await _fetchIsProfileComplete(refreshed.uid);
@@ -294,8 +334,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 }
-
-
 
 class _Collections {
   static const String users = 'users';

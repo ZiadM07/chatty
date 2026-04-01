@@ -105,12 +105,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i206.ChatDataSource>(
       () => _i206.ChatDataSourceImpl(gh<_i974.FirebaseFirestore>()),
     );
-    gh.lazySingleton<_i613.AuthRepository>(
-      () => _i613.AuthRepository(
-        gh<_i933.AuthDataSource>(),
-        gh<_i120.StorageDataSource>(),
-      ),
-    );
     gh.lazySingleton<_i422.StoryDataSource>(
       () => _i422.StoryDataSourceImpl(gh<_i974.FirebaseFirestore>()),
     );
@@ -153,6 +147,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i120.StorageDataSource>(),
       ),
     );
+    gh.lazySingleton<_i613.AuthRepository>(
+      () => _i613.AuthRepository(
+        gh<_i933.AuthDataSource>(),
+        gh<_i120.StorageDataSource>(),
+        gh<_i206.ChatDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i279.FirestoreOfflineHelper>(
       () => _i279.FirestoreOfflineHelper(gh<_i159.NetworkInfo>()),
     );
@@ -160,6 +161,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i554.AuthCubit(
         gh<_i613.AuthRepository>(),
         gh<_i39.NotificationService>(),
+      ),
+    );
+    gh.factory<_i877.ProfileCubit>(
+      () => _i877.ProfileCubit(
+        gh<_i996.ProfileRepository>(),
+        gh<_i613.AuthRepository>(),
       ),
     );
     gh.factory<_i1008.ChatCubit>(
@@ -173,9 +180,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i190.UsersRepository>(
       () => _i190.UsersRepository(gh<_i295.UsersDataSource>()),
-    );
-    gh.factory<_i877.ProfileCubit>(
-      () => _i877.ProfileCubit(gh<_i996.ProfileRepository>()),
     );
     gh.singleton<_i769.NotificationsCubit>(
       () => _i769.NotificationsCubit(

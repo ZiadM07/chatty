@@ -3,18 +3,20 @@ import 'package:Chatty/core/constants/exports.dart';
 class SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final bool enabled;
   final VoidCallback onTap;
   final Widget? trailing;
+  final Color? iconColor;
   const SettingsTile({
     super.key,
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     this.enabled = true,
     required this.onTap,
     this.trailing,
+    this.iconColor,
   });
 
   @override
@@ -41,9 +43,9 @@ class SettingsTile extends StatelessWidget {
                   : null,
               color: enabled
                   ? null
-                  : context.colorScheme.surfaceContainerHighest,
+                  : iconColor ?? context.colorScheme.surfaceContainerHighest,
             ),
-            child: Icon(icon, size: 22, color: context.colorScheme.onPrimary),
+            child: Icon(icon, size: 22, color: context.colorScheme.textPrimary),
           ),
 
           const SizedBox(width: 16),
@@ -59,12 +61,14 @@ class SettingsTile extends StatelessWidget {
                   weight: FontWeight.w600,
                   color: context.colorScheme.onSurface,
                 ),
-                const SizedBox(height: 4),
-                AppText(
-                  subtitle,
-                  size: 13,
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  AppText(
+                    subtitle!,
+                    size: 13,
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                ],
               ],
             ),
           ),

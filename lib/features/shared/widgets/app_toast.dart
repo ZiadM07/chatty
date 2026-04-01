@@ -9,6 +9,7 @@ class AppToast {
     _showCustomToast(
       context: context,
       content: message,
+
       boxColor: context.colorScheme.error,
     );
   }
